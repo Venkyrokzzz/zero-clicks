@@ -14,30 +14,50 @@ export default function About() {
   return (
     <section
       style={{
-        backgroundColor: "var(--bg-surface)",
-        borderTop: "1px solid var(--border)",
-        borderBottom: "1px solid var(--border)",
-        padding: "128px 24px",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        padding: "128px 48px",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
+      {/* Prismatic background light */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          width: "600px",
+          height: "600px",
+          background:
+            "radial-gradient(circle, rgba(249,168,212,0.07) 0%, rgba(196,181,253,0.05) 40%, transparent 70%)",
+          top: "-100px",
+          right: "-100px",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+        }}
+      />
+
       <motion.div
         ref={ref}
-        initial={{ opacity: 0, y: 24 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, ease }}
-        style={{ maxWidth: "1100px", margin: "0 auto" }}
+        transition={{ duration: 0.8, ease }}
+        style={{ maxWidth: "1200px", margin: "0 auto", position: "relative" }}
         className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-start"
       >
-        {/* Left: decorative quotation mark */}
+        {/* Left decorative side */}
         <div>
           <div
-            aria-hidden="true"
+            aria-hidden
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "6rem",
+              fontSize: "7rem",
               lineHeight: 1,
-              color: "var(--text-muted)",
-              marginBottom: "16px",
+              background: "linear-gradient(135deg, rgba(196,181,253,0.3), rgba(168,216,255,0.15))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              marginBottom: "20px",
               userSelect: "none",
             }}
           >
@@ -46,9 +66,9 @@ export default function About() {
           <p
             style={{
               fontSize: "11px",
-              letterSpacing: "0.15em",
+              letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: "var(--accent)",
+              color: "var(--text-secondary)",
               fontFamily: "var(--font-body)",
               fontWeight: 500,
             }}
@@ -57,7 +77,7 @@ export default function About() {
           </p>
         </div>
 
-        {/* Right: text */}
+        {/* Right text */}
         <div>
           <h2
             style={{
@@ -77,7 +97,7 @@ export default function About() {
               fontWeight: 400,
               fontSize: "1rem",
               color: "var(--text-secondary)",
-              lineHeight: 1.7,
+              lineHeight: 1.8,
               marginBottom: "40px",
             }}
           >
@@ -85,7 +105,7 @@ export default function About() {
           </p>
           <div
             style={{
-              borderTop: "1px solid var(--border)",
+              borderTop: "1px solid rgba(255,255,255,0.08)",
               paddingTop: "24px",
             }}
           >

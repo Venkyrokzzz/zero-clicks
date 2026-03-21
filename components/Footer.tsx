@@ -1,5 +1,6 @@
 // components/Footer.tsx
 "use client";
+
 import Link from "next/link";
 import { SITE, FOOTER } from "@/lib/content";
 
@@ -7,14 +8,15 @@ export default function Footer() {
   return (
     <footer
       style={{
-        backgroundColor: "var(--bg-surface)",
-        borderTop: "1px solid var(--border)",
-        padding: "32px 24px",
+        background: "rgba(255,255,255,0.02)",
+        backdropFilter: "blur(12px)",
+        borderTop: "1px solid rgba(255,255,255,0.07)",
+        padding: "36px 48px",
       }}
     >
       <div
         style={{
-          maxWidth: "1100px",
+          maxWidth: "1200px",
           margin: "0 auto",
           display: "flex",
           alignItems: "center",
@@ -23,7 +25,6 @@ export default function Footer() {
           gap: "16px",
         }}
       >
-        {/* Logo */}
         <Link
           href="/"
           style={{
@@ -36,8 +37,7 @@ export default function Footer() {
           {SITE.name}
         </Link>
 
-        {/* Nav links */}
-        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "28px" }}>
           {[
             { label: "Instagram", href: SITE.instagram },
             { label: "LinkedIn", href: SITE.linkedin },
@@ -52,20 +52,19 @@ export default function Footer() {
                 fontSize: "12px",
                 color: "var(--text-muted)",
                 textDecoration: "none",
-                letterSpacing: "0.03em",
+                letterSpacing: "0.04em",
                 fontFamily: "var(--font-body)",
                 fontWeight: 400,
                 transition: "color 200ms ease",
               }}
-              onMouseEnter={e => (e.currentTarget.style.color = "var(--text-primary)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "var(--text-muted)")}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}
             >
               {link.label}
             </Link>
           ))}
         </div>
 
-        {/* Copyright */}
         <p
           style={{
             fontSize: "11px",

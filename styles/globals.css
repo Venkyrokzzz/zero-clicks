@@ -1,26 +1,25 @@
-/* globals.css
-   ─────────────────────────────────────────────────────────────────────
-   Colour tokens — edit the variables below to retheme the entire site.
-   ──────────────────────────────────────────────────────────────────── */
+/* globals.css — Glass / Prismatic dark theme */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* ── Core palette ─────────────────────────────────────── */
-    --bg:              #0c0c0b;
-    --bg-surface:      #141412;
-    --bg-hover:        #1c1c19;
-    --text-primary:    #f0ede4;
-    --text-secondary:  #8a8678;
-    --text-muted:      #4a4840;
-    --accent:          #e8b84b;
-    --accent-dim:      #e8b84b22;
-    --border:          #2a2925;
-    --border-light:    #1e1d1a;
+    /* ── Palette ────────────────────────────────────── */
+    --bg:              #06060e;
+    --bg-surface:      #0b0b18;
+    --bg-card:         rgba(255,255,255,0.04);
+    --bg-hover:        rgba(255,255,255,0.07);
+    --text-primary:    #f0f0ff;
+    --text-secondary:  #8a8ab8;
+    --text-muted:      #3a3a62;
+    --accent:          #7eb8ff;
+    --accent-dim:      rgba(126,184,255,0.12);
+    --accent-glow:     rgba(126,184,255,0.3);
+    --border:          rgba(255,255,255,0.08);
+    --border-light:    rgba(255,255,255,0.04);
 
-    /* ── Typography ───────────────────────────────────────── */
+    /* ── Typography ─────────────────────────────────── */
     --font-display:    'DM Serif Display', Georgia, serif;
     --font-body:       'Inter', system-ui, sans-serif;
   }
@@ -35,9 +34,6 @@
 
   body {
     background-color: var(--bg);
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 128px 128px;
     font-family: var(--font-body);
   }
 
@@ -46,30 +42,97 @@
     font-weight: 400;
   }
 
-  /* ── Scrollbar ────────────────────────────────────────────── */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
-  /* ── Selection ───────────────────────────────────────────── */
-  ::selection { background: var(--accent); color: var(--bg); }
-
-  /* ── Focus ───────────────────────────────────────────────── */
+  ::selection { background: rgba(126,184,255,0.35); color: var(--text-primary); }
   *:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 }
 
-/* ── Proof bar marquee ──────────────────────────────────────── */
+/* ── Marquee ────────────────────────────────────────── */
 @keyframes marquee-scroll {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-
 .marquee-track {
   display: flex;
   width: max-content;
   animation: marquee-scroll 30s linear infinite;
 }
+.marquee-track:hover { animation-play-state: paused; }
 
-.marquee-track:hover {
-  animation-play-state: paused;
+/* ── Prismatic shimmer ──────────────────────────────── */
+@keyframes prismatic {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.prismatic-text {
+  background: linear-gradient(
+    135deg,
+    #a8d8ff 0%,
+    #c4b5fd 20%,
+    #f9a8d4 35%,
+    #6ee7b7 50%,
+    #93c5fd 65%,
+    #c4b5fd 80%,
+    #a8d8ff 100%
+  );
+  background-size: 300% 300%;
+  animation: prismatic 6s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glass card ──────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.glass-strong {
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+/* ── Glow pulse ──────────────────────────────────────── */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+/* ── Float anim ──────────────────────────────────────── */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+/* ── Background radial blobs ─────────────────────────── */
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(-40px, -55px) scale(1.07); }
+  66%       { transform: translate(35px, 30px) scale(0.94); }
+}
+@keyframes blob-float-alt {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(50px, -40px) scale(0.92); }
+  66%       { transform: translate(-30px, 55px) scale(1.1); }
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  animation: blob-float 16s ease-in-out infinite;
+}
+.blob-alt {
+  animation: blob-float-alt 20s ease-in-out infinite;
 }

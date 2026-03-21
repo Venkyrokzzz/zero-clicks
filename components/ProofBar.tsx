@@ -9,9 +9,10 @@ export default function ProofBar() {
   return (
     <div
       style={{
-        backgroundColor: "var(--bg-surface)",
-        borderTop: "1px solid var(--border)",
-        borderBottom: "1px solid var(--border)",
+        background: "rgba(255,255,255,0.02)",
+        backdropFilter: "blur(8px)",
+        borderTop: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
         padding: "16px 0",
         overflow: "hidden",
       }}
@@ -26,7 +27,7 @@ export default function ProofBar() {
               padding: "0 32px",
               fontSize: "11px",
               color: "var(--text-muted)",
-              letterSpacing: "0.08em",
+              letterSpacing: "0.1em",
               textTransform: "uppercase",
               fontFamily: "var(--font-body)",
               fontWeight: 500,
@@ -35,7 +36,17 @@ export default function ProofBar() {
             }}
           >
             {item}
-            <span aria-hidden="true" style={{ color: "var(--border)", fontSize: "14px" }}>·</span>
+            <span
+              aria-hidden
+              style={{
+                width: "4px",
+                height: "4px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #a8d8ff, #c4b5fd)",
+                display: "inline-block",
+                opacity: 0.5,
+              }}
+            />
           </span>
         ))}
       </div>
