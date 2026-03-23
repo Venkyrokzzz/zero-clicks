@@ -71,16 +71,21 @@ export default function ContactForm() {
     setFormState("submitting");
     setErrorMsg("");
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          access_key: "53cf9ade-73a5-4e1c-a684-d7bab8607d35",
+          subject: `New enquiry from ${data.name} — Zero Clicks`,
+          from_name: "Zero Clicks Website",
+          ...data,
+        }),
       });
       const json = await res.json();
-      if (!res.ok) { setErrorMsg("Something went wrong. Email me directly at hello@zeroclicks.dev"); setFormState("error"); return; }
+      if (!json.success) { setErrorMsg("Something went wrong. Email me directly at venkateshsurampudi1@gmail.com"); setFormState("error"); return; }
       setFormState("success");
     } catch {
-      setErrorMsg("Something went wrong. Email me directly at hello@zeroclicks.dev");
+      setErrorMsg("Something went wrong. Email me directly at venkateshsurampudi1@gmail.com");
       setFormState("error");
     }
   };
