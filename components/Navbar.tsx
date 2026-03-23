@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { SITE } from "@/lib/content";
 import { motion } from "framer-motion";
@@ -52,14 +53,29 @@ export default function Navbar() {
             }
           }}
           style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "1.05rem",
-            color: "var(--text-primary)",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
             textDecoration: "none",
-            whiteSpace: "nowrap",
           }}
         >
-          {SITE.name}
+          <Image
+            src="/logo.png"
+            alt="Zero Clicks"
+            width={36}
+            height={36}
+            style={{ borderRadius: "8px" }}
+          />
+          <span
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "1.05rem",
+              color: "var(--text-primary)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {SITE.name}
+          </span>
         </Link>
 
         <nav style={{ display: "flex", alignItems: "center", gap: "32px" }}>
