@@ -3,7 +3,7 @@
 export default function CalendlyButton() {
   return (
     <a
-      href="https://calendly.com/zeroclicks"
+      href="https://calendly.com/zeroclicks-hq/30min"
       target="_blank"
       rel="noopener noreferrer"
       style={{
