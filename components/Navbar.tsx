@@ -64,6 +64,7 @@ export default function Navbar() {
             alt="Zero Clicks"
             width={36}
             height={36}
+            unoptimized
             style={{ borderRadius: "8px" }}
           />
           <span
