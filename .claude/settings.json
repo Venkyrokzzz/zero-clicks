@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev)",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npm run lint:fix)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push origin main)",
+      "Bash(git log *)",
+      "Bash(npx vercel *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(chmod *)",
+      "Bash(cp *)",
+      "Bash(mv *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Read(.env)",
+      "Read(.env.local)",
+      "Read(.env.*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/lint-on-save.sh $CLAUDE_TOOL_INPUT_FILE_PATH"
+          }
+        ]
+      }
+    ]
+  },
+  "model": "claude-sonnet-4-6"
+}
