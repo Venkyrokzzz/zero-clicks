@@ -7,9 +7,10 @@
 export const SITE = {
   name: "Zero Clicks",
   tagline: "We automate the boring stuff so you can focus on what matters.",
-  email: "zeroclicks.hq@gmail.com",
-  instagram: "https://instagram.com/zeroclicks",
+  email: "hello@zeroclicks.dev",
+  github: "https://github.com/venkatesh-surampudi",
   linkedin: "https://linkedin.com/in/venkatesh-surampudi-b51323379",
+  twitter: "https://x.com/venkatesh_n8n",
   founder: {
     name: "Venky",
     fullName: "Venkatesh Surampudi",
@@ -21,26 +22,28 @@ export const HERO = {
   headlineTop: "Stop doing it manually.",
   headlineBottom: "Let the machines handle it.",
   subtext:
-    "Zero Clicks builds custom AI automation workflows for UK businesses — saving hours every week and removing the admin that slows you down.",
+    "Zero Clicks builds custom AI automation workflows for UK hospitality and SMEs — your inbox answered, bookings handled, ops running 24/7. Set up in days, not months.",
   ctaPrimary: {
-    label: "See how it works",
-    href: "#services",
+    label: "Book a free 30-min call",
+    href: "/contact",
   },
   ctaSecondary: {
-    label: "Talk to Venky",
-    href: "mailto:zeroclicks.hq@gmail.com",
+    label: "See how it works",
+    href: "#services",
   },
 } as const;
 
 // ── Proof bar ─────────────────────────────────────────────────────────────────
 // Items repeat automatically in the marquee — no need to duplicate.
 export const PROOF_BAR_ITEMS: string[] = [
-  "Used by operations teams in London",
-  "Built on n8n",
+  "Built for UK hospitality businesses",
+  "Built on n8n — open source, no lock-in",
   "Deployed in days, not months",
-  "Saves 10+ hours per week",
+  "Automations run 24/7",
   "Custom-built for your stack",
   "UK-based, always available",
+  "OAuth2 secured — no stored passwords",
+  "Claude AI — Haiku for speed, Sonnet for quality",
 ];
 
 // ── Services ──────────────────────────────────────────────────────────────────
@@ -77,42 +80,124 @@ export interface Step {
   number: string;
   title: string;
   description: string;
+  details: string[];
 }
 
 export const STEPS: Step[] = [
   {
     number: "01",
     title: "Audit",
-    description:
-      "We map your current manual processes in a 30-minute call. No slides, no fluff — just clarity on where your time is going.",
+    description: "We map your current manual processes in a 30-minute call. No slides, no fluff — just clarity on where your time is going.",
+    details: ["Map every repetitive task", "Identify integration points", "Estimate time saved per week", "Recommend tool stack"],
   },
   {
     number: "02",
     title: "Build",
-    description:
-      "We design and build the automation in n8n, connected to your existing tools. You see progress daily.",
+    description: "We design and build the automation in n8n, connected to your existing tools. You see progress daily.",
+    details: ["n8n workflow design", "Claude AI integration", "Security: OAuth2 + encrypted creds", "Testing on real data"],
   },
   {
     number: "03",
     title: "Deploy",
-    description:
-      "Go live, usually within a week. We hand over full documentation and stay on for 30 days of support.",
+    description: "Go live, usually within a week. We hand over full documentation and stay on for 30 days of support.",
+    details: ["Self-hosted or cloud", "Monitoring & error alerts", "Dead letter queue setup", "Handover + documentation"],
   },
 ];
 
 // ── About ─────────────────────────────────────────────────────────────────────
 export const ABOUT = {
-  heading: "Built by someone who's worked in operations, not just consulted on it.",
-  body: "Venky spent years running back-of-house at Greene King Mayfair — kitchens don't run on spreadsheets and good intentions. Now he builds the automations he wishes existed then: fast, practical, and built for businesses that are too busy to be slow.",
+  heading: "Built by someone who's worked inside the businesses he now automates.",
+  body: "Venky spent nearly two years in hospitality operations at Greene King — close enough to the chaos to understand exactly where time gets lost. The inbox that never clears. The bookings logged by hand. The supplier chase that eats your morning. He saw the gaps that off-the-shelf software doesn't touch.\n\nWhen he left, he didn't go looking for a course. He picked up n8n and Claude AI, broke things, fixed them, and built workflows that actually hold up under real operating conditions. Zero Clicks is the result — practical automation from someone who knows what a busy shift actually looks like.",
   label: "Founder, Zero Clicks",
 } as const;
+
+// ── Featured project ──────────────────────────────────────────────────────────
+export const FEATURED_PROJECT = {
+  label: "CASE STUDY — HOSPITALITY",
+  title: "Gmail AI Assistant for Pub Owners",
+  description:
+    "One workflow handles the entire inbox — classify, alert, draft, log. Built with n8n + Claude Haiku + Sonnet. Deployed in under 5 minutes.",
+  story: {
+    problem: "A pub owner was spending 90 minutes every morning manually reading, sorting, and replying to emails — supplier quotes, booking requests, complaints, and spam all mixed together. Evenings were the same. No system. No triage. Just an overflowing inbox.",
+    solution: "We built a single n8n workflow triggered by every new Gmail. Claude Haiku classifies it in under a second. Priority emails ping Telegram instantly. Action items get an AI-drafted reply in their tone. Everything gets logged to Sheets.",
+    result: "From day one: inbox time dropped from 90 minutes to under 15. Running cost is £8/month. Zero emails missed. The owner now checks Telegram for alerts instead of refreshing their inbox.",
+  },
+  stats: [
+    { val: "45 min", label: "Time saved/day" },
+    { val: "£8/mo", label: "Running cost" },
+    { val: "100%", label: "Self-hosted" },
+    { val: "OAuth2", label: "Secured" },
+  ],
+  tech: ["n8n", "Claude Haiku", "Claude Sonnet", "Gmail", "Telegram", "Google Sheets"],
+  outcome: "From 90 minutes of daily inbox triage to under 15.",
+} as const;
+
+// ── Packages ──────────────────────────────────────────────────────────────────
+export interface Package {
+  name: string;
+  price: string;
+  timeline: string;
+  description: string;
+  features: string[];
+  highlight: boolean;
+  cta: string;
+}
+
+export const PACKAGES: Package[] = [
+  {
+    name: "Starter",
+    price: "£499",
+    timeline: "Delivered in 3 days",
+    description: "One focused automation to solve your biggest bottleneck.",
+    features: [
+      "Single workflow build",
+      "Gmail, Slack, Sheets or CRM",
+      "30-day support included",
+      "Full documentation",
+    ],
+    highlight: false,
+    cta: "Book a call",
+  },
+  {
+    name: "Pro",
+    price: "£1,200",
+    timeline: "Delivered in 7 days",
+    description: "Full operations workflow — email, leads, alerts, and logging.",
+    features: [
+      "Up to 3 connected workflows",
+      "AI classification + drafting",
+      "Telegram / Slack alerts",
+      "Google Sheets logging",
+      "60-day support included",
+      "Video walkthrough",
+    ],
+    highlight: true,
+    cta: "Book a call — most popular",
+  },
+  {
+    name: "Monthly",
+    price: "£350/mo",
+    timeline: "Ongoing partnership",
+    description: "Automation on retainer — build, maintain, and improve every month.",
+    features: [
+      "2 new or updated workflows/month",
+      "Priority support",
+      "Monthly performance review",
+      "Unlimited small fixes",
+    ],
+    highlight: false,
+    cta: "Let's talk",
+  },
+];
 
 // ── CTA section ───────────────────────────────────────────────────────────────
 export const CTA_SECTION = {
   heading: "Ready to cut the admin?",
-  subtext: "Most workflows are live within a week.",
-  buttonLabel: "Get in touch",
-  buttonHref: "mailto:zeroclicks.hq@gmail.com",
+  subtext: "Book a free 30-minute discovery call. No hard sell — just a clear plan for what we'd automate first and what it'd cost.",
+  buttonLabel: "Book a free call",
+  buttonHref: "/contact",
+  secondaryLabel: "Or email us",
+  secondaryHref: "mailto:zeroclicks.hq@gmail.com",
 } as const;
 
 // ── Contact page ──────────────────────────────────────────────────────────────
@@ -127,5 +212,5 @@ export const CONTACT_PAGE = {
 
 // ── Footer ────────────────────────────────────────────────────────────────────
 export const FOOTER = {
-  copyright: `© ${new Date().getFullYear()} Zero Clicks. All rights reserved.`,
+  copyright: `© 2026 Zero Clicks.`,
 } as const;

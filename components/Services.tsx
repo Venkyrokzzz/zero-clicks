@@ -4,148 +4,149 @@
 import { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { SERVICES, type Service } from "@/lib/content";
+import Link from "next/link";
 
 const ease = [0.25, 0.1, 0.25, 1.0] as const;
 
+const tags = ["Workflow", "CRM & Leads", "AI Pipeline"];
+
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.12 } },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 40, rotateX: 12 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    rotateX: 0,
-    transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1.0] },
-  },
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1.0] } },
 };
 
-const prismColors = [
-  "linear-gradient(135deg, #a8d8ff, #c4b5fd)",
-  "linear-gradient(135deg, #c4b5fd, #f9a8d4)",
-  "linear-gradient(135deg, #6ee7b7, #93c5fd)",
-];
-
 function ServiceCard({ service, index }: { service: Service; index: number }) {
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [hovered, setHovered] = useState(false);
+  const [tilt, setTilt] = useState("perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0px)");
   const num = String(index + 1).padStart(2, "0");
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: -y * 13, y: x * 13 });
+    setTilt(`perspective(900px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translateZ(10px)`);
   };
 
   return (
-    <motion.div
-      variants={cardVariants}
+    <Link href={`/contact?service=${encodeURIComponent(service.title)}`} style={{ textDecoration: "none", display: "block" }}>
+      <motion.div
+        variants={cardVariants}
+        onMouseEnter={() => setHovered(true)}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => { setTilt({ x: 0, y: 0 }); setHovered(false); }}
-      style={{ perspective: "1000px" }}
+      onMouseLeave={() => { setHovered(false); setTilt("perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0px)"); }}
+      style={{
+        background: hovered ? "var(--bg-hover)" : "var(--bg-card)",
+        border: `1px solid ${hovered ? "var(--border-mid)" : "var(--border)"}`,
+        borderRadius: "10px",
+        padding: "28px",
+        position: "relative",
+        transition: "background 200ms ease, border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease",
+        cursor: "default",
+        transform: tilt,
+        boxShadow: hovered ? "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.08)" : "none",
+        willChange: "transform",
+      }}
     >
-      <div
+      {/* Number */}
+      <span
         style={{
-          background: hovered
-            ? "rgba(255,255,255,0.07)"
-            : "rgba(255,255,255,0.03)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          border: hovered
-            ? "1px solid rgba(255,255,255,0.18)"
-            : "1px solid rgba(255,255,255,0.08)",
-          padding: "36px",
-          borderRadius: "12px",
-          position: "relative",
-          overflow: "hidden",
-          transform: hovered
-            ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(10px)`
-            : "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)",
-          transition: hovered
-            ? "transform 0.07s linear, border-color 200ms, background 200ms, box-shadow 200ms"
-            : "transform 0.5s ease, border-color 200ms, background 200ms, box-shadow 200ms",
-          boxShadow: hovered
-            ? "0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12)"
-            : "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
-          height: "100%",
-          boxSizing: "border-box",
+          position: "absolute",
+          top: "18px",
+          right: "18px",
+          fontSize: "10px",
+          color: "var(--text-muted)",
+          fontFamily: "var(--font-body)",
+          letterSpacing: "0.1em",
+          fontWeight: 600,
         }}
       >
-        {/* Number */}
-        <span
-          style={{
-            position: "absolute",
-            top: "18px",
-            right: "18px",
-            fontSize: "10px",
-            color: "var(--text-muted)",
-            letterSpacing: "0.12em",
-            fontFamily: "var(--font-body)",
-            fontWeight: 500,
-          }}
-        >
-          {num}
-        </span>
+        {num}
+      </span>
 
-        {/* Prismatic accent bar */}
-        <div
-          style={{
-            width: hovered ? "48px" : "32px",
-            height: "2px",
-            background: prismColors[index % prismColors.length],
-            marginBottom: "28px",
-            borderRadius: "1px",
-            boxShadow: hovered ? "0 0 16px rgba(196,181,253,0.5)" : "none",
-            transition: "width 300ms ease, box-shadow 200ms ease",
-          }}
-        />
+      {/* Tag chip */}
+      <span
+        style={{
+          display: "inline-block",
+          fontSize: "10px",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          color: hovered ? "var(--accent)" : "var(--text-muted)",
+          background: hovered ? "var(--accent-dim)" : "transparent",
+          border: `1px solid ${hovered ? "var(--accent)" : "var(--border)"}`,
+          padding: "3px 8px",
+          borderRadius: "4px",
+          fontFamily: "var(--font-body)",
+          fontWeight: 600,
+          marginBottom: "20px",
+          transition: "all 200ms ease",
+        }}
+      >
+        {tags[index] ?? "Automation"}
+      </span>
 
-        <h3
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 400,
-            fontSize: "1.15rem",
-            color: "var(--text-primary)",
-            marginBottom: "14px",
-            lineHeight: 1.3,
-          }}
-        >
-          {service.title}
-        </h3>
+      <h3
+        style={{
+          fontFamily: "var(--font-display)",
+          fontWeight: 400,
+          fontSize: "1.15rem",
+          color: "var(--text-primary)",
+          marginBottom: "12px",
+          lineHeight: 1.3,
+        }}
+      >
+        {service.title}
+      </h3>
 
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontWeight: 400,
-            fontSize: "0.9rem",
-            color: "var(--text-secondary)",
-            lineHeight: 1.75,
-            margin: 0,
-          }}
-        >
-          {service.description}
-        </p>
+      <p
+        style={{
+          fontFamily: "var(--font-body)",
+          fontWeight: 400,
+          fontSize: "0.9rem",
+          color: "var(--text-secondary)",
+          lineHeight: 1.75,
+          margin: 0,
+        }}
+      >
+        {service.description}
+      </p>
 
-        {/* Inner light refraction on hover */}
-        {hovered && (
-          <div
-            aria-hidden
-            style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "12px",
-              background:
-                "radial-gradient(ellipse at 30% 0%, rgba(196,181,253,0.08) 0%, transparent 60%)",
-              pointerEvents: "none",
-            }}
-          />
-        )}
+      {/* Get started link */}
+      <div
+        style={{
+          marginTop: "20px",
+          color: "var(--accent)",
+          fontSize: "12px",
+          fontFamily: "var(--font-body)",
+          fontWeight: 600,
+          opacity: hovered ? 1 : 0,
+          transform: hovered ? "translateY(0)" : "translateY(5px)",
+          transition: "all 0.3s ease",
+        }}
+      >
+        → Get started
       </div>
-    </motion.div>
+
+      {/* Hover accent bottom line */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: "28px",
+          right: "28px",
+          height: "1px",
+          background: "var(--accent)",
+          opacity: hovered ? 0.5 : 0,
+          transition: "opacity 200ms ease",
+          borderRadius: "1px",
+        }}
+      />
+      </motion.div>
+    </Link>
   );
 }
 
@@ -156,38 +157,25 @@ export default function Services() {
   const gridInView = useInView(gridRef, { once: true, margin: "-80px" });
 
   return (
-    <section id="services" style={{ padding: "128px 48px", position: "relative" }}>
+    <section id="services" style={{ padding: "120px 48px", position: "relative" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
         <motion.div
           ref={headerRef}
-          initial={{ opacity: 0, y: 28 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={headerInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, ease }}
-          style={{ marginBottom: "72px" }}
+          transition={{ duration: 0.6, ease }}
+          style={{ marginBottom: "56px" }}
         >
-          <p
-            style={{
-              fontSize: "11px",
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--text-secondary)",
-              marginBottom: "14px",
-              fontFamily: "var(--font-body)",
-              fontWeight: 500,
-            }}
-          >
+          <p style={{
+            fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase",
+            color: "var(--accent)", marginBottom: "12px", fontFamily: "var(--font-body)", fontWeight: 600,
+          }}>
             Services
           </p>
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 400,
-              fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)",
-              color: "var(--text-primary)",
-              margin: 0,
-              lineHeight: 1.15,
-            }}
-          >
+          <h2 style={{
+            fontFamily: "var(--font-display)", fontWeight: 400,
+            fontSize: "clamp(1.8rem, 3vw, 2.6rem)", color: "var(--text-primary)", margin: 0, lineHeight: 1.15,
+          }}>
             What we build
           </h2>
         </motion.div>
@@ -197,11 +185,7 @@ export default function Services() {
           variants={containerVariants}
           initial="hidden"
           animate={gridInView ? "visible" : "hidden"}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "20px",
-          }}
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}
         >
           {SERVICES.map((service, i) => (
             <ServiceCard key={service.title} service={service} index={i} />

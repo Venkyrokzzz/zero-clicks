@@ -5,6 +5,8 @@
 import type { Metadata } from "next";
 import { Inter, DM_Serif_Display } from "next/font/google";
 import "../styles/globals.css";
+import CursorGlow from "../components/CursorGlow";
+import ScrollProgress from "../components/ScrollProgress";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,12 +28,12 @@ export const metadata: Metadata = {
     template: "%s | Zero Clicks",
   },
   description:
-    "Zero Clicks builds custom n8n AI automation workflows for UK SMEs. Reduce manual admin, save hours every week, and scale without hiring.",
-  keywords: ["AI automation", "n8n", "workflow automation", "UK SME", "business automation"],
+    "Zero Clicks builds custom n8n + Claude AI automation workflows for UK hospitality businesses and SMEs. Automate your inbox, bookings, and ops in days.",
+  keywords: ["AI automation", "n8n", "workflow automation", "UK hospitality", "pub automation", "email automation", "Claude AI", "business automation"],
   openGraph: {
     title: "Zero Clicks — AI Automation for UK Businesses",
-    description: "We automate the boring stuff so you can focus on what matters.",
-    url: "https://zeroclicks.co.uk",
+    description: "Custom n8n + Claude AI workflows for UK hospitality and SMEs. Inbox automated, ops running 24/7.",
+    url: "https://zeroclicks.dev",
     siteName: "Zero Clicks",
     locale: "en_GB",
     type: "website",
@@ -61,6 +63,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
          */}
       </head>
       <body>
+        <ScrollProgress />
+        <CursorGlow />
         {children}
       </body>
     </html>

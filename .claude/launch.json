@@ -5,7 +5,7 @@
       "name": "zero-clicks",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 3000
+      "port": 3001
     }
   ]
 }

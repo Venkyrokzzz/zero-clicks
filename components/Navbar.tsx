@@ -10,27 +10,26 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 32);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -14 }}
+      initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1.0] }}
+      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1.0] }}
       style={{
         position: "fixed",
         top: 0,
         left: 0,
         right: 0,
         zIndex: 50,
-        borderBottom: scrolled ? "1px solid rgba(255,255,255,0.07)" : "1px solid transparent",
-        backgroundColor: scrolled ? "rgba(6,6,14,0.75)" : "transparent",
-        backdropFilter: scrolled ? "blur(20px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(20px)" : "none",
-        transition: "border-color 300ms ease, background-color 300ms ease",
+        borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
+        backgroundColor: scrolled ? "rgba(8,8,8,0.9)" : "transparent",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
+        transition: "border-color 250ms ease, background-color 250ms ease",
       }}
     >
       <div
@@ -38,7 +37,7 @@ export default function Navbar() {
           maxWidth: "1200px",
           margin: "0 auto",
           padding: "0 48px",
-          height: "62px",
+          height: "60px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -46,34 +45,43 @@ export default function Navbar() {
       >
         <Link
           href="/"
+          onClick={(e) => {
+            if (typeof window !== "undefined" && window.location.pathname === "/") {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          }}
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: "1.1rem",
+            fontSize: "1.05rem",
             color: "var(--text-primary)",
             textDecoration: "none",
             whiteSpace: "nowrap",
-            letterSpacing: "-0.01em",
           }}
         >
           {SITE.name}
         </Link>
 
         <nav style={{ display: "flex", alignItems: "center", gap: "32px" }}>
-          {["#services", "#how-it-works"].map((href, i) => (
+          {[
+            { label: "Services", href: "/#services" },
+            { label: "How it works", href: "/#how-it-works" },
+            { label: "Work", href: "/#work" },
+          ].map(link => (
             <Link
-              key={href}
-              href={href}
+              key={link.href}
+              href={link.href}
               style={{
                 fontSize: "13px",
                 color: "var(--text-secondary)",
                 textDecoration: "none",
-                letterSpacing: "0.02em",
+                letterSpacing: "0.01em",
                 transition: "color 200ms ease",
               }}
               onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
               onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-secondary)")}
             >
-              {i === 0 ? "Services" : "How it works"}
+              {link.label}
             </Link>
           ))}
 
@@ -82,24 +90,24 @@ export default function Navbar() {
             style={{
               fontSize: "13px",
               color: "var(--text-primary)",
-              border: "1px solid rgba(255,255,255,0.15)",
-              padding: "8px 18px",
-              textDecoration: "none",
-              letterSpacing: "0.04em",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-mid)",
+              padding: "7px 16px",
               borderRadius: "6px",
-              transition: "background 200ms ease, border-color 200ms ease",
-              backgroundColor: "rgba(255,255,255,0.05)",
-              backdropFilter: "blur(8px)",
+              textDecoration: "none",
+              transition: "border-color 200ms ease, background 200ms ease",
+              fontFamily: "var(--font-body)",
+              fontWeight: 500,
             }}
             onMouseEnter={e => {
               const el = e.currentTarget as HTMLElement;
-              el.style.backgroundColor = "rgba(255,255,255,0.1)";
-              el.style.borderColor = "rgba(255,255,255,0.3)";
+              el.style.borderColor = "var(--accent)";
+              el.style.background = "var(--accent-dim)";
             }}
             onMouseLeave={e => {
               const el = e.currentTarget as HTMLElement;
-              el.style.backgroundColor = "rgba(255,255,255,0.05)";
-              el.style.borderColor = "rgba(255,255,255,0.15)";
+              el.style.borderColor = "var(--border-mid)";
+              el.style.background = "var(--bg-card)";
             }}
           >
             Get in touch

@@ -8,10 +8,9 @@ export default function Footer() {
   return (
     <footer
       style={{
-        background: "rgba(255,255,255,0.02)",
-        backdropFilter: "blur(12px)",
-        borderTop: "1px solid rgba(255,255,255,0.07)",
-        padding: "36px 48px",
+        borderTop: "1px solid var(--border)",
+        padding: "32px 48px",
+        background: "var(--bg-surface)",
       }}
     >
       <div
@@ -37,10 +36,11 @@ export default function Footer() {
           {SITE.name}
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "28px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
           {[
-            { label: "Instagram", href: SITE.instagram },
+            { label: "X/Twitter", href: SITE.twitter },
             { label: "LinkedIn", href: SITE.linkedin },
+            { label: "GitHub", href: SITE.github },
             { label: "Email", href: `mailto:${SITE.email}` },
           ].map(link => (
             <Link
@@ -57,7 +57,7 @@ export default function Footer() {
                 fontWeight: 400,
                 transition: "color 200ms ease",
               }}
-              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-secondary)")}
               onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")}
             >
               {link.label}
@@ -74,7 +74,7 @@ export default function Footer() {
             margin: 0,
           }}
         >
-          {FOOTER.copyright}
+          {FOOTER.copyright} · Built with n8n + Claude AI · London
         </p>
       </div>
     </footer>
