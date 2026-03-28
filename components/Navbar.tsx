@@ -3,17 +3,34 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/content";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+
+const PRODUCTS = [
+  { label: "Inbox Autopilot", href: "/#services", description: "Email handled 24/7" },
+  { label: "Reputation Manager", href: "/#services", description: "Reviews + complaints" },
+];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setProductsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
@@ -28,7 +45,7 @@ export default function Navbar() {
         right: 0,
         zIndex: 50,
         borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
-        backgroundColor: scrolled ? "rgba(8,8,8,0.9)" : "transparent",
+        backgroundColor: scrolled ? "rgba(10,10,16,0.92)" : "transparent",
         backdropFilter: scrolled ? "blur(12px)" : "none",
         transition: "border-color 250ms ease, background-color 250ms ease",
       }}
@@ -83,8 +100,7 @@ export default function Navbar() {
           {[
             { label: "Services", href: "/#services" },
             { label: "How it works", href: "/#how-it-works" },
-            { label: "Work", href: "/#work" },
-          ].map(link => (
+          ].map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -95,12 +111,191 @@ export default function Navbar() {
                 letterSpacing: "0.01em",
                 transition: "color 200ms ease",
               }}
-              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
-              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-secondary)")}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLElement).style.color = "var(--text-secondary)")
+              }
             >
               {link.label}
             </Link>
           ))}
+
+          {/* Products dropdown */}
+          <div ref={dropdownRef} style={{ position: "relative" }}>
+            <button
+              onClick={() => setProductsOpen((o) => !o)}
+              style={{
+                fontSize: "13px",
+                color: productsOpen ? "var(--text-primary)" : "var(--text-secondary)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                letterSpacing: "0.01em",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                padding: 0,
+                transition: "color 200ms ease",
+                fontFamily: "var(--font-body)",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")
+              }
+              onMouseLeave={(e) => {
+                if (!productsOpen)
+                  (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
+              }}
+            >
+              Products
+              <svg
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+                style={{
+                  transform: productsOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 200ms ease",
+                }}
+              >
+                <path
+                  d="M2 3.5L5 6.5L8 3.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+
+            <AnimatePresence>
+              {productsOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.18 }}
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 12px)",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: "var(--bg-card)",
+                    border: "1px solid var(--border-mid)",
+                    borderRadius: "10px",
+                    padding: "8px",
+                    minWidth: "200px",
+                    boxShadow: "0 16px 40px rgba(0,0,0,0.4)",
+                    zIndex: 100,
+                  }}
+                >
+                  {PRODUCTS.map((product) => (
+                    <Link
+                      key={product.label}
+                      href={product.href}
+                      onClick={() => setProductsOpen(false)}
+                      style={{
+                        display: "block",
+                        padding: "10px 14px",
+                        borderRadius: "6px",
+                        textDecoration: "none",
+                        transition: "background 150ms ease",
+                      }}
+                      onMouseEnter={(e) =>
+                        ((e.currentTarget as HTMLElement).style.background =
+                          "var(--bg-hover)")
+                      }
+                      onMouseLeave={(e) =>
+                        ((e.currentTarget as HTMLElement).style.background = "transparent")
+                      }
+                    >
+                      <p
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: 500,
+                          color: "var(--text-primary)",
+                          margin: 0,
+                          fontFamily: "var(--font-body)",
+                        }}
+                      >
+                        {product.label}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: "11px",
+                          color: "var(--text-muted)",
+                          margin: "2px 0 0",
+                          fontFamily: "var(--font-body)",
+                        }}
+                      >
+                        {product.description}
+                      </p>
+                    </Link>
+                  ))}
+
+                  {/* Divider */}
+                  <div
+                    style={{
+                      height: "1px",
+                      background: "var(--border)",
+                      margin: "6px 8px",
+                    }}
+                  />
+
+                  {/* Live Demo featured item */}
+                  <Link
+                    href="/demo"
+                    onClick={() => setProductsOpen(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "10px 14px",
+                      borderRadius: "6px",
+                      textDecoration: "none",
+                      background: "var(--accent-dim)",
+                      border: "1px solid rgba(59,130,246,0.15)",
+                      transition: "background 150ms ease",
+                    }}
+                    onMouseEnter={(e) =>
+                      ((e.currentTarget as HTMLElement).style.background =
+                        "rgba(59,130,246,0.12)")
+                    }
+                    onMouseLeave={(e) =>
+                      ((e.currentTarget as HTMLElement).style.background =
+                        "var(--accent-dim)")
+                    }
+                  >
+                    <span style={{ fontSize: "14px" }}>🎬</span>
+                    <div>
+                      <p
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "var(--accent)",
+                          margin: 0,
+                          fontFamily: "var(--font-body)",
+                        }}
+                      >
+                        Live Demo
+                      </p>
+                      <p
+                        style={{
+                          fontSize: "11px",
+                          color: "var(--text-secondary)",
+                          margin: "2px 0 0",
+                          fontFamily: "var(--font-body)",
+                        }}
+                      >
+                        See it working right now
+                      </p>
+                    </div>
+                  </Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <Link
             href="/contact"
@@ -116,12 +311,12 @@ export default function Navbar() {
               fontFamily: "var(--font-body)",
               fontWeight: 500,
             }}
-            onMouseEnter={e => {
+            onMouseEnter={(e) => {
               const el = e.currentTarget as HTMLElement;
               el.style.borderColor = "var(--accent)";
               el.style.background = "var(--accent-dim)";
             }}
-            onMouseLeave={e => {
+            onMouseLeave={(e) => {
               const el = e.currentTarget as HTMLElement;
               el.style.borderColor = "var(--border-mid)";
               el.style.background = "var(--bg-card)";
