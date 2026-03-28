@@ -68,9 +68,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ response: text });
   } catch (err) {
-    console.error("Anthropic API error:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Anthropic API error:", message);
     return NextResponse.json(
-      { error: "Failed to generate response." },
+      { error: message },
       { status: 502 }
     );
   }
