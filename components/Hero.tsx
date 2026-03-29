@@ -108,7 +108,7 @@ export default function Hero() {
               color: "#A1A1AA",
             }}
           >
-            While you run the pub.
+            Your ops, on autopilot.
           </motion.span>
         </h1>
 
