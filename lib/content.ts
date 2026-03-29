@@ -22,7 +22,7 @@ export const HERO = {
   headlineTop: "Stop doing it manually.",
   headlineBottom: "Let the machines handle it.",
   subtext:
-    "Zero Clicks builds custom AI automation workflows for UK hospitality and SMEs — your inbox answered, bookings handled, ops running 24/7. Set up in days, not months.",
+    "We build AI workflows that eliminate repetitive admin — email triage, lead routing, ops alerts, and more. Powered by n8n and Claude AI. Running 24/7 from day one.",
   ctaPrimary: {
     label: "Book a free 30-min call",
     href: "/contact",

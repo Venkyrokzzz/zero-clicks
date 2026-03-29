@@ -77,7 +77,7 @@ export default function Hero() {
               fontWeight: 500,
             }}
           >
-            Automation Command Center
+            n8n · Claude AI · Built for UK SMEs
           </span>
         </motion.div>
 
@@ -98,7 +98,7 @@ export default function Hero() {
             transition={{ duration: 0.7, ease, delay: 0.05 }}
             style={{ display: "block" }}
           >
-            Your inbox, handled.
+            You run the business.
           </motion.span>
           <motion.span
             animate={{ opacity: 1, y: 0 }}
@@ -108,7 +108,7 @@ export default function Hero() {
               color: "#A1A1AA",
             }}
           >
-            Everything else? Handled.
+            AI runs everything else.
           </motion.span>
         </h1>
 
