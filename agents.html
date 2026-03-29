@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Zero Clicks — Agent HQ 🎮</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const C = document.getElementById('c')
+const ctx = C.getContext('2d')
+C.width = window.innerWidth
+C.height = window.innerHeight
+
+// ─── PIXEL HELPERS ────────────────────────────────────────────────────────────
+const P = 5 // pixel size
+function px(x, y, color) { ctx.fillStyle = color; ctx.fillRect(x, y, P-1, P-1) }
+
+// ─── SPRITE DATA ──────────────────────────────────────────────────────────────
+// 0=transparent 1=skin 2=hair 3=agent-color 4=pants 5=shoe 6=white 7=dark-eye 8=blush
+const SPRITES = {
+  idle_a: [
+    [0,0,0,2,2,0,0,0],
+    [0,0,2,2,2,2,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,7,1,7,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [1,3,3,3,3,3,3,1],
+    [0,3,3,3,3,3,3,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,5,0,0,5,0,0],
+  ],
+  idle_b: [
+    [0,0,0,2,2,0,0,0],
+    [0,0,2,2,2,2,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,7,1,7,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [1,3,3,3,3,3,3,1],
+    [0,0,4,4,4,4,0,0],
+    [0,0,4,0,0,4,0,0],
+    [0,5,5,0,0,5,5,0],
+  ],
+  work_a: [
+    [0,0,0,2,2,0,0,0],
+    [0,0,2,2,2,2,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,7,1,7,0,0],
+    [0,0,1,1,1,1,0,0],
+    [1,3,3,3,3,3,3,1],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,5,0,0,5,0,0],
+  ],
+  work_b: [
+    [0,0,0,2,2,0,0,0],
+    [0,0,2,2,2,2,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,7,1,7,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,3,3,3,3,3,3,0],
+    [1,3,3,3,3,3,3,1],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,5,0,0,5,0,0],
+  ],
+  sleep_a: [
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,2,2,1,1,1,1],
+    [0,2,2,1,1,0,7,1],
+    [2,2,1,1,1,1,1,1],
+    [0,3,3,3,3,3,3,0],
+    [0,0,3,3,3,3,0,0],
+    [0,0,4,4,4,4,0,0],
+    [0,5,5,5,5,5,5,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+  ],
+  sleep_b: [
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,2,2,1,1,1,1],
+    [0,2,2,1,1,0,0,1],
+    [2,2,1,1,1,1,1,1],
+    [0,3,3,3,3,3,3,0],
+    [0,0,3,3,3,3,0,0],
+    [0,0,4,4,4,4,0,0],
+    [0,5,5,5,5,5,5,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],
+  ],
+  celebrate_a: [
+    [0,0,0,2,2,0,0,0],
+    [0,0,2,2,2,2,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,7,1,7,0,0],
+    [0,0,1,8,8,1,0,0],
+    [1,0,3,3,3,3,0,1],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,0,4,0,0,4,0,0],
+    [0,4,4,0,0,4,4,0],
+    [5,5,0,0,0,0,5,5],
+  ],
+  celebrate_b: [
+    [1,0,3,3,3,3,0,1],
+    [0,0,2,2,2,2,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,7,1,7,0,0],
+    [0,0,1,8,8,1,0,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [1,0,3,3,3,3,0,1],
+    [0,0,0,4,4,0,0,0],
+    [0,0,4,4,4,4,0,0],
+    [0,5,5,0,0,5,5,0],
+  ],
+  eat_a: [
+    [0,0,0,2,2,0,0,0],
+    [0,0,2,2,2,2,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,7,1,7,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,1,1],
+    [1,3,3,3,3,3,0,0],
+    [0,3,3,3,3,3,3,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,5,0,0,5,0,0],
+  ],
+  eat_b: [
+    [0,0,0,2,2,0,0,0],
+    [0,0,2,2,2,2,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,7,1,7,0,0],
+    [0,0,1,8,1,1,0,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,1,1,0],
+    [1,3,3,3,3,3,0,0],
+    [0,3,3,3,3,3,3,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,5,0,0,5,0,0],
+  ],
+  think_a: [
+    [0,0,0,2,2,0,0,0],
+    [0,0,2,2,2,2,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,7,1,0,0,0],
+    [0,0,1,1,1,0,0,0],
+    [0,0,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,0,1],
+    [0,3,3,3,3,3,3,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,5,0,0,5,0,0],
+  ],
+  stretch_a: [
+    [0,1,0,2,2,0,1,0],
+    [1,0,2,2,2,2,0,1],
+    [0,0,1,1,1,1,0,0],
+    [0,0,1,7,1,7,0,0],
+    [0,0,1,1,1,1,0,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,3,3,3,3,3,3,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,4,4,4,4,0,0],
+    [0,0,5,0,0,5,0,0],
+  ],
+}
+
+// ─── COLOR MAP ────────────────────────────────────────────────────────────────
+function colorMap(code, agentColor) {
+  const map = {
+    0: null,
+    1: '#ffd4a3', 2: '#3b2314', 3: agentColor,
+    4: '#2a3f6b', 5: '#111827', 6: '#ffffff',
+    7: '#1a1a2e', 8: '#ff9a9a'
+  }
+  return map[code] || null
+}
+
+function drawSprite(sprite, cx, cy, agentColor, yOffset = 0) {
+  const name = sprite
+  const data = SPRITES[name]
+  if (!data) return
+  data.forEach((row, r) => {
+    row.forEach((code, c) => {
+      const col = colorMap(code, agentColor)
+      if (col) {
+        ctx.fillStyle = col
+        ctx.fillRect(cx + c * P, cy + r * P + yOffset, P - 1, P - 1)
+      }
+    })
+  })
+}
+
+// ─── MATRIX RAIN ─────────────────────────────────────────────────────────────
+const matrixCanvas = document.createElement('canvas')
+matrixCanvas.width = C.width; matrixCanvas.height = C.height
+const mctx = matrixCanvas.getContext('2d')
+const matrixChars = 'アイウエオ01ABCDEFGHIJK◆●○□▲'
+const mCols = Math.floor(C.width / 12)
+const drops = Array(mCols).fill(1)
+function drawMatrix() {
+  mctx.fillStyle = 'rgba(0,0,0,0.06)'
+  mctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height)
+  mctx.font = '11px monospace'
+  drops.forEach((drop, i) => {
+    mctx.fillStyle = `rgba(0,200,80,${Math.random() * 0.12 + 0.03})`
+    mctx.fillText(matrixChars[Math.floor(Math.random() * matrixChars.length)], i * 12, drop * 12)
+    if (drop * 12 > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0
+    drops[i]++
+  })
+}
+
+// ─── PARTICLES ────────────────────────────────────────────────────────────────
+let particles = []
+function spawnConfetti(x, y, color) {
+  for (let i = 0; i < 20; i++) {
+    particles.push({
+      x, y, vx: (Math.random() - 0.5) * 6, vy: -(Math.random() * 5 + 2),
+      color, life: 1, size: Math.random() * 4 + 2
+    })
+  }
+}
+function spawnZzz(x, y) {
+  particles.push({
+    x, y, vx: (Math.random() - 0.5) * 0.5, vy: -0.8,
+    color: '#a78bfa', life: 1, size: 10, text: 'z',
+    type: 'text'
+  })
+}
+
+// ─── AGENTS ───────────────────────────────────────────────────────────────────
+const AGENT_DEFS = [
+  { id: 'cr', name: 'Code Reviewer', code: 'CR-01', color: '#60a5fa', icon: '🔍',
+    tasks: ['git diff scanning...', 'Type checking...', 'Security scan...', 'No CRITICALs ✓'] },
+  { id: 'db', name: 'Debugger', code: 'DB-02', color: '#fbbf24', icon: '🐛',
+    tasks: ['Reading stack...', 'Isolating bug...', 'Patching...', 'Bug squashed ✓'] },
+  { id: 'tw', name: 'Test Writer', code: 'TW-03', color: '#34d399', icon: '✅',
+    tasks: ['Reading source...', 'Writing tests...', 'Coverage 94%...', '24 passing ✓'] },
+  { id: 'rf', name: 'Refactorer', code: 'RF-04', color: '#a78bfa', icon: '♻️',
+    tasks: ['Scanning code...', 'Extracting fns...', 'Cleaning up...', 'Simplified ✓'] },
+  { id: 'dw', name: 'Doc Writer', code: 'DW-05', color: '#f472b6', icon: '📝',
+    tasks: ['Reading files...', 'Writing JSDoc...', 'README done...', 'Published ✓'] },
+  { id: 'sa', name: 'Security', code: 'SA-06', color: '#fb923c', icon: '🛡️',
+    tasks: ['Scanning secrets...', 'Auth check...', 'Schema verify...', 'All clear ✓'] },
+]
+
+// State machine
+const STATES = ['idle', 'sleep', 'work', 'celebrate', 'eat', 'think', 'stretch']
+const STATE_DURATION = { idle: null, sleep: null, work: null, celebrate: 2000, eat: 5000, think: 6000, stretch: 3500 }
+
+const agents = AGENT_DEFS.map((def, i) => ({
+  ...def,
+  state: 'idle',
+  frame: 0,
+  frameTimer: 0,
+  stateTimer: 0,
+  idleTimer: Math.random() * 8000 + 5000, // random time before doing something
+  taskIndex: 0,
+  taskTimer: 0,
+  progress: 0,
+  completed: 0,
+  currentTask: 'Standby...',
+  zzzTimer: 0,
+  speechBubble: null,
+  speechTimer: 0,
+  yBob: 0,
+  yBobDir: 1,
+}))
+
+// Layout: 3 cols × 2 rows
+const COLS = 3, ROWS = 2
+const PAD = 20
+const cardW = Math.floor((C.width - PAD * (COLS + 1)) / COLS)
+const cardH = Math.floor((C.height - 100 - PAD * (ROWS + 1)) / ROWS)
+
+function agentRect(i) {
+  const col = i % COLS, row = Math.floor(i / COLS)
+  return {
+    x: PAD + col * (cardW + PAD),
+    y: 90 + PAD + row * (cardH + PAD),
+    w: cardW, h: cardH
+  }
+}
+
+// Click handler
+C.addEventListener('click', e => {
+  const mx = e.clientX, my = e.clientY
+  agents.forEach((ag, i) => {
+    const r = agentRect(i)
+    if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
+      if (ag.state === 'sleep') {
+        wakeAgent(ag)
+      } else if (ag.state === 'idle' || ag.state === 'eat' || ag.state === 'think' || ag.state === 'stretch') {
+        startWork(ag)
+      }
+    }
+  })
+  // RUN ALL button
+  if (mx >= C.width - 140 && mx <= C.width - 20 && my >= 20 && my <= 55) {
+    agents.forEach(ag => {
+      if (ag.state === 'idle' || ag.state === 'sleep') {
+        setTimeout(() => startWork(ag), agents.indexOf(ag) * 250)
+      }
+    })
+  }
+})
+
+C.addEventListener('mousemove', e => {
+  const mx = e.clientX, my = e.clientY
+  let onAgent = false
+  agents.forEach((ag, i) => {
+    const r = agentRect(i)
+    if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) {
+      onAgent = ag.state === 'idle' || ag.state === 'sleep' || ag.state === 'eat' || ag.state === 'think'
+    }
+  })
+  C.style.cursor = onAgent ? 'pointer' : 'default'
+})
+
+function wakeAgent(ag) {
+  ag.state = 'idle'
+  ag.idleTimer = Math.random() * 5000 + 3000
+  showSpeech(ag, ['Huh? What?!', 'I was dreaming...', 'Already?! 😴', '...ok ok'][Math.floor(Math.random() * 4)])
+}
+
+function startWork(ag) {
+  ag.state = 'work'
+  ag.taskIndex = 0
+  ag.progress = 0
+  ag.currentTask = ag.tasks[0]
+  ag.taskTimer = 0
+  showSpeech(ag, ['On it!', 'Right away!', "Let's go! 💪", 'Deploying!'][Math.floor(Math.random() * 4)])
+}
+
+function showSpeech(ag, text, duration = 2500) {
+  ag.speechBubble = text
+  ag.speechTimer = duration
+}
+
+let totalTasks = 0
+let startTime = Date.now()
+
+// ─── UPDATE ───────────────────────────────────────────────────────────────────
+let lastTime = 0
+function update(now) {
+  const dt = now - lastTime
+  lastTime = now
+
+  // Matrix
+  if (Math.floor(now / 60) !== Math.floor((now - dt) / 60)) drawMatrix()
+
+  agents.forEach(ag => {
+    // Frame animation
+    ag.frameTimer += dt
+    if (ag.frameTimer > 350) { ag.frameTimer = 0; ag.frame++ }
+
+    // Speech bubble timer
+    if (ag.speechTimer > 0) {
+      ag.speechTimer -= dt
+      if (ag.speechTimer <= 0) ag.speechBubble = null
+    }
+
+    // Y bobbing for idle
+    if (ag.state === 'idle') {
+      ag.yBob += ag.yBobDir * 0.03
+      if (Math.abs(ag.yBob) > 1.5) ag.yBobDir *= -1
+    } else { ag.yBob = 0 }
+
+    // State machine
+    switch (ag.state) {
+      case 'idle':
+        ag.idleTimer -= dt
+        if (ag.idleTimer <= 0) {
+          // Pick random idle action
+          const roll = Math.random()
+          if (roll < 0.30) {
+            ag.state = 'sleep'
+            ag.zzzTimer = 0
+          } else if (roll < 0.50) {
+            ag.state = 'eat'
+            ag.stateTimer = STATE_DURATION.eat
+            showSpeech(ag, ['Snack time 🍕', 'Tea break ☕', 'Biscuit time 🍪'][Math.floor(Math.random() * 3)])
+          } else if (roll < 0.70) {
+            ag.state = 'think'
+            ag.stateTimer = STATE_DURATION.think
+            showSpeech(ag, ['hmm...', '🤔 thinking...', 'Interesting...'][Math.floor(Math.random() * 3)])
+          } else {
+            ag.state = 'stretch'
+            ag.stateTimer = STATE_DURATION.stretch
+            showSpeech(ag, ['*yaaawn*', 'Stretching! 🧘', 'Quick break'][Math.floor(Math.random() * 3)])
+          }
+          ag.idleTimer = Math.random() * 10000 + 8000
+        }
+        break
+
+      case 'sleep':
+        ag.zzzTimer += dt
+        if (ag.zzzTimer > 2000) {
+          ag.zzzTimer = 0
+          const r = agentRect(agents.indexOf(ag))
+          spawnZzz(r.x + r.w * 0.65, r.y + r.h * 0.35)
+        }
+        break
+
+      case 'eat':
+      case 'think':
+      case 'stretch':
+        ag.stateTimer -= dt
+        if (ag.stateTimer <= 0) {
+          ag.state = 'idle'
+          ag.idleTimer = Math.random() * 10000 + 6000
+        }
+        break
+
+      case 'work':
+        ag.taskTimer += dt
+        ag.progress = Math.min(100, ag.progress + dt * 0.04)
+        if (ag.taskTimer > 1200) {
+          ag.taskTimer = 0
+          ag.taskIndex++
+          if (ag.taskIndex >= ag.tasks.length) {
+            ag.state = 'celebrate'
+            ag.stateTimer = STATE_DURATION.celebrate
+            ag.currentTask = ag.tasks[ag.tasks.length - 1]
+            ag.completed++
+            totalTasks++
+            const r = agentRect(agents.indexOf(ag))
+            spawnConfetti(r.x + r.w / 2, r.y + r.h / 2, ag.color)
+            showSpeech(ag, ['DONE! 🎉', 'Nailed it!', '✅ Complete!', 'Ship it! 🚀'][Math.floor(Math.random() * 4)])
+          } else {
+            ag.currentTask = ag.tasks[ag.taskIndex]
+          }
+        }
+        break
+
+      case 'celebrate':
+        ag.stateTimer -= dt
+        if (ag.stateTimer <= 0) {
+          ag.state = 'idle'
+          ag.progress = 0
+          ag.currentTask = 'Standby...'
+          ag.idleTimer = Math.random() * 10000 + 5000
+        }
+        break
+    }
+  })
+
+  // Particles
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy
+    p.vy += 0.15
+    p.life -= 0.015
+  })
+  particles = particles.filter(p => p.life > 0)
+}
+
+// ─── DRAW ─────────────────────────────────────────────────────────────────────
+function draw(now) {
+  ctx.clearRect(0, 0, C.width, C.height)
+
+  // Matrix background
+  ctx.globalAlpha = 0.5
+  ctx.drawImage(matrixCanvas, 0, 0)
+  ctx.globalAlpha = 1
+
+  // Scanlines
+  ctx.fillStyle = 'rgba(0,0,0,0.04)'
+  for (let y = 0; y < C.height; y += 3) ctx.fillRect(0, y, C.width, 1)
+
+  // ── Header ──────────────────────────────────────────────────────────────────
+  ctx.fillStyle = 'rgba(0,0,0,0.75)'
+  roundRect(ctx, 10, 10, C.width - 20, 70, 10)
+  ctx.fill()
+  ctx.strokeStyle = 'rgba(0,255,100,0.2)'
+  ctx.lineWidth = 1
+  roundRect(ctx, 10, 10, C.width - 20, 70, 10)
+  ctx.stroke()
+
+  ctx.fillStyle = '#00ff64'
+  ctx.font = 'bold 14px monospace'
+  ctx.fillText('◈ ZERO CLICKS — AGENT HQ', 20, 34)
+
+  ctx.fillStyle = 'rgba(255,255,255,0.3)'
+  ctx.font = '9px monospace'
+  ctx.fillText('BUILD FASTER. SHIP SMARTER. ZERO MANUAL WORK.', 20, 50)
+
+  // Stats
+  const elapsed = Date.now() - startTime
+  const h = String(Math.floor(elapsed / 3600000)).padStart(2,'0')
+  const m = String(Math.floor((elapsed % 3600000) / 60000)).padStart(2,'0')
+  const s = String(Math.floor((elapsed % 60000) / 1000)).padStart(2,'0')
+  const active = agents.filter(a => a.state === 'work').length
+  const sleeping = agents.filter(a => a.state === 'sleep').length
+
+  const stats = [
+    { label: 'TASKS', val: totalTasks, color: '#60a5fa' },
+    { label: 'ACTIVE', val: active, color: '#22c55e' },
+    { label: 'SLEEPING', val: sleeping, color: '#a78bfa' },
+    { label: 'UPTIME', val: `${h}:${m}:${s}`, color: '#f472b6' },
+  ]
+  stats.forEach((st, i) => {
+    const sx = C.width - 480 + i * 110
+    ctx.fillStyle = st.color
+    ctx.font = `bold 18px monospace`
+    ctx.fillText(st.val, sx, 38)
+    ctx.fillStyle = 'rgba(255,255,255,0.3)'
+    ctx.font = '8px monospace'
+    ctx.fillText(st.label, sx, 52)
+  })
+
+  // RUN ALL button
+  const btnX = C.width - 140, btnY = 20
+  ctx.fillStyle = 'rgba(0,255,100,0.1)'
+  roundRect(ctx, btnX, btnY, 120, 36, 6); ctx.fill()
+  ctx.strokeStyle = 'rgba(0,255,100,0.3)'; ctx.lineWidth = 1
+  roundRect(ctx, btnX, btnY, 120, 36, 6); ctx.stroke()
+  ctx.fillStyle = '#00ff64'
+  ctx.font = 'bold 10px monospace'
+  ctx.fillText('▶  RUN ALL', btnX + 28, btnY + 22)
+
+  // ── Agent Cards ─────────────────────────────────────────────────────────────
+  agents.forEach((ag, i) => {
+    const { x, y, w, h } = agentRect(i)
+    const isActive = ag.state === 'work' || ag.state === 'celebrate'
+
+    // Card bg
+    ctx.fillStyle = isActive ? `${ag.color}0d` : 'rgba(0,0,0,0.7)'
+    roundRect(ctx, x, y, w, h, 10); ctx.fill()
+    ctx.strokeStyle = isActive ? `${ag.color}55` : 'rgba(255,255,255,0.08)'
+    ctx.lineWidth = isActive ? 1.5 : 1
+    roundRect(ctx, x, y, w, h, 10); ctx.stroke()
+
+    // Glow for active
+    if (isActive) {
+      ctx.shadowColor = ag.color
+      ctx.shadowBlur = 20
+      roundRect(ctx, x, y, w, h, 10); ctx.stroke()
+      ctx.shadowBlur = 0
+    }
+
+    // Title bar
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'
+    roundRectTop(ctx, x + 1, y + 1, w - 2, 28, 10)
+    ctx.fill()
+
+    // Status dot
+    const dotColor = ag.state === 'work' ? '#22c55e' : ag.state === 'sleep' ? '#a78bfa' : ag.state === 'celebrate' ? '#fbbf24' : '#444'
+    if (ag.state === 'work') { ctx.shadowColor = '#22c55e'; ctx.shadowBlur = 6 }
+    ctx.fillStyle = dotColor
+    ctx.beginPath(); ctx.arc(x + 14, y + 15, 4, 0, Math.PI * 2); ctx.fill()
+    ctx.shadowBlur = 0
+
+    ctx.fillStyle = ag.color
+    ctx.font = `bold 9px monospace`
+    ctx.fillText(ag.code, x + 24, y + 19)
+
+    const stateLabel = { idle: 'STANDBY', sleep: 'SLEEPING 💤', work: 'RUNNING', celebrate: 'DONE! ✓', eat: 'SNACK BREAK ☕', think: 'THINKING 🤔', stretch: 'STRETCHING 🧘' }
+    ctx.fillStyle = isActive ? ag.color : 'rgba(255,255,255,0.25)'
+    ctx.font = '8px monospace'
+    ctx.fillText(stateLabel[ag.state] || ag.state.toUpperCase(), x + w - ctx.measureText(stateLabel[ag.state] || '').width - 12, y + 19)
+
+    // ── Pixel character ────────────────────────────────────────────────────────
+    const charX = x + 16
+    const charY = y + 40 + Math.round(ag.yBob)
+    const f = ag.frame
+
+    switch (ag.state) {
+      case 'idle':    drawSprite(f % 2 === 0 ? 'idle_a' : 'idle_b', charX, charY, ag.color); break
+      case 'sleep':   drawSprite(f % 2 === 0 ? 'sleep_a' : 'sleep_b', charX, charY + 15, ag.color); break
+      case 'work':    drawSprite(f % 2 === 0 ? 'work_a' : 'work_b', charX, charY, ag.color); break
+      case 'celebrate': {
+        const jump = Math.abs(Math.sin(now / 200)) * 8
+        drawSprite(f % 2 === 0 ? 'celebrate_a' : 'celebrate_b', charX, charY - jump, ag.color)
+        break
+      }
+      case 'eat':     drawSprite(f % 2 === 0 ? 'eat_a' : 'eat_b', charX, charY, ag.color); break
+      case 'think':   drawSprite(f % 2 === 0 ? 'think_a' : 'idle_a', charX, charY, ag.color); break
+      case 'stretch': drawSprite(f % 2 === 0 ? 'stretch_a' : 'idle_b', charX, charY, ag.color); break
+    }
+
+    // Thought bubble for thinking
+    if (ag.state === 'think') {
+      const bx = charX + 48, by = charY + 10
+      ctx.fillStyle = 'rgba(255,255,255,0.08)'
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)'
+      ctx.lineWidth = 1
+      roundRect(ctx, bx, by, 60, 22, 8); ctx.fill(); ctx.stroke()
+      ctx.fillStyle = 'rgba(255,255,255,0.5)'
+      ctx.font = '10px monospace'
+      ctx.fillText('...🤔...', bx + 6, by + 15)
+    }
+
+    // Agent info panel (right of character)
+    const infoX = charX + 60, infoY = y + 38
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'
+    ctx.font = `bold 10px monospace`
+    ctx.fillText(`${ag.icon} ${ag.name}`, infoX, infoY + 12)
+
+    ctx.fillStyle = isActive ? ag.color : 'rgba(255,255,255,0.3)'
+    ctx.font = '8px monospace'
+    ctx.fillText(`> ${ag.currentTask}`, infoX, infoY + 28)
+    if (ag.state === 'work') {
+      ctx.fillStyle = 'rgba(255,255,255,0.15)'
+      ctx.font = '7px monospace'
+      ctx.fillText(`${ag.completed} done this session`, infoX, infoY + 42)
+    }
+
+    // Progress bar
+    if (ag.state === 'work' || ag.state === 'celebrate') {
+      const barX = x + 8, barY = y + h - 20, barW = w - 16
+      ctx.fillStyle = 'rgba(255,255,255,0.06)'
+      roundRect(ctx, barX, barY, barW, 8, 4); ctx.fill()
+      ctx.fillStyle = ag.state === 'celebrate' ? '#22c55e' : ag.color
+      if (ag.state === 'celebrate') { ctx.shadowColor = '#22c55e'; ctx.shadowBlur = 8 }
+      roundRect(ctx, barX, barY, (ag.progress / 100) * barW, 8, 4); ctx.fill()
+      ctx.shadowBlur = 0
+    }
+
+    // Footer: completed count + hint
+    ctx.fillStyle = 'rgba(255,255,255,0.15)'
+    ctx.font = '7px monospace'
+    ctx.fillText(`${ag.completed} tasks completed`, x + 10, y + h - 6)
+
+    if (ag.state === 'idle' || ag.state === 'eat' || ag.state === 'think') {
+      ctx.fillStyle = ag.color + '99'
+      ctx.font = '7px monospace'
+      ctx.fillText('CLICK TO RUN ▶', x + w - 90, y + h - 6)
+    } else if (ag.state === 'sleep') {
+      ctx.fillStyle = '#a78bfa99'
+      ctx.font = '7px monospace'
+      ctx.fillText('CLICK TO WAKE 👆', x + w - 100, y + h - 6)
+    }
+
+    // Speech bubble
+    if (ag.speechBubble && ag.speechTimer > 0) {
+      const alpha = Math.min(1, ag.speechTimer / 400)
+      const bw = Math.max(80, ctx.measureText(ag.speechBubble).width + 16)
+      const bx = x + w / 2 - bw / 2, by = y + 8
+
+      ctx.globalAlpha = alpha
+      ctx.fillStyle = 'rgba(255,255,255,0.92)'
+      roundRect(ctx, bx, by, bw, 22, 5); ctx.fill()
+      // Tail
+      ctx.beginPath()
+      ctx.moveTo(x + w / 2 - 5, by + 22)
+      ctx.lineTo(x + w / 2, by + 30)
+      ctx.lineTo(x + w / 2 + 5, by + 22)
+      ctx.closePath(); ctx.fill()
+
+      ctx.fillStyle = '#1a1a2e'
+      ctx.font = 'bold 9px monospace'
+      ctx.fillText(ag.speechBubble, bx + 8, by + 15)
+      ctx.globalAlpha = 1
+    }
+  })
+
+  // ── Particles ────────────────────────────────────────────────────────────────
+  particles.forEach(p => {
+    ctx.globalAlpha = p.life
+    if (p.type === 'text') {
+      ctx.fillStyle = p.color
+      ctx.font = `bold ${p.size}px monospace`
+      ctx.fillText(p.text, p.x, p.y)
+    } else {
+      ctx.fillStyle = p.color
+      ctx.fillRect(p.x, p.y, p.size, p.size)
+    }
+    ctx.globalAlpha = 1
+  })
+
+  // ── Help text ────────────────────────────────────────────────────────────────
+  ctx.fillStyle = 'rgba(255,255,255,0.12)'
+  ctx.font = '9px monospace'
+  ctx.fillText('CLICK agents to run them · They\'ll sleep, eat, think and celebrate on their own · RUN ALL fires them simultaneously', 20, C.height - 10)
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + w - r, y)
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+  ctx.lineTo(x + w, y + h - r)
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+  ctx.lineTo(x + r, y + h)
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+  ctx.lineTo(x, y + r)
+  ctx.quadraticCurveTo(x, y, x + r, y)
+  ctx.closePath()
+}
+function roundRectTop(ctx, x, y, w, h, r) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + w - r, y)
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+  ctx.lineTo(x + w, y + h)
+  ctx.lineTo(x, y + h)
+  ctx.lineTo(x, y + r)
+  ctx.quadraticCurveTo(x, y, x + r, y)
+  ctx.closePath()
+}
+
+// ─── LOOP ─────────────────────────────────────────────────────────────────────
+function loop(now) {
+  update(now)
+  draw(now)
+  requestAnimationFrame(loop)
+}
+
+// Initial matrix fill
+for (let i = 0; i < 50; i++) drawMatrix()
+requestAnimationFrame(loop)
+
+// Resize
+window.addEventListener('resize', () => {
+  C.width = window.innerWidth; C.height = window.innerHeight
+  matrixCanvas.width = C.width; matrixCanvas.height = C.height
+})
+</script>
+</body>
+</html>

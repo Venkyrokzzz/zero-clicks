@@ -20,15 +20,9 @@ export default function CTASection() {
         textAlign: "center",
         position: "relative",
         overflow: "hidden",
+        background: "var(--bg)",
       }}
     >
-      {/* Blue radial glow */}
-      <div aria-hidden style={{
-        position: "absolute",
-        inset: 0,
-        background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(59,130,246,0.07) 0%, transparent 70%)",
-        pointerEvents: "none",
-      }} />
       <motion.div
         ref={ref}
         initial={{ opacity: 0, y: 24 }}
@@ -141,6 +135,48 @@ export default function CTASection() {
               </span>
             </div>
           ))}
+        </div>
+        {/* Bottom n8n Flow Verification */}
+        <div style={{ position: "relative", height: "140px", width: "100%", marginTop: "80px", marginBottom: "-120px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          
+          <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+            <defs>
+              <filter id="ctaGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+            <line x1="0" y1="50%" x2="100%" y2="50%" stroke="var(--border)" strokeWidth="2" strokeDasharray="4 4" fill="none" />
+            <motion.line 
+              x1="0" y1="50%" x2="100%" y2="50%" 
+              stroke="var(--accent)" strokeWidth="2" fill="none" filter="url(#ctaGlow)"
+              strokeDasharray="200 1500"
+              initial={{ strokeDashoffset: 1500 }}
+              animate={{ strokeDashoffset: -200 }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            />
+          </svg>
+
+          <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: "100px" }}>
+            <motion.div 
+              style={{ background: "var(--bg-surface)", border: "1px solid var(--border-strong)", width: "56px", height: "56px", borderRadius: "14px", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "24px", boxShadow: "0 8px 16px rgba(0,0,0,0.4)" }}
+              initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
+            >
+              📥
+            </motion.div>
+            <motion.div 
+              style={{ background: "var(--bg-surface)", border: "1px solid var(--border-strong)", width: "56px", height: "56px", borderRadius: "14px", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "24px", boxShadow: "0 8px 16px rgba(0,0,0,0.4)" }}
+              initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
+            >
+              🧠
+            </motion.div>
+            <motion.div 
+              style={{ background: "var(--bg-surface)", border: "1px solid var(--accent)", width: "56px", height: "56px", borderRadius: "14px", display: "flex", justifyContent: "center", alignItems: "center", fontSize: "24px", color: "var(--accent)", boxShadow: "0 0 24px rgba(255,100,100,0.2)" }}
+              initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.5 }}
+            >
+              ✓
+            </motion.div>
+          </div>
         </div>
       </motion.div>
     </section>

@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { SITE } from "@/lib/content";
 
 const TESTIMONIALS = [
   {
@@ -12,7 +11,7 @@ const TESTIMONIALS = [
     role: "Owner, The Anchor Inn",
     location: "Bristol, UK",
     initials: "JW",
-    color: "#3b82f6",
+    color: "var(--text-primary)",
   },
   {
     quote:
@@ -21,7 +20,7 @@ const TESTIMONIALS = [
     role: "Operations Manager, Meridian Events",
     location: "London, UK",
     initials: "SC",
-    color: "#8b5cf6",
+    color: "var(--text-primary)",
   },
   {
     quote:
@@ -30,7 +29,7 @@ const TESTIMONIALS = [
     role: "General Manager, The Feathers",
     location: "Manchester, UK",
     initials: "MO",
-    color: "#10b981",
+    color: "var(--text-primary)",
   },
 ];
 
@@ -43,68 +42,53 @@ export default function Testimonials() {
       ref={sectionRef}
       style={{
         borderTop: "1px solid var(--border)",
-        padding: "120px 48px",
+        padding: "140px 48px",
+        background: "transparent",
       }}
     >
-      {/* Label */}
-      <motion.p
-        initial={{ opacity: 0, y: 16 }}
-        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          color: "var(--accent)",
-          fontSize: "11px",
-          textTransform: "uppercase",
-          letterSpacing: "0.12em",
-          fontFamily: "var(--font-body)",
-          fontWeight: 700,
-          margin: 0,
-          marginBottom: 16,
-        }}
-      >
-        WHAT CLIENTS SAY
-      </motion.p>
+      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6 }}
+          style={{ marginBottom: "64px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}
+        >
+          <div>
+            <h2 style={{
+              fontFamily: "var(--font-display)", fontWeight: 600, letterSpacing: "-0.03em",
+              fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text-primary)", margin: 0, lineHeight: 1.1,
+            }}>
+              Don't just take our word for it.
+            </h2>
+          </div>
+          <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
+            // 04 Testimonials
+          </div>
+        </motion.div>
 
-      {/* Heading */}
-      <motion.h2
-        initial={{ opacity: 0, y: 16 }}
-        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-        transition={{ duration: 0.5, delay: 0.05 }}
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
-          fontWeight: 400,
-          color: "var(--text-primary)",
-          margin: 0,
-        }}
-      >
-        Results that speak for themselves
-      </motion.h2>
+        {/* Cards grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {TESTIMONIALS.map((t, i) => (
+            <TestimonialCard key={t.author} testimonial={t} delay={i * 0.1} isInView={isInView} />
+          ))}
+        </div>
 
-      {/* Cards grid */}
-      <div
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
-        style={{ marginTop: 64 }}
-      >
-        {TESTIMONIALS.map((t, i) => (
-          <TestimonialCard key={t.author} testimonial={t} delay={i * 0.1} isInView={isInView} />
-        ))}
+        {/* Disclaimer note */}
+        <p
+          style={{
+            fontSize: "12px",
+            color: "var(--text-muted)",
+            fontFamily: "var(--font-mono)",
+            textAlign: "center",
+            marginTop: 48,
+            marginBottom: 0,
+            opacity: 0.5,
+          }}
+        >
+          // Placeholder testimonials — replace with real client quotes before launch
+        </p>
       </div>
-
-      {/* Disclaimer note */}
-      <p
-        style={{
-          fontSize: "11px",
-          color: "var(--text-muted)",
-          fontFamily: "var(--font-body)",
-          fontStyle: "italic",
-          textAlign: "center",
-          marginTop: 32,
-          marginBottom: 0,
-        }}
-      >
-        * Placeholder testimonials — replace with real client quotes before launch
-      </p>
     </section>
   );
 }
@@ -118,51 +102,34 @@ function TestimonialCard({
   delay: number;
   isInView: boolean;
 }) {
-  const { quote, author, role, location, initials, color } = testimonial;
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseEnter = () => {
-    if (cardRef.current) {
-      cardRef.current.style.borderColor = color + "44";
-      cardRef.current.style.boxShadow = `0 8px 32px ${color}18`;
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (cardRef.current) {
-      cardRef.current.style.borderColor = "var(--border-mid)";
-      cardRef.current.style.boxShadow = "none";
-    }
-  };
+  const { quote, author, role, location, initials } = testimonial;
+  const [hovered, setHovered] = useState(false);
 
   return (
     <motion.div
-      ref={cardRef}
       initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
       transition={{ duration: 0.5, delay }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
-        background: "var(--bg-card)",
-        border: "1px solid var(--border-mid)",
-        borderRadius: 12,
-        padding: 32,
-        transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border)",
+        borderRadius: "16px",
+        padding: 36,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        transition: "all 300ms ease",
+        transform: hovered ? "translateY(-2px)" : "none",
+        boxShadow: hovered ? "0 20px 40px rgba(0,0,0,0.4)" : "none",
       }}
     >
-      {/* Quote mark */}
-      <div
-        style={{
-          color: color,
-          fontSize: 48,
-          fontFamily: "var(--font-display)",
-          opacity: 0.4,
-          lineHeight: 1,
-          marginBottom: 12,
-        }}
-      >
-        &ldquo;
+      {/* Quote mark (simplified abstract svg) */}
+      <div style={{ marginBottom: 24 }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--text-primary)" opacity="0.2">
+          <path d="M14.017 18L14.017 10.609C14.017 4.905 17.748 1.039 23 0L23.995 2.151C21.563 3.068 20 5.789 20 8H24V18H14.017ZM0 18V10.609C0 4.905 3.748 1.038 9 0L9.996 2.151C7.563 3.068 6 5.789 6 8H9.983L9.983 18L0 18Z" />
+        </svg>
       </div>
 
       {/* Quote text */}
@@ -170,39 +137,40 @@ function TestimonialCard({
         style={{
           fontSize: "0.95rem",
           color: "var(--text-secondary)",
-          lineHeight: 1.8,
+          lineHeight: 1.7,
           fontFamily: "var(--font-body)",
-          fontStyle: "italic",
           margin: 0,
         }}
       >
-        {quote}
+        "{quote}"
       </p>
 
       {/* Divider + Author */}
       <div
         style={{
-          borderTop: "1px solid var(--border)",
-          marginTop: 24,
-          paddingTop: 20,
+          borderTop: "1px dashed var(--border)",
+          marginTop: "auto",
+          paddingTop: 24,
           display: "flex",
           alignItems: "center",
           gap: 12,
         }}
       >
-        {/* Avatar */}
+        {/* Abstract Avatar */}
         <div
           style={{
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             borderRadius: "50%",
-            background: `linear-gradient(135deg, ${color}, ${color}88)`,
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid var(--border)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 13,
-            fontWeight: 700,
-            color: "white",
+            fontSize: 12,
+            fontFamily: "var(--font-mono)",
+            fontWeight: 500,
+            color: "var(--text-muted)",
             flexShrink: 0,
           }}
         >
@@ -214,8 +182,9 @@ function TestimonialCard({
           <p
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "1rem",
+              fontSize: "0.95rem",
               color: "var(--text-primary)",
+              fontWeight: 500,
               margin: 0,
               marginBottom: 2,
             }}

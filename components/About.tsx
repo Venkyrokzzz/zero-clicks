@@ -16,6 +16,7 @@ export default function About() {
       style={{
         borderTop: "1px solid var(--border)",
         padding: "120px 48px",
+        background: "transparent",
       }}
     >
       <motion.div
@@ -59,20 +60,20 @@ export default function About() {
                 width: "48px",
                 height: "48px",
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, var(--accent), #8b5cf6)",
+                background: "var(--bg-surface)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "15px",
                 fontFamily: "var(--font-body)",
                 fontWeight: 700,
-                color: "#fff",
+                color: "var(--text-primary)",
                 letterSpacing: "0.04em",
-                border: "2px solid var(--border-mid)",
+                border: "1px solid var(--border-strong)",
                 transition: "border-color 200ms ease",
               }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)"}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "var(--border-mid)"}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = "var(--text-primary)"}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "var(--border-strong)"}
               >
                 VS
               </div>

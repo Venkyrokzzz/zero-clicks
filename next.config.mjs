@@ -4,8 +4,11 @@
 
 const nextConfig = {
   // Prevent Three.js / R3F / Rapier from being bundled server-side
-  serverExternalPackages: ["three", "@react-three/fiber", "@react-three/rapier", "meshline"],
+  experimental: {
+    serverComponentsExternalPackages: ["three", "@react-three/fiber", "@react-three/rapier", "meshline"],
+  },
 
+  /*
   async headers() {
     return [
       {
@@ -33,6 +36,7 @@ const nextConfig = {
       },
     ];
   },
+  */
 };
 
 export default nextConfig;

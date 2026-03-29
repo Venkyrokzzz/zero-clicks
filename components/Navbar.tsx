@@ -322,7 +322,7 @@ export default function Navbar() {
               el.style.background = "var(--bg-card)";
             }}
           >
-            Get in touch
+            Book a free call
           </Link>
         </nav>
       </div>

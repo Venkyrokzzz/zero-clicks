@@ -3,22 +3,21 @@
 // Analytics: drop scripts in the commented block below.
 
 import type { Metadata } from "next";
-import { Inter, DM_Serif_Display } from "next/font/google";
+import { Inter } from "next/font/google";
 import "../styles/globals.css";
-import CursorGlow from "../components/CursorGlow";
-import ScrollProgress from "../components/ScrollProgress";
+import TechnicalBackground from "../components/TechnicalBackground";
 
-const inter = Inter({
+const interBody = Inter({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["400", "500"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
-const dmSerif = DM_Serif_Display({
+const interDisplay = Inter({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: "400",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -52,8 +51,33 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${dmSerif.variable}`}>
+    <html lang="en" className={`${interBody.variable} ${interDisplay.variable}`}>
       <head>
+        {/* Critical inline CSS — guarantees dark theme before any stylesheet loads */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          :root {
+            --bg: #000000;
+            --bg-surface: #0A0A0A;
+            --bg-card: #121212;
+            --bg-hover: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A1A1AA;
+            --text-muted: #71717A;
+            --accent: #FF6363;
+            --accent-dim: rgba(255,99,99,0.1);
+            --accent-glow: rgba(255,99,99,0.25);
+            --border: rgba(255,255,255,0.08);
+            --border-mid: rgba(255,255,255,0.12);
+            --border-strong: rgba(255,255,255,0.2);
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+          }
+          html, body {
+            background-color: #000000 !important;
+            color: #FFFFFF !important;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+          }
+        `}} />
         {/*
          * ── Analytics placeholder ─────────────────────────────────────
          * Uncomment to enable:
@@ -66,9 +90,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
          * ──────────────────────────────────────────────────────────────
          */}
       </head>
-      <body>
-        <ScrollProgress />
-        <CursorGlow />
+      <body style={{ backgroundColor: '#000000', color: '#FFFFFF', margin: 0 }}>
+        <TechnicalBackground />
         {children}
       </body>
     </html>

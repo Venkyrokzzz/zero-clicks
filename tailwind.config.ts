@@ -18,13 +18,14 @@ const config: Config = {
         accent:    "var(--accent)",
         border:    "var(--border)",
         "border-light": "var(--border-light)",
+        "border-strong": "var(--border-strong)",
       },
       fontFamily: {
-        display: ["var(--font-display)", "Georgia", "serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
         body:    ["var(--font-body)", "system-ui", "sans-serif"],
       },
       maxWidth: {
-        content: "1100px",
+        content: "1200px",
       },
     },
   },

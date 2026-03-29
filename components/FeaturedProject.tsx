@@ -1,4 +1,3 @@
-// components/FeaturedProject.tsx
 "use client";
 
 import { useRef, useState } from "react";
@@ -17,32 +16,31 @@ export default function FeaturedProject() {
       id="work"
       style={{
         borderTop: "1px solid var(--border)",
-        padding: "120px 48px",
+        padding: "140px 48px",
         position: "relative",
       }}
     >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
         {/* Header */}
         <motion.div
           ref={ref}
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease }}
-          style={{ marginBottom: "64px" }}
+          style={{ marginBottom: "64px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}
         >
-          <p style={{
-            fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase",
-            color: "var(--accent)", marginBottom: "12px", fontFamily: "var(--font-body)", fontWeight: 600,
-          }}>
-            {FEATURED_PROJECT.label}
-          </p>
-          <h2 style={{
-            fontFamily: "var(--font-display)", fontWeight: 400,
-            fontSize: "clamp(1.8rem, 3vw, 2.6rem)", color: "var(--text-primary)",
-            margin: 0, lineHeight: 1.15,
-          }}>
-            {FEATURED_PROJECT.title}
-          </h2>
+          <div>
+            <h2 style={{
+              fontFamily: "var(--font-display)", fontWeight: 600, letterSpacing: "-0.03em",
+              fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text-primary)",
+              margin: 0, lineHeight: 1.1,
+            }}>
+              {FEATURED_PROJECT.title}
+            </h2>
+          </div>
+          <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
+            // 03 Case Study
+          </div>
         </motion.div>
 
         {/* Main card */}
@@ -53,11 +51,12 @@ export default function FeaturedProject() {
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           style={{
-            background: "var(--bg-card)",
-            border: `1px solid ${hovered ? "var(--accent)" : "var(--border-mid)"}`,
-            borderRadius: "12px",
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "16px",
             overflow: "hidden",
-            boxShadow: hovered ? "0 0 24px rgba(59, 130, 246, 0.25)" : "none",
+            boxShadow: hovered ? "0 24px 48px rgba(0,0,0,0.5)" : "none",
+            transform: hovered ? "translateY(-4px)" : "none",
             transition: "all 300ms ease",
           }}
         >
@@ -69,7 +68,7 @@ export default function FeaturedProject() {
             <div style={{ padding: "48px", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <p style={{
                 fontFamily: "var(--font-body)", fontSize: "1rem",
-                color: "var(--text-secondary)", lineHeight: 1.85, margin: 0,
+                color: "var(--text-secondary)", lineHeight: 1.7, margin: 0,
               }}>
                 {FEATURED_PROJECT.description}
               </p>
@@ -80,51 +79,30 @@ export default function FeaturedProject() {
                   style={{
                     display: "inline-block",
                     padding: "12px 24px",
-                    background: "-webkit-linear-gradient(180deg, var(--accent), #8b5cf6)",
-                    color: "#fff",
-                    borderRadius: "8px",
+                    background: "var(--text-primary)",
+                    color: "#000",
+                    borderRadius: "6px",
                     textDecoration: "none",
                     fontFamily: "var(--font-body)",
                     fontWeight: 600,
-                    fontSize: "14px",
-                    textAlign: "center",
-                    boxShadow: "0 4px 14px rgba(59,130,246,0.25)",
-                    transition: "transform 200ms ease, box-shadow 200ms ease",
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 20px rgba(59,130,246,0.4)";
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 14px rgba(59,130,246,0.25)";
-                  }}
-                >
-                  See how it works →
-                </a>
-                <a
-                  href="/contact?service=Gmail+AI+Assistant"
-                  style={{
-                    display: "inline-block",
-                    padding: "8px 12px",
-                    color: "var(--text-secondary)",
-                    textDecoration: "none",
-                    fontFamily: "var(--font-body)",
-                    fontWeight: 500,
                     fontSize: "13px",
                     textAlign: "center",
-                    transition: "color 200ms ease",
+                    transition: "opacity 200ms ease, transform 200ms ease",
                   }}
-                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
-                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-secondary)")}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.opacity = "0.9";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.opacity = "1";
+                  }}
                 >
-                  Get this built for your business →
+                  See how it works <span style={{ fontFamily: "var(--font-mono)", opacity: 0.5 }}>⌘K</span>
                 </a>
               </div>
             </div>
-            <div style={{ padding: "48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <div style={{ padding: "48px", display: "flex", flexDirection: "column", justifyContent: "center", background: "rgba(255,255,255,0.02)" }}>
               <p style={{
-                fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase",
+                fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase",
                 color: "var(--text-muted)", fontFamily: "var(--font-body)", fontWeight: 600,
                 marginBottom: "16px",
               }}>
@@ -141,10 +119,9 @@ export default function FeaturedProject() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {FEATURED_PROJECT.tech.map(t => (
                   <span key={t} style={{
-                    fontSize: "11px", fontFamily: "var(--font-body)", fontWeight: 500,
-                    letterSpacing: "0.06em", textTransform: "uppercase",
-                    color: "var(--accent)", background: "var(--accent-dim)",
-                    border: "1px solid var(--accent)", padding: "4px 10px",
+                    fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 500,
+                    color: "var(--text-secondary)", background: "rgba(255,255,255,0.05)",
+                    border: "1px solid var(--border)", padding: "4px 8px",
                     borderRadius: "4px",
                   }}>
                     {t}
@@ -157,12 +134,12 @@ export default function FeaturedProject() {
           {/* Middle: The story — Problem → Solution → Result */}
           <div
             className="grid grid-cols-1 md:grid-cols-3"
-            style={{ borderBottom: "1px solid var(--border)" }}
+            style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-surface)" }}
           >
             {[
-              { label: "The Problem", icon: "⚠", text: FEATURED_PROJECT.story.problem, color: "#f59e0b" },
-              { label: "The Solution", icon: "⚡", text: FEATURED_PROJECT.story.solution, color: "#3b82f6" },
-              { label: "The Result", icon: "✓", text: FEATURED_PROJECT.story.result, color: "#10b981" },
+              { label: "The Problem", text: FEATURED_PROJECT.story.problem },
+              { label: "The Solution", text: FEATURED_PROJECT.story.solution },
+              { label: "The Result", text: FEATURED_PROJECT.story.result },
             ].map((s, i) => (
               <div
                 key={s.label}
@@ -172,25 +149,16 @@ export default function FeaturedProject() {
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-                  <div style={{
-                    width: 28, height: 28, borderRadius: "6px",
-                    background: `${s.color}18`,
-                    border: `1px solid ${s.color}33`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "12px", color: s.color, flexShrink: 0,
-                  }}>
-                    {s.icon}
-                  </div>
                   <p style={{
                     fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase",
-                    color: s.color, fontFamily: "var(--font-body)", fontWeight: 700, margin: 0,
+                    color: "var(--text-secondary)", fontFamily: "var(--font-mono)", fontWeight: 600, margin: 0,
                   }}>
-                    {s.label}
+                    // {s.label}
                   </p>
                 </div>
                 <p style={{
                   fontSize: "0.875rem", fontFamily: "var(--font-body)", fontWeight: 400,
-                  color: "var(--text-secondary)", lineHeight: 1.8, margin: 0,
+                  color: "var(--text-secondary)", lineHeight: 1.7, margin: 0,
                 }}>
                   {s.text}
                 </p>
@@ -202,6 +170,7 @@ export default function FeaturedProject() {
           <div style={{
             display: "grid",
             gridTemplateColumns: `repeat(${FEATURED_PROJECT.stats.length}, 1fr)`,
+            background: "rgba(255,255,255,0.02)"
           }}>
             {FEATURED_PROJECT.stats.map((s, i) => (
               <div
@@ -212,9 +181,9 @@ export default function FeaturedProject() {
                 }}
               >
                 <p style={{
-                  fontFamily: "var(--font-display)", fontSize: "2.2rem", fontWeight: 400,
+                  fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 600,
                   color: "var(--text-primary)", margin: "0 0 6px", lineHeight: 1,
-                  letterSpacing: "-0.02em",
+                  letterSpacing: "-0.04em",
                 }}>
                   {s.val}
                 </p>

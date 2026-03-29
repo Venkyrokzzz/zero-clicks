@@ -11,9 +11,11 @@ export default function ProofBar() {
       style={{
         borderTop: "1px solid var(--border)",
         borderBottom: "1px solid var(--border)",
-        padding: "14px 0",
+        padding: "16px 0",
         overflow: "hidden",
         background: "var(--bg-surface)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
       }}
     >
       <div className="marquee-track">
@@ -24,26 +26,26 @@ export default function ProofBar() {
               display: "inline-flex",
               alignItems: "center",
               padding: "0 28px",
-              fontSize: "11px",
+              fontSize: "12px",
               color: "var(--text-muted)",
-              letterSpacing: "0.1em",
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
               fontFamily: "var(--font-body)",
-              fontWeight: 500,
+              fontWeight: 400,
               whiteSpace: "nowrap",
-              gap: "28px",
+              gap: "48px",
             }}
           >
             {item}
             <span
               aria-hidden
               style={{
-                width: "3px",
-                height: "3px",
+                width: "4px",
+                height: "4px",
                 borderRadius: "50%",
-                background: "var(--accent)",
+                background: "var(--border-mid)",
                 display: "inline-block",
-                opacity: 0.4,
+                opacity: 0.6,
               }}
             />
           </span>
