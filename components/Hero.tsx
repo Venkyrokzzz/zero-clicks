@@ -5,10 +5,7 @@ import Link from "next/link";
 import { HERO } from "@/lib/content";
 import dynamic from "next/dynamic";
 
-const N8NFlowBackground = dynamic(() => import("./N8NFlowBackground"), {
-  ssr: false,
-});
-const N8NWorkflowDemo = dynamic(() => import("./N8NWorkflowDemo"), {
+const N8nWorkflowBackground = dynamic(() => import("./N8nWorkflowBackground"), {
   ssr: false,
 });
 
@@ -29,7 +26,7 @@ export default function Hero() {
         background: "transparent",
       }}
     >
-      <N8NFlowBackground />
+      <N8nWorkflowBackground />
       <div
         style={{
           maxWidth: "960px",
@@ -85,12 +82,15 @@ export default function Hero() {
         <h1
           style={{
             fontFamily: "Inter, system-ui, sans-serif",
-            fontWeight: 600,
+            fontWeight: 700,
             fontSize: "clamp(3rem, 7vw, 6rem)",
             lineHeight: 1.05,
             letterSpacing: "-0.04em",
-            color: "#FFFFFF",
             margin: "0 0 24px",
+            background: "linear-gradient(to bottom, #ffffff, #ffffff 60%, #71717a)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
           }}
         >
           <motion.span
@@ -103,10 +103,7 @@ export default function Hero() {
           <motion.span
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease, delay: 0.15 }}
-            style={{
-              display: "block",
-              color: "#A1A1AA",
-            }}
+            style={{ display: "block" }}
           >
             AI runs everything else.
           </motion.span>
@@ -206,42 +203,6 @@ export default function Hero() {
           </Link>
         </motion.div>
 
-        {/* Raycast-style UI Mockup with Flow Automation Inside */}
-        <motion.div
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8, ease, delay: 0.5 }}
-          style={{
-            marginTop: "80px",
-            width: "100%",
-            height: "520px",
-            background: "rgba(18, 18, 20, 0.7)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            border: "1px solid var(--border-strong)",
-            borderRadius: "16px",
-            boxShadow: "0 32px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            position: "relative",
-          }}
-        >
-          {/* Faux OS Toolbar */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: "8px", padding: "16px 24px", borderBottom: "1px solid var(--border)"
-          }}>
-            <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#ff5f56" }} />
-            <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#ffbd2e" }} />
-            <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#27c93f" }} />
-            
-            <div style={{ marginLeft: "12px", flex: 1, display: "flex", alignItems: "center", color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px" }}>
-              <span style={{ color: "var(--accent)" }}>~</span> /workflows/handle-inquiry.ts
-            </div>
-          </div>
-
-          {/* n8n Flow Demo */}
-          <N8NWorkflowDemo />
-        </motion.div>
       </div>
     </section>
   );
