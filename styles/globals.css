@@ -5,8 +5,8 @@
 
 @layer base {
   :root {
-    --bg:           #000000;
-    --bg-surface:   #0A0A0A;
+    --bg:           #09090b;
+    --bg-surface:   #0e0e10;
     --bg-card:      #121212;
     --bg-hover:     #1E1E1E;
     --text-primary: #FFFFFF;
@@ -68,4 +68,46 @@
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
+}
+
+/* ── Atmospheric Glow ────────────────────────── */
+.hero-glow-container {
+  position: absolute;
+  inset: 0;
+  z-index: -10;
+  background-color: #09090b;
+  overflow: hidden;
+}
+
+.radial-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(
+    circle at center,
+    rgba(59, 130, 246, 0.08) 0%,
+    rgba(147, 51, 234, 0.03) 35%,
+    transparent 70%
+  );
+  filter: blur(80px);
+  animation: pulse-glow 10s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+}
+
+.hero-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+  filter: contrast(150%) brightness(100%);
 }

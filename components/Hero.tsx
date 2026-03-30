@@ -24,6 +24,7 @@ export default function Hero() {
         overflow: "hidden",
         padding: "160px 48px 80px",
         background: "transparent",
+        isolation: "isolate",
       }}
     >
       <N8nWorkflowBackground />

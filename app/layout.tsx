@@ -72,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
           }
           html, body {
-            background-color: #000000 !important;
+            background-color: #09090b !important;
             color: #FFFFFF !important;
             margin: 0;
             -webkit-font-smoothing: antialiased;
@@ -90,7 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
          * ──────────────────────────────────────────────────────────────
          */}
       </head>
-      <body style={{ backgroundColor: '#000000', color: '#FFFFFF', margin: 0 }}>
+      <body style={{ backgroundColor: '#09090b', color: '#FFFFFF', margin: 0 }}>
         <TechnicalBackground />
         {children}
       </body>

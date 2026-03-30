@@ -9,9 +9,9 @@ const N8nWorkflowBackground = () => {
   return (
     <div
       style={{
-        position: 'fixed',
+        position: 'absolute',
         inset: 0,
-        zIndex: -10,
+        zIndex: 0,
         backgroundColor: '#080808',
         overflow: 'hidden',
       }}
@@ -38,11 +38,11 @@ const N8nWorkflowBackground = () => {
           initial={{
             y: '110vh',
             x: `${Math.random() * 100}%`,
-            opacity: 0,
+            opacity: 0.5,
           }}
           animate={{
             y: '-20vh',
-            opacity: [0, 0.5, 0.5, 0],
+            opacity: [0.5, 0.5, 0.5, 0],
             rotate: [0, 45, 90],
           }}
           transition={{
