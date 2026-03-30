@@ -10,6 +10,10 @@ const N8nSciFiBackground = dynamic(() => import("./N8nSciFiBackground"), {
   ssr: false,
 });
 
+const GenerativeDataStream = dynamic(() => import("./GenerativeDataStream"), {
+  ssr: false,
+});
+
 const ease = [0.25, 0.1, 0.25, 1.0] as const;
 
 export default function Hero() {
@@ -28,6 +32,7 @@ export default function Hero() {
         isolation: "isolate",
       }}
     >
+      <GenerativeDataStream />
       <N8nSciFiBackground />
       <div
         style={{
