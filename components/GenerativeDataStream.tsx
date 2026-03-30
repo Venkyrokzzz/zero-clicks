@@ -23,148 +23,147 @@ const GenerativeDataStream = () => {
     window.addEventListener('resize', resize);
     resize();
 
-    // Background gradient setup
-    const gradientBg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradientBg.addColorStop(0, '#0a1628');
-    gradientBg.addColorStop(1, '#0f1e2e');
+    const W = () => canvas.width;
+    const H = () => canvas.height;
 
-    const strands: Strand[] = [];
-    const strandCount = 250;
-    const colors = ['#ff6d5a', '#00f2ff', '#7000ff', '#00d4ff', '#ffffff', '#ff8866', '#00e5ff', '#ff9999'];
+    // --- Flowing strand config ---
+    const strandCount = 300;
+    const colors = [
+      '#ff4d4d', '#ff6d5a', '#ff8866', '#e85533',   // reds/oranges
+      '#00e5ff', '#00d4ff', '#00f2ff', '#29b6f6',   // cyans
+      '#7c4dff', '#a855f7', '#7000ff', '#b388ff',   // purples
+    ];
 
-    class Strand {
-      startX: number;
-      startY: number;
-      speed: number;
-      width: number;
-      color: string;
-      points: { x: number; y: number }[];
+    interface StrandData {
+      baseY: number;
       amplitude: number;
       frequency: number;
-      offset: number;
-      progress: number;
-      life: number;
-
-      constructor() {
-        this.init();
-      }
-
-      init() {
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * 800 + 300;
-        this.startX = canvas.width / 2 + Math.cos(angle) * distance;
-        this.startY = canvas.height / 2 + Math.sin(angle) * distance;
-        this.progress = 0;
-        this.life = Math.random() * 0.5 + 0.5;
-        this.speed = Math.random() * 0.008 + 0.003;
-        this.width = Math.random() * 3 + 0.8;
-        this.color = colors[Math.floor(Math.random() * colors.length)];
-        this.points = [];
-        this.amplitude = Math.random() * 80 + 30;
-        this.frequency = Math.random() * 0.015 + 0.005;
-        this.offset = Math.random() * 1000;
-      }
-
-      draw() {
-        this.progress += this.speed;
-        this.offset += 0.01;
-
-        // Path toward center
-        const progress = Math.min(this.progress, 1);
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-
-        const currentX = this.startX + (centerX - this.startX) * progress;
-        const currentY = this.startY + (centerY - this.startY) * progress;
-
-        // Add wave distortion
-        const angle = Math.atan2(this.startY - centerY, this.startX - centerX);
-        const distortion = Math.sin(progress * 10 + this.offset) * this.amplitude;
-        const distortedX = currentX + Math.cos(angle + Math.PI / 2) * distortion;
-        const distortedY = currentY + Math.sin(angle + Math.PI / 2) * distortion;
-
-        this.points.push({ x: distortedX, y: distortedY });
-        if (this.points.length > 150) this.points.shift();
-
-        const alpha = Math.max(0, this.life - Math.abs(progress - 0.5) * 2);
-        ctx.globalAlpha = alpha * 0.6;
-        ctx.beginPath();
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.width;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
-        if (this.points.length > 1) {
-          ctx.moveTo(this.points[0].x, this.points[0].y);
-          for (let i = 1; i < this.points.length; i++) {
-            ctx.lineTo(this.points[i].x, this.points[i].y);
-          }
-        }
-        ctx.stroke();
-
-        // Glow head
-        ctx.beginPath();
-        ctx.arc(distortedX, distortedY, this.width * 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = alpha * 0.8;
-        ctx.fill();
-
-        if (progress >= 1) this.init();
-      }
+      phase: number;
+      phaseSpeed: number;
+      width: number;
+      color: string;
+      opacity: number;
+      direction: number; // 1 = left-to-right, -1 = right-to-left
+      yDrift: number;
     }
 
-    for (let i = 0; i < strandCount; i++) strands.push(new Strand());
+    const strandsData: StrandData[] = [];
 
-    // Particles/stars
-    const particles: { x: number; y: number; vx: number; vy: number; life: number; size: number }[] = [];
-    for (let i = 0; i < 80; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        life: Math.random() * 0.5 + 0.5,
-        size: Math.random() * 1.5 + 0.5,
+    for (let i = 0; i < strandCount; i++) {
+      strandsData.push({
+        baseY: Math.random() * H() * 1.4 - H() * 0.2,
+        amplitude: Math.random() * 120 + 40,
+        frequency: Math.random() * 0.004 + 0.001,
+        phase: Math.random() * Math.PI * 2,
+        phaseSpeed: (Math.random() * 0.008 + 0.002) * (Math.random() > 0.5 ? 1 : -1),
+        width: Math.random() * 1.8 + 0.3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        opacity: Math.random() * 0.22 + 0.05,
+        direction: Math.random() > 0.5 ? 1 : -1,
+        yDrift: (Math.random() - 0.5) * 0.15,
       });
     }
 
+    // --- Particles ---
+    const particleCount = 100;
+    const particles: { x: number; y: number; size: number; alpha: number; twinkleSpeed: number }[] = [];
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * W(),
+        y: Math.random() * H(),
+        size: Math.random() * 2 + 0.5,
+        alpha: Math.random(),
+        twinkleSpeed: Math.random() * 0.02 + 0.005,
+      });
+    }
+
+    // --- Render ---
     const render = () => {
       time++;
+      const w = W();
+      const h = H();
 
-      // Background
-      ctx.fillStyle = gradientBg;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Deep navy background
+      ctx.fillStyle = '#080e1a';
+      ctx.fillRect(0, 0, w, h);
 
-      // Darken overlay for trail effect
-      ctx.fillStyle = 'rgba(10, 22, 40, 0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Warm central glow
+      const glowRadius = Math.min(w, h) * 0.6;
+      const glow = ctx.createRadialGradient(w * 0.5, h * 0.35, 0, w * 0.5, h * 0.35, glowRadius);
+      glow.addColorStop(0, 'rgba(255, 90, 60, 0.12)');
+      glow.addColorStop(0.3, 'rgba(180, 60, 100, 0.06)');
+      glow.addColorStop(0.6, 'rgba(80, 40, 120, 0.03)');
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
 
-      // Draw particles
-      particles.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= 0.005;
+      // Draw strands with additive blending
+      ctx.globalCompositeOperation = 'lighter';
 
-        if (p.life <= 0) {
-          p.x = Math.random() * canvas.width;
-          p.y = Math.random() * canvas.height;
-          p.life = Math.random() * 0.5 + 0.5;
-          p.vx = (Math.random() - 0.5) * 0.3;
-          p.vy = (Math.random() - 0.5) * 0.3;
+      const segmentWidth = 4; // pixels between sample points
+
+      for (const s of strandsData) {
+        s.phase += s.phaseSpeed;
+        s.baseY += s.yDrift;
+
+        // Wrap around vertically
+        if (s.baseY > h * 1.3) s.baseY = -h * 0.3;
+        if (s.baseY < -h * 0.3) s.baseY = h * 1.3;
+
+        ctx.beginPath();
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = s.width;
+        ctx.globalAlpha = s.opacity;
+
+        const steps = Math.ceil(w / segmentWidth);
+        let prevX = 0;
+        let prevY = s.baseY + Math.sin(s.phase) * s.amplitude;
+
+        ctx.moveTo(prevX, prevY);
+
+        for (let step = 1; step <= steps; step++) {
+          const x = step * segmentWidth;
+          // Multi-frequency sine for organic shape
+          const y =
+            s.baseY +
+            Math.sin(x * s.frequency + s.phase) * s.amplitude +
+            Math.sin(x * s.frequency * 2.3 + s.phase * 1.7) * (s.amplitude * 0.3) +
+            Math.sin(x * s.frequency * 0.5 + s.phase * 0.4) * (s.amplitude * 0.5);
+
+          // Smooth curve using quadratic bezier
+          const cpX = (prevX + x) / 2;
+          const cpY = (prevY + y) / 2;
+          ctx.quadraticCurveTo(prevX, prevY, cpX, cpY);
+
+          prevX = x;
+          prevY = y;
         }
 
-        ctx.globalAlpha = p.life * 0.6;
+        ctx.stroke();
+      }
+
+      ctx.globalCompositeOperation = 'source-over';
+
+      // Draw particles (twinkling dots)
+      for (const p of particles) {
+        p.alpha += p.twinkleSpeed;
+        const a = (Math.sin(p.alpha) + 1) * 0.5 * 0.6;
+        ctx.globalAlpha = a;
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
-      });
+      }
 
-      // Draw strands with additive blending
-      ctx.globalCompositeOperation = 'lighter';
-      strands.forEach(s => s.draw());
-      ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
+
+      // Centre vignette for text readability
+      const vignette = ctx.createRadialGradient(w * 0.5, h * 0.45, 0, w * 0.5, h * 0.45, w * 0.35);
+      vignette.addColorStop(0, 'rgba(8, 14, 26, 0.5)');
+      vignette.addColorStop(0.6, 'rgba(8, 14, 26, 0.2)');
+      vignette.addColorStop(1, 'transparent');
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, w, h);
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -185,6 +184,7 @@ const GenerativeDataStream = () => {
         inset: 0,
         zIndex: 1,
         backgroundColor: 'transparent',
+        filter: 'blur(0.5px)',
       }}
     />
   );

@@ -6,10 +6,6 @@ import { HERO } from "@/lib/content";
 import dynamic from "next/dynamic";
 import MagneticButton from "./MagneticButton";
 
-const N8nSciFiBackground = dynamic(() => import("./N8nSciFiBackground"), {
-  ssr: false,
-});
-
 const GenerativeDataStream = dynamic(() => import("./GenerativeDataStream"), {
   ssr: false,
 });
@@ -33,7 +29,6 @@ export default function Hero() {
       }}
     >
       <GenerativeDataStream />
-      <N8nSciFiBackground />
       <div
         style={{
           maxWidth: "960px",
