@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import MagneticButton from "./MagneticButton";
 
 interface Review {
   id: string;
@@ -190,31 +191,11 @@ export default function ReviewCard({ review, onApprove }: ReviewCardProps) {
       {/* Actions */}
       {review.status === "pending" && (
         <div style={{ display: "flex", gap: "12px" }}>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onApprove(review.id)}
-            style={{
-              flex: 1,
-              padding: "12px 20px",
-              background: "#ff6d5a",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "8px",
-              fontWeight: 600,
-              cursor: "pointer",
-              fontSize: "0.95rem",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = "0.9";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = "1";
-            }}
-          >
-            ✓ Approve & Send
-          </motion.button>
+          <div style={{ flex: 1 }}>
+            <MagneticButton onClick={() => onApprove(review.id)}>
+              ✓ Approve & Send
+            </MagneticButton>
+          </div>
           <button
             style={{
               flex: 1,

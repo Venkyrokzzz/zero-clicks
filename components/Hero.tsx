@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { HERO } from "@/lib/content";
 import dynamic from "next/dynamic";
+import MagneticButton from "./MagneticButton";
 
 const N8nWorkflowBackground = dynamic(() => import("./N8nWorkflowBackground"), {
   ssr: false,
@@ -133,39 +134,10 @@ export default function Hero() {
           transition={{ duration: 0.5, ease, delay: 0.35 }}
           style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap", justifyContent: "center" }}
         >
-          <Link
-            href={HERO.ctaPrimary.href}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              fontSize: "14px",
-              fontFamily: "var(--font-body)",
-              fontWeight: 600,
-              color: "#000000",
-              background: "#ffffff",
-              padding: "12px 20px 12px 24px",
-              borderRadius: "8px",
-              textDecoration: "none",
-              transition: "opacity 200ms ease, transform 200ms ease",
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.opacity = "0.9";
-              (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.opacity = "1";
-              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-            }}
-          >
-            <span>{HERO.ctaPrimary.label}</span>
-            <kbd style={{ 
-              background: "rgba(0,0,0,0.1)", 
-              padding: "2px 6px", 
-              borderRadius: "4px",
-              fontSize: "12px",
-              fontFamily: "var(--font-mono)",
-            }}>↵</kbd>
+          <Link href={HERO.ctaPrimary.href} style={{ textDecoration: "none" }}>
+            <MagneticButton>
+              <span>{HERO.ctaPrimary.label}</span>
+            </MagneticButton>
           </Link>
 
           <Link
