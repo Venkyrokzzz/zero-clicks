@@ -26,117 +26,162 @@ const GenerativeDataStream = () => {
     const W = () => canvas.width;
     const H = () => canvas.height;
 
-    // --- Flowing strand config ---
-    const strandCount = 300;
+    // Focal point — upper centre, where the warm glow sits
+    const focalX = () => W() * 0.5;
+    const focalY = () => H() * 0.3;
+
+    // --- Colours matching the reference ---
     const colors = [
-      '#ff4d4d', '#ff6d5a', '#ff8866', '#e85533',   // reds/oranges
-      '#00e5ff', '#00d4ff', '#00f2ff', '#29b6f6',   // cyans
-      '#7c4dff', '#a855f7', '#7000ff', '#b388ff',   // purples
+      '#ff4d4d', '#ff6d5a', '#ff8866', '#e85533', '#ff3333',  // reds/oranges
+      '#00e5ff', '#00d4ff', '#00f2ff', '#29b6f6', '#4dd0e1',  // cyans
+      '#7c4dff', '#a855f7', '#7000ff', '#b388ff', '#ce93d8',  // purples/magentas
     ];
 
+    // --- Strand: each is a full-screen flowing curve that arcs toward the focal point ---
     interface StrandData {
-      baseY: number;
-      amplitude: number;
-      frequency: number;
-      phase: number;
-      phaseSpeed: number;
+      // Start on a random edge
+      sx: number;
+      sy: number;
+      // End on the opposite-ish edge
+      ex: number;
+      ey: number;
+      // Control point pull toward focal
+      pull: number;
+      // Visual
       width: number;
       color: string;
       opacity: number;
-      direction: number; // 1 = left-to-right, -1 = right-to-left
-      yDrift: number;
+      // Animation
+      phase: number;
+      phaseSpeed: number;
+      waveAmp: number;
     }
 
+    const strandCount = 350;
     const strandsData: StrandData[] = [];
 
-    for (let i = 0; i < strandCount; i++) {
-      strandsData.push({
-        baseY: Math.random() * H() * 1.4 - H() * 0.2,
-        amplitude: Math.random() * 120 + 40,
-        frequency: Math.random() * 0.004 + 0.001,
-        phase: Math.random() * Math.PI * 2,
-        phaseSpeed: (Math.random() * 0.008 + 0.002) * (Math.random() > 0.5 ? 1 : -1),
-        width: Math.random() * 1.8 + 0.3,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        opacity: Math.random() * 0.22 + 0.05,
-        direction: Math.random() > 0.5 ? 1 : -1,
-        yDrift: (Math.random() - 0.5) * 0.15,
-      });
-    }
+    const randomEdgePoint = (w: number, h: number): [number, number] => {
+      const edge = Math.floor(Math.random() * 4);
+      switch (edge) {
+        case 0: return [Math.random() * w, -20];                // top
+        case 1: return [Math.random() * w, h + 20];             // bottom
+        case 2: return [-20, Math.random() * h];                 // left
+        case 3: return [w + 20, Math.random() * h];              // right
+        default: return [0, 0];
+      }
+    };
 
-    // --- Particles ---
-    const particleCount = 100;
-    const particles: { x: number; y: number; size: number; alpha: number; twinkleSpeed: number }[] = [];
+    const initStrands = () => {
+      strandsData.length = 0;
+      const w = W();
+      const h = H();
+
+      for (let i = 0; i < strandCount; i++) {
+        const [sx, sy] = randomEdgePoint(w, h);
+        const [ex, ey] = randomEdgePoint(w, h);
+
+        strandsData.push({
+          sx, sy, ex, ey,
+          pull: Math.random() * 0.6 + 0.3,       // how much it curves toward focal
+          width: Math.random() * 2.0 + 0.3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          opacity: Math.random() * 0.28 + 0.06,
+          phase: Math.random() * Math.PI * 2,
+          phaseSpeed: (Math.random() * 0.006 + 0.001) * (Math.random() > 0.5 ? 1 : -1),
+          waveAmp: Math.random() * 60 + 15,
+        });
+      }
+    };
+
+    initStrands();
+
+    // --- Particles (twinkling dots) ---
+    const particleCount = 120;
+    const particles: { x: number; y: number; size: number; alpha: number; speed: number }[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * W(),
         y: Math.random() * H(),
-        size: Math.random() * 2 + 0.5,
-        alpha: Math.random(),
-        twinkleSpeed: Math.random() * 0.02 + 0.005,
+        size: Math.random() * 2.5 + 0.5,
+        alpha: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.015 + 0.005,
       });
     }
 
-    // --- Render ---
+    // --- Render loop ---
     const render = () => {
       time++;
       const w = W();
       const h = H();
+      const fx = focalX();
+      const fy = focalY();
 
       // Deep navy background
-      ctx.fillStyle = '#080e1a';
+      ctx.fillStyle = '#070d19';
       ctx.fillRect(0, 0, w, h);
 
-      // Warm central glow
-      const glowRadius = Math.min(w, h) * 0.6;
-      const glow = ctx.createRadialGradient(w * 0.5, h * 0.35, 0, w * 0.5, h * 0.35, glowRadius);
-      glow.addColorStop(0, 'rgba(255, 90, 60, 0.12)');
-      glow.addColorStop(0.3, 'rgba(180, 60, 100, 0.06)');
-      glow.addColorStop(0.6, 'rgba(80, 40, 120, 0.03)');
-      glow.addColorStop(1, 'transparent');
-      ctx.fillStyle = glow;
+      // Strong warm glow in upper-centre (like reference)
+      const glowR = Math.max(w, h) * 0.55;
+      const glow1 = ctx.createRadialGradient(fx, fy, 0, fx, fy, glowR);
+      glow1.addColorStop(0, 'rgba(255, 100, 50, 0.18)');
+      glow1.addColorStop(0.25, 'rgba(220, 60, 80, 0.10)');
+      glow1.addColorStop(0.5, 'rgba(120, 40, 140, 0.05)');
+      glow1.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow1;
       ctx.fillRect(0, 0, w, h);
 
-      // Draw strands with additive blending
+      // Secondary cooler glow lower
+      const glow2 = ctx.createRadialGradient(w * 0.5, h * 0.75, 0, w * 0.5, h * 0.75, glowR * 0.7);
+      glow2.addColorStop(0, 'rgba(0, 100, 200, 0.06)');
+      glow2.addColorStop(0.5, 'rgba(60, 0, 150, 0.03)');
+      glow2.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow2;
+      ctx.fillRect(0, 0, w, h);
+
+      // --- Draw strands ---
       ctx.globalCompositeOperation = 'lighter';
-
-      const segmentWidth = 4; // pixels between sample points
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
       for (const s of strandsData) {
         s.phase += s.phaseSpeed;
-        s.baseY += s.yDrift;
 
-        // Wrap around vertically
-        if (s.baseY > h * 1.3) s.baseY = -h * 0.3;
-        if (s.baseY < -h * 0.3) s.baseY = h * 1.3;
+        // Quadratic bezier: start → control (pulled toward focal) → end
+        // The control point is a weighted average between midpoint and focal
+        const midX = (s.sx + s.ex) / 2;
+        const midY = (s.sy + s.ey) / 2;
+        const cpX = midX + (fx - midX) * s.pull;
+        const cpY = midY + (fy - midY) * s.pull;
+
+        // Animate wave perpendicular to the curve direction
+        const angle = Math.atan2(s.ey - s.sy, s.ex - s.sx) + Math.PI / 2;
+        const wave = Math.sin(s.phase) * s.waveAmp;
+        const animCpX = cpX + Math.cos(angle) * wave;
+        const animCpY = cpY + Math.sin(angle) * wave;
 
         ctx.beginPath();
         ctx.strokeStyle = s.color;
         ctx.lineWidth = s.width;
         ctx.globalAlpha = s.opacity;
 
-        const steps = Math.ceil(w / segmentWidth);
-        let prevX = 0;
-        let prevY = s.baseY + Math.sin(s.phase) * s.amplitude;
+        // Draw as a series of small segments for smoother curves
+        const segments = 60;
+        for (let i = 0; i <= segments; i++) {
+          const t = i / segments;
+          // Quadratic bezier formula
+          const x = (1 - t) * (1 - t) * s.sx + 2 * (1 - t) * t * animCpX + t * t * s.ex;
+          const y = (1 - t) * (1 - t) * s.sy + 2 * (1 - t) * t * animCpY + t * t * s.ey;
 
-        ctx.moveTo(prevX, prevY);
+          // Add secondary micro-wave for organic feel
+          const microWave = Math.sin(t * 12 + s.phase * 2) * (s.waveAmp * 0.15);
+          const finalX = x + Math.cos(angle) * microWave;
+          const finalY = y + Math.sin(angle) * microWave;
 
-        for (let step = 1; step <= steps; step++) {
-          const x = step * segmentWidth;
-          // Multi-frequency sine for organic shape
-          const y =
-            s.baseY +
-            Math.sin(x * s.frequency + s.phase) * s.amplitude +
-            Math.sin(x * s.frequency * 2.3 + s.phase * 1.7) * (s.amplitude * 0.3) +
-            Math.sin(x * s.frequency * 0.5 + s.phase * 0.4) * (s.amplitude * 0.5);
-
-          // Smooth curve using quadratic bezier
-          const cpX = (prevX + x) / 2;
-          const cpY = (prevY + y) / 2;
-          ctx.quadraticCurveTo(prevX, prevY, cpX, cpY);
-
-          prevX = x;
-          prevY = y;
+          if (i === 0) {
+            ctx.moveTo(finalX, finalY);
+          } else {
+            ctx.lineTo(finalX, finalY);
+          }
         }
 
         ctx.stroke();
@@ -144,10 +189,10 @@ const GenerativeDataStream = () => {
 
       ctx.globalCompositeOperation = 'source-over';
 
-      // Draw particles (twinkling dots)
+      // --- Particles ---
       for (const p of particles) {
-        p.alpha += p.twinkleSpeed;
-        const a = (Math.sin(p.alpha) + 1) * 0.5 * 0.6;
+        p.alpha += p.speed;
+        const a = (Math.sin(p.alpha) + 1) * 0.5 * 0.7;
         ctx.globalAlpha = a;
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
@@ -156,14 +201,6 @@ const GenerativeDataStream = () => {
       }
 
       ctx.globalAlpha = 1;
-
-      // Centre vignette for text readability
-      const vignette = ctx.createRadialGradient(w * 0.5, h * 0.45, 0, w * 0.5, h * 0.45, w * 0.35);
-      vignette.addColorStop(0, 'rgba(8, 14, 26, 0.5)');
-      vignette.addColorStop(0.6, 'rgba(8, 14, 26, 0.2)');
-      vignette.addColorStop(1, 'transparent');
-      ctx.fillStyle = vignette;
-      ctx.fillRect(0, 0, w, h);
 
       animationFrameId = requestAnimationFrame(render);
     };
