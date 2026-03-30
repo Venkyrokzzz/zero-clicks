@@ -54,7 +54,7 @@ const N8nSciFiBackground = () => {
           inset: 0,
           width: '100%',
           height: '100%',
-          opacity: 0.4,
+          opacity: 0.7,
         }}
       >
         <defs>
@@ -77,19 +77,19 @@ const N8nSciFiBackground = () => {
               x2={`${x2}%`}
               y2={`${y2}%`}
               stroke="url(#rayGradient)"
-              strokeWidth="1.5"
+              strokeWidth="2"
               initial={{ opacity: 0 }}
               animate={{
-                opacity: [0.2, 0.5, 0.2],
-                strokeWidth: [1, 2, 1],
+                opacity: [0.4, 0.8, 0.4],
+                strokeWidth: [1.5, 3, 1.5],
               }}
               transition={{
-                duration: 2.5,
+                duration: 2,
                 repeat: Infinity,
                 ease: 'easeInOut',
-                delay: i * 0.15,
+                delay: i * 0.12,
               }}
-              style={{ filter: 'drop-shadow(0 0 4px rgba(255, 109, 90, 0.4))' }}
+              style={{ filter: 'drop-shadow(0 0 12px rgba(255, 109, 90, 0.8))' }}
             />
           );
         })}
@@ -106,16 +106,27 @@ const N8nSciFiBackground = () => {
         }}
       >
         <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8] }}
-          transition={{ duration: 2.5, repeat: Infinity }}
+          animate={{ scale: [0.9, 1.3, 0.9], opacity: [0.9, 1, 0.9] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           style={{
-            width: '128px',
-            height: '128px',
+            width: '160px',
+            height: '160px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(255, 109, 90, 0.3), rgba(255, 109, 90, 0))',
-            border: '2px solid rgba(255, 109, 90, 0.6)',
-            filter: 'blur(15px)',
-            boxShadow: '0 0 60px rgba(255, 109, 90, 0.4)',
+            background: 'radial-gradient(circle, rgba(255, 109, 90, 0.8), rgba(255, 109, 90, 0.2), transparent)',
+            border: '3px solid rgba(255, 109, 90, 1)',
+            filter: 'blur(8px)',
+            boxShadow: '0 0 100px rgba(255, 109, 90, 0.8), 0 0 40px rgba(255, 109, 90, 0.6)',
+          }}
+        />
+        <motion.div
+          animate={{ scale: [1.3, 1.6, 1.3], opacity: [0.4, 0.8, 0.4] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.1 }}
+          style={{
+            position: 'absolute',
+            inset: -40,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255, 109, 90, 0.4), transparent)',
+            filter: 'blur(30px)',
           }}
         />
         <div
@@ -161,28 +172,29 @@ const N8nSciFiBackground = () => {
               y1="50%"
               x2={node.x}
               y2={node.y}
-              stroke="rgba(255, 109, 90, 0.1)"
-              strokeWidth="1"
+              stroke="rgba(255, 109, 90, 0.25)"
+              strokeWidth="1.5"
             />
 
             {/* Animated Data Pulse */}
             <motion.circle
               cx="50%"
               cy="50%"
-              r="3"
+              r="4"
               fill="#ff6d5a"
               initial={{ opacity: 0 }}
               animate={{
                 cx: ['50%', node.x],
                 cy: ['50%', node.y],
-                opacity: [0, 0.8, 0],
+                opacity: [0, 1, 0],
               }}
               transition={{
-                duration: 3,
+                duration: 2.5,
                 repeat: Infinity,
-                delay: node.id * 0.8,
+                delay: node.id * 0.6,
                 ease: 'easeInOut',
               }}
+              style={{ filter: 'drop-shadow(0 0 8px #ff6d5a)' }}
             />
           </React.Fragment>
         ))}
