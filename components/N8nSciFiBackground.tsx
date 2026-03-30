@@ -135,7 +135,7 @@ const N8nSciFiBackground = () => {
         ))}
       </svg>
 
-      {/* Floating Nodes */}
+      {/* Floating Nodes - Minimal */}
       {nodes.map((node) => (
         <motion.div
           key={node.id}
@@ -155,25 +155,23 @@ const N8nSciFiBackground = () => {
         >
           <div
             style={{
-              padding: '8px 12px',
-              borderRadius: '6px',
-              border: '1px solid rgba(34, 211, 238, 0.3)',
-              background: 'rgba(0, 0, 0, 0.8)',
-              backdropFilter: 'blur(12px)',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              border: '1px solid rgba(255, 109, 90, 0.4)',
+              background: 'rgba(255, 109, 90, 0.05)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '6px',
+              fontFamily: 'monospace',
+              color: 'rgba(255, 109, 90, 0.5)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              whiteSpace: 'nowrap',
             }}
           >
-            <div
-              style={{
-                fontSize: '8px',
-                fontFamily: 'monospace',
-                color: '#22d3ee',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {node.label} // RUNNING
-            </div>
+            •
           </div>
         </motion.div>
       ))}
