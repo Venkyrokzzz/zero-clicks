@@ -1,41 +1,91 @@
+'use client';
+
 import React from 'react';
 import { motion } from 'framer-motion';
 
 const N8nWorkflowBackground = () => {
-  // Creating 10 "Nodes" that look like n8n blocks
   const nodes = Array.from({ length: 10 });
 
   return (
-    <div className="fixed inset-0 -z-10 bg-[#080808] overflow-hidden">
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: -10,
+        backgroundColor: '#080808',
+        overflow: 'hidden',
+      }}
+    >
       {/* 1. Deep Orange Atmospheric Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-[#ff6d5a]/5 blur-[120px] rounded-full" />
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '800px',
+          height: '600px',
+          background: 'radial-gradient(circle, rgba(255, 109, 90, 0.08), transparent 70%)',
+          filter: 'blur(120px)',
+          borderRadius: '50%',
+        }}
+      />
 
       {/* 2. Floating Workflow Nodes */}
       {nodes.map((_, i) => (
         <motion.div
           key={i}
-          initial={{ y: "110vh", x: `${Math.random() * 100}%`, opacity: 0 }}
+          initial={{
+            y: '110vh',
+            x: `${Math.random() * 100}%`,
+            opacity: 0,
+          }}
           animate={{
-            y: "-20vh",
+            y: '-20vh',
             opacity: [0, 0.5, 0.5, 0],
-            rotate: [0, 45, 90]
+            rotate: [0, 45, 90],
           }}
           transition={{
             duration: Math.random() * 10 + 20,
             repeat: Infinity,
             delay: Math.random() * 15,
-            ease: "linear"
+            ease: 'linear',
           }}
-          className="absolute p-4 rounded-xl border border-[#ff6d5a]/20 bg-[#111]/80 backdrop-blur-sm"
-          style={{ width: '50px', height: '50px' }}
+          style={{
+            position: 'absolute',
+            width: '50px',
+            height: '50px',
+            padding: '16px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 109, 90, 0.2)',
+            background: 'rgba(17, 17, 17, 0.8)',
+            backdropFilter: 'blur(8px)',
+          }}
         >
           {/* Internal "Node" Dot */}
-          <div className="w-2 h-2 rounded-full bg-[#ff6d5a] shadow-[0_0_10px_#ff6d5a]" />
+          <div
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: '#ff6d5a',
+              boxShadow: '0 0 10px #ff6d5a',
+              margin: 'auto',
+            }}
+          />
         </motion.div>
       ))}
 
       {/* 3. Connecting "Data Streams" */}
-      <svg className="absolute inset-0 w-full h-full opacity-20">
+      <svg
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          opacity: 0.2,
+        }}
+      >
         <motion.path
           d="M 50 1100 Q 400 600 800 1100"
           stroke="#ff6d5a"
@@ -48,7 +98,15 @@ const N8nWorkflowBackground = () => {
       </svg>
 
       {/* 4. Film Grain for Professional Finish */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.03,
+          pointerEvents: 'none',
+          backgroundImage: 'url(https://grainy-gradients.vercel.app/noise.svg)',
+        }}
+      />
     </div>
   );
 };
