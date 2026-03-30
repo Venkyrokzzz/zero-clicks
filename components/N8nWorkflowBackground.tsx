@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import RaycastBeams from './RaycastBeams';
 
 const N8nWorkflowBackground = () => {
   const nodes = Array.from({ length: 10 });
@@ -16,6 +17,9 @@ const N8nWorkflowBackground = () => {
         overflow: 'hidden',
       }}
     >
+      {/* Raycast Beams with n8n features */}
+      <RaycastBeams />
+
       {/* 1. Deep Orange Atmospheric Glow */}
       <div
         style={{
