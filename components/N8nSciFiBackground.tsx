@@ -1,0 +1,184 @@
+'use client';
+
+import React from 'react';
+import { motion } from 'framer-motion';
+
+const N8nSciFiBackground = () => {
+  const nodes = [
+    { id: 1, x: '20%', y: '30%', label: 'Email' },
+    { id: 2, x: '80%', y: '40%', label: 'CRM' },
+    { id: 3, x: '30%', y: '70%', label: 'Slack' },
+    { id: 4, x: '70%', y: '75%', label: 'Ops' },
+  ];
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 0,
+        backgroundColor: '#020305',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Grid Overlay */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.03,
+          backgroundImage: 'url(https://grainy-gradients.vercel.app/noise.svg)',
+          zIndex: 10,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(255,109,90,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,109,90,0.05) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          maskImage: 'radial-gradient(ellipse at center, black, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, black, transparent 80%)',
+        }}
+      />
+
+      {/* Central AI Core */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      >
+        <motion.div
+          animate={{ scale: [1, 1.1, 1], opacity: [0.6, 0.8, 0.6] }}
+          transition={{ duration: 3, repeat: Infinity }}
+          style={{
+            width: '128px',
+            height: '128px',
+            borderRadius: '50%',
+            background: 'rgba(255, 109, 90, 0.1)',
+            border: '1px solid rgba(255, 109, 90, 0.3)',
+            filter: 'blur(20px)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '10px',
+            fontFamily: 'monospace',
+            color: '#ff6d5a',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+          }}
+        >
+          AI_CORE
+        </div>
+      </div>
+
+      {/* SVG Connection Lines */}
+      <svg
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        <defs>
+          <linearGradient id="pulseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="rgba(255, 109, 90, 0.8)" />
+            <stop offset="100%" stopColor="rgba(255, 109, 90, 0)" />
+          </linearGradient>
+        </defs>
+
+        {nodes.map((node) => (
+          <React.Fragment key={node.id}>
+            {/* Connection Line */}
+            <line
+              x1="50%"
+              y1="50%"
+              x2={node.x}
+              y2={node.y}
+              stroke="rgba(255, 109, 90, 0.1)"
+              strokeWidth="1"
+            />
+
+            {/* Animated Data Pulse */}
+            <motion.circle
+              cx="50%"
+              cy="50%"
+              r="3"
+              fill="#ff6d5a"
+              initial={{ opacity: 0 }}
+              animate={{
+                cx: ['50%', node.x],
+                cy: ['50%', node.y],
+                opacity: [0, 0.8, 0],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                delay: node.id * 0.8,
+                ease: 'easeInOut',
+              }}
+            />
+          </React.Fragment>
+        ))}
+      </svg>
+
+      {/* Floating Nodes */}
+      {nodes.map((node) => (
+        <motion.div
+          key={node.id}
+          style={{
+            position: 'absolute',
+            left: node.x,
+            top: node.y,
+            transform: 'translate(-50%, -50%)',
+          }}
+          animate={{ y: [0, -10, 0] }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: node.id * 0.2,
+          }}
+        >
+          <div
+            style={{
+              padding: '8px 12px',
+              borderRadius: '6px',
+              border: '1px solid rgba(34, 211, 238, 0.3)',
+              background: 'rgba(0, 0, 0, 0.8)',
+              backdropFilter: 'blur(12px)',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '8px',
+                fontFamily: 'monospace',
+                color: '#22d3ee',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {node.label} // RUNNING
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+export default N8nSciFiBackground;

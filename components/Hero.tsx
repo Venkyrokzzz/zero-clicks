@@ -6,7 +6,7 @@ import { HERO } from "@/lib/content";
 import dynamic from "next/dynamic";
 import MagneticButton from "./MagneticButton";
 
-const N8nWorkflowBackground = dynamic(() => import("./N8nWorkflowBackground"), {
+const N8nSciFiBackground = dynamic(() => import("./N8nSciFiBackground"), {
   ssr: false,
 });
 
@@ -28,7 +28,7 @@ export default function Hero() {
         isolation: "isolate",
       }}
     >
-      <N8nWorkflowBackground />
+      <N8nSciFiBackground />
       <div
         style={{
           maxWidth: "960px",
