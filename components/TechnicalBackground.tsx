@@ -1,6 +1,7 @@
 "use client";
 
-import N8nFlowBackground from "./N8nFlowBackground";
+import RisingFlowBackground from "./RisingFlowBackground";
+import RisingAura from "./RisingAura";
 
 export default function TechnicalBackground() {
   return (
@@ -8,18 +9,14 @@ export default function TechnicalBackground() {
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: -1,
+        zIndex: 0,
         pointerEvents: "none",
         overflow: "hidden",
-        background: "#000000",
+        background: "transparent",
       }}
     >
-      {/* Raycast-style colorful aura glows */}
-      <div style={{ position: "absolute", top: "-20%", left: "10%", width: "50%", height: "60%", background: "radial-gradient(circle, rgba(147, 51, 234, 0.18) 0%, transparent 60%)", filter: "blur(120px)" }} />
-      <div style={{ position: "absolute", bottom: "-10%", right: "10%", width: "60%", height: "60%", background: "radial-gradient(circle, rgba(239, 68, 68, 0.14) 0%, transparent 60%)", filter: "blur(120px)" }} />
-      <div style={{ position: "absolute", top: "40%", left: "-10%", width: "40%", height: "50%", background: "radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, transparent 60%)", filter: "blur(120px)" }} />
 
-      {/* Subtle grid pattern */}
+      {/* Grid pattern */}
       <div
         style={{
           position: "absolute",
@@ -34,8 +31,11 @@ export default function TechnicalBackground() {
         }}
       />
 
-      {/* 60fps Canvas-based n8n flow animation */}
-      <N8nFlowBackground />
+      {/* Rising light streaks + motes */}
+      <RisingAura />
+
+      {/* Bright cyan rising particles */}
+      <RisingFlowBackground />
     </div>
   );
 }
