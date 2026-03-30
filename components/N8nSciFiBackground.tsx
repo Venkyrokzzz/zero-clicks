@@ -162,25 +162,78 @@ const N8nSciFiBackground = () => {
             <stop offset="0%" stopColor="rgba(255, 109, 90, 0.8)" />
             <stop offset="100%" stopColor="rgba(255, 109, 90, 0)" />
           </linearGradient>
+          <filter id="glowFilter">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
 
         {nodes.map((node) => (
           <React.Fragment key={node.id}>
-            {/* Connection Line */}
+            {/* Connection Line - Glow Background */}
             <line
               x1="50%"
               y1="50%"
               x2={node.x}
               y2={node.y}
-              stroke="rgba(255, 109, 90, 0.25)"
-              strokeWidth="1.5"
+              stroke="rgba(255, 109, 90, 0.2)"
+              strokeWidth="4"
+              filter="url(#glowFilter)"
+              opacity="0.3"
             />
 
-            {/* Animated Data Pulse */}
+            {/* Connection Line - Main */}
+            <motion.line
+              x1="50%"
+              y1="50%"
+              x2={node.x}
+              y2={node.y}
+              stroke="rgba(255, 109, 90, 0.6)"
+              strokeWidth="1.5"
+              animate={{
+                opacity: [0.3, 0.8, 0.3],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: 'easeInOut',
+                delay: node.id * 0.2,
+              }}
+              filter="url(#glowFilter)"
+            />
+
+            {/* Pulse Trail Effect */}
             <motion.circle
               cx="50%"
               cy="50%"
-              r="4"
+              r="6"
+              fill="none"
+              stroke="#ff6d5a"
+              strokeWidth="2"
+              initial={{ opacity: 0 }}
+              animate={{
+                cx: ['50%', node.x],
+                cy: ['50%', node.y],
+                opacity: [0, 0.6, 0],
+                r: [6, 12, 6],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                delay: node.id * 0.6,
+                ease: 'easeInOut',
+              }}
+              style={{ filter: 'drop-shadow(0 0 16px #ff6d5a)' }}
+            />
+
+            {/* Animated Data Pulse (core) */}
+            <motion.circle
+              cx="50%"
+              cy="50%"
+              r="6"
               fill="#ff6d5a"
               initial={{ opacity: 0 }}
               animate={{
@@ -194,7 +247,27 @@ const N8nSciFiBackground = () => {
                 delay: node.id * 0.6,
                 ease: 'easeInOut',
               }}
-              style={{ filter: 'drop-shadow(0 0 8px #ff6d5a)' }}
+              style={{ filter: 'drop-shadow(0 0 12px rgba(255, 109, 90, 0.9))' }}
+            />
+
+            {/* Burst particles */}
+            <motion.circle
+              cx={node.x}
+              cy={node.y}
+              r="3"
+              fill="#ff6d5a"
+              initial={{ opacity: 0, r: 0 }}
+              animate={{
+                opacity: [0, 0.8, 0],
+                r: [0, 8, 0],
+              }}
+              transition={{
+                duration: 0.8,
+                repeat: Infinity,
+                delay: node.id * 0.6 + 2.5,
+                ease: 'easeOut',
+              }}
+              style={{ filter: 'drop-shadow(0 0 10px #ff6d5a)' }}
             />
           </React.Fragment>
         ))}
@@ -218,22 +291,47 @@ const N8nSciFiBackground = () => {
             delay: node.id * 0.2,
           }}
         >
+          {/* Outer Pulsing Ring */}
+          <motion.div
+            style={{
+              position: 'absolute',
+              inset: -16,
+              borderRadius: '50%',
+              border: '2px solid rgba(255, 109, 90, 0.3)',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+            animate={{
+              opacity: [0.8, 0.2, 0.8],
+              scale: [1, 1.4, 1],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: node.id * 0.2,
+            }}
+          />
+
+          {/* Core Node */}
           <div
             style={{
               width: '24px',
               height: '24px',
               borderRadius: '50%',
-              border: '1px solid rgba(255, 109, 90, 0.4)',
-              background: 'rgba(255, 109, 90, 0.05)',
+              border: '2px solid rgba(255, 109, 90, 0.8)',
+              background: 'radial-gradient(circle, rgba(255, 109, 90, 0.3), rgba(255, 109, 90, 0.05))',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '6px',
               fontFamily: 'monospace',
-              color: 'rgba(255, 109, 90, 0.5)',
+              color: 'rgba(255, 109, 90, 0.8)',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               whiteSpace: 'nowrap',
+              boxShadow: '0 0 16px rgba(255, 109, 90, 0.4)',
             }}
           >
             •
