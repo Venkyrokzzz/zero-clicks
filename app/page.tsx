@@ -4,10 +4,11 @@ import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 
 // Hero Components
-import NeuralFlow from '@/components/NeuralFlow';
 import WorkflowCard from '@/components/WorkflowCard';
 import MagneticButton from '@/components/MagneticButton';
 import Link from 'next/link';
+
+const WaveBackground = dynamic(() => import('@/components/WaveBackground'), { ssr: false });
 
 // Flagship Sections
 const ProofBar = dynamic(() => import('@/components/ProofBar'), { ssr: false });
@@ -28,23 +29,24 @@ export default function Home() {
         position: 'relative',
         width: '100%',
         background: 'var(--bg)',
-        overflowX: 'hidden',
       }}
     >
+      {/* Wave canvas — z:0, pointer-events:none. All content uses z:10+ */}
+      <WaveBackground />
+
       {/* Hero Section */}
       <section
         style={{
           position: 'relative',
+          zIndex: 10,
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           padding: '0 16px',
-          overflow: 'hidden',
         }}
       >
-        <NeuralFlow />
 
         <div
           style={{
@@ -207,33 +209,23 @@ export default function Home() {
         <WorkflowCard />
       </section>
 
-      {/* Flagship Content Sections */}
-      <ProofBar />
-      <DemoStrip />
-      
-      <section id="services">
-        <Services />
-      </section>
+      {/* Flagship Content Sections — z:10 keeps them above the wave canvas */}
+      <div style={{ position: 'relative', zIndex: 10 }}>
+        <ProofBar />
+        <DemoStrip />
 
-      <section id="how-it-works">
-        <HowItWorks />
-      </section>
+        <section id="services"><Services /></section>
+        <section id="how-it-works"><HowItWorks /></section>
+        <section id="work"><FeaturedProject /></section>
 
-      <section id="work">
-        <FeaturedProject />
-      </section>
+        <Testimonials />
 
-      <Testimonials />
+        <section id="pricing"><Pricing /></section>
 
-      <section id="pricing">
-        <Pricing />
-      </section>
-
-      <About />
-      
-      <CTASection />
-      
-      <Footer />
+        <About />
+        <CTASection />
+        <Footer />
+      </div>
     </main>
   );
 }
