@@ -5,8 +5,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
-import TechnicalBackground from "../components/TechnicalBackground";
-import SciFiNav from "../components/SciFiNav";
+import Navbar from "../components/Navbar";
 
 const interBody = Inter({
   subsets: ["latin"],
@@ -92,8 +91,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
          */}
       </head>
       <body style={{ backgroundColor: '#09090b', color: '#FFFFFF', margin: 0 }}>
-        <TechnicalBackground />
-        <SciFiNav />
+        <Navbar />
         {children}
       </body>
     </html>

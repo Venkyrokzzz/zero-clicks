@@ -5,8 +5,9 @@ import { motion } from 'framer-motion';
 
 const navLinks = [
   { name: 'Services', href: '#services', id: '01' },
-  { name: 'How it works', href: '#how-it-works', id: '02' },
-  { name: 'Products', href: '#products', id: '03' },
+  { name: 'Process', href: '#how-it-works', id: '02' },
+  { name: 'Results', href: '#work', id: '03' },
+  { name: 'Pricing', href: '#pricing', id: '04' },
 ];
 
 const SciFiNav = () => {
