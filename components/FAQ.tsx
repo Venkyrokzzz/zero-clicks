@@ -98,10 +98,10 @@ export default function FAQ() {
         >
           Still have questions?{" "}
           <a
-            href="mailto:venky@0-clicks.uk"
+            href="mailto:zeroclicks.hq@gmail.com"
             style={{ color: "var(--text-primary)", textDecoration: "underline", textUnderlineOffset: "4px" }}
           >
-            Email venky@0-clicks.uk
+            Email zeroclicks.hq@gmail.com
           </a>
           {" "}— usually replies within a few hours.
         </motion.p>

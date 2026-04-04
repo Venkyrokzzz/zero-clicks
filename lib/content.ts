@@ -7,7 +7,7 @@
 export const SITE = {
   name: "Zero Clicks",
   tagline: "We automate the boring stuff so you can focus on what matters.",
-  email: "venky@0-clicks.uk",
+  email: "zeroclicks.hq@gmail.com",
   github: "https://github.com/venkatesh-surampudi",
   linkedin: "https://linkedin.com/in/venkatesh-surampudi-b51323379",
   twitter: "https://x.com/venkatesh_n8n",
@@ -197,7 +197,7 @@ export const CTA_SECTION = {
   buttonLabel: "Book a free call",
   buttonHref: "/contact",
   secondaryLabel: "Or email us",
-  secondaryHref: "mailto:venky@0-clicks.uk",
+  secondaryHref: "mailto:zeroclicks.hq@gmail.com",
 } as const;
 
 // ── Contact page ──────────────────────────────────────────────────────────────
