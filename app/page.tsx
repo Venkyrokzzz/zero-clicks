@@ -134,7 +134,7 @@ export default function Home() {
               fontWeight: 300,
             }}
           >
-            Your pub gets 45 minutes back every morning. We build the AI that handles your inbox, routes your leads, and replies to reviews — while you&apos;re on the floor running the business.
+            We build AI workflows that eliminate repetitive admin — email triage, lead routing, review replies, and more. Powered by n8n and Claude AI. Running 24/7 from day one.
           </motion.p>
 
           {/* Proof stats — surfaced from case study */}
