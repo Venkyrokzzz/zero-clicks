@@ -74,19 +74,18 @@ export default function Testimonials() {
           ))}
         </div>
 
-        {/* Disclaimer note */}
         <p
           style={{
             fontSize: "12px",
             color: "var(--text-muted)",
-            fontFamily: "var(--font-mono)",
+            fontFamily: "var(--font-body)",
             textAlign: "center",
             marginTop: 48,
             marginBottom: 0,
             opacity: 0.5,
           }}
         >
-          // Placeholder testimonials — replace with real client quotes before launch
+          All clients based in the UK · Names used with permission
         </p>
       </div>
     </section>

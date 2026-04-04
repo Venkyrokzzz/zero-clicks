@@ -19,6 +19,7 @@ const FeaturedProject = dynamic(() => import('@/components/FeaturedProject'), { 
 const Testimonials = dynamic(() => import('@/components/Testimonials'), { ssr: false });
 const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
 const About = dynamic(() => import('@/components/About'), { ssr: false });
+const FAQ = dynamic(() => import('@/components/FAQ'), { ssr: false });
 const CTASection = dynamic(() => import('@/components/CTASection'), { ssr: false });
 const Footer = dynamic(() => import('@/components/Footer'), { ssr: false });
 
@@ -85,7 +86,7 @@ export default function Home() {
               }}
             />
             <span style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#a1a1aa', fontWeight: 500 }}>
-              N8N · Claude AI · Built for UK SMEs
+              N8N · Claude AI · Built for UK Hospitality
             </span>
           </motion.div>
 
@@ -133,9 +134,32 @@ export default function Home() {
               fontWeight: 300,
             }}
           >
-            We build AI workflows that eliminate repetitive admin — email triage, lead routing, ops alerts, and more.
-            Powered by n8n and Claude AI. Running 24/7 from day one.
+            Your pub gets 45 minutes back every morning. We build the AI that handles your inbox, routes your leads, and replies to reviews — while you&apos;re on the floor running the business.
           </motion.p>
+
+          {/* Proof stats — surfaced from case study */}
+          <motion.div
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            style={{
+              display: 'inline-flex',
+              gap: '32px',
+              marginBottom: '32px',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}
+          >
+            {[
+              { val: '45 min', label: 'saved daily' },
+              { val: '£8/mo', label: 'running cost' },
+              { val: '48 hrs', label: 'to go live' },
+            ].map((s) => (
+              <div key={s.val} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1 }}>{s.val}</div>
+                <div style={{ fontSize: '11px', color: '#71717a', letterSpacing: '0.06em', textTransform: 'uppercase' as const, marginTop: '4px' }}>{s.label}</div>
+              </div>
+            ))}
+          </motion.div>
 
           {/* CTA Buttons */}
           <motion.div
@@ -223,6 +247,7 @@ export default function Home() {
         <section id="pricing"><Pricing /></section>
 
         <About />
+        <FAQ />
         <CTASection />
         <Footer />
       </div>
