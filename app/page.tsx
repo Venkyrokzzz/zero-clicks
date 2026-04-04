@@ -22,6 +22,8 @@ const About = dynamic(() => import('@/components/About'), { ssr: false });
 const FAQ = dynamic(() => import('@/components/FAQ'), { ssr: false });
 const CTASection = dynamic(() => import('@/components/CTASection'), { ssr: false });
 const Footer = dynamic(() => import('@/components/Footer'), { ssr: false });
+const BackToTop = dynamic(() => import('@/components/BackToTop'), { ssr: false });
+const FloatingChat = dynamic(() => import('@/components/FloatingChat'), { ssr: false });
 
 export default function Home() {
   return (
@@ -251,6 +253,9 @@ export default function Home() {
         <CTASection />
         <Footer />
       </div>
+
+      <BackToTop />
+      <FloatingChat />
     </main>
   );
 }
