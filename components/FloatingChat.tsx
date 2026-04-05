@@ -94,19 +94,28 @@ export default function FloatingChat() {
           >
             <button
               onClick={() => setBubbleVisible(false)}
-              style={{ position: "absolute", top: "6px", right: "8px", background: "none", border: "none", cursor: "pointer", color: "#71717a", fontSize: "14px", lineHeight: 1 }}
-            >×</button>
+              aria-label="Dismiss"
+              style={{
+                position: "absolute", top: "8px", right: "8px",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "4px",
+                cursor: "pointer", color: "#71717a",
+                fontSize: "10px", fontWeight: 700,
+                lineHeight: 1, padding: "3px 5px",
+              }}
+            >✕</button>
             <p style={{ fontSize: "13px", color: "#f4f4f5", fontFamily: "var(--font-body)", fontWeight: 500, margin: "0 0 4px", paddingRight: "12px" }}>
-              Not sure where to start?
+              Have a question?
             </p>
             <p style={{ fontSize: "12px", color: "#71717a", fontFamily: "var(--font-body)", margin: "0 0 10px" }}>
-              Drop us a quick message — we reply same day.
+              Ask us anything — what to automate, how it works, what it costs.
             </p>
             <button
               onClick={handleOpen}
               style={{ fontSize: "12px", fontWeight: 600, color: "#60a5fa", fontFamily: "var(--font-body)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
             >
-              Send a message →
+              Ask us →
             </button>
             {/* pointer */}
             <div style={{ position: "absolute", bottom: "-6px", right: "22px", width: "10px", height: "10px", background: "rgba(18,18,22,0.96)", border: "1px solid rgba(255,255,255,0.1)", borderTop: "none", borderLeft: "none", transform: "rotate(45deg)" }} />
@@ -136,18 +145,29 @@ export default function FloatingChat() {
               backdropFilter: "blur(20px)",
             }}
           >
-            {/* Terminal title bar */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "10px 14px", borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)" }}>
-              <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#ff5f57" }} />
-              <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#febc2e" }} />
-              <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#28c840" }} />
-              <span style={{ marginLeft: "8px", fontSize: "11px", color: "#52525b", fontFamily: "var(--font-mono)" }}>
-                ~/enquiry
-              </span>
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)" }}>
+              <div>
+                <p style={{ fontSize: "13px", fontWeight: 600, color: "#f4f4f5", fontFamily: "var(--font-body)", margin: 0 }}>Got a question?</p>
+                <p style={{ fontSize: "11px", color: "#52525b", fontFamily: "var(--font-body)", margin: "2px 0 0" }}>We reply within a few hours</p>
+              </div>
               <button
                 onClick={() => setOpen(false)}
-                style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "#52525b", fontSize: "16px", lineHeight: 1, padding: "0 2px" }}
-              >×</button>
+                aria-label="Close"
+                style={{
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  color: "#a1a1aa",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  fontFamily: "var(--font-body)",
+                  padding: "4px 9px",
+                  lineHeight: 1.4,
+                  letterSpacing: "0.02em",
+                }}
+              >Close</button>
             </div>
 
             {state === "sent" ? (
@@ -169,9 +189,10 @@ export default function FloatingChat() {
             ) : (
               <form onSubmit={handleSubmit} style={{ padding: "16px" }}>
                 {/* Prompt line */}
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px" }}>
-                  <span style={{ color: "#22c55e", fontFamily: "var(--font-mono)", fontSize: "12px" }}>▶</span>
-                  <span style={{ color: "#71717a", fontFamily: "var(--font-mono)", fontSize: "12px" }}>What do you want to automate?</span>
+                <div style={{ marginBottom: "14px" }}>
+                  <p style={{ fontSize: "13px", color: "#a1a1aa", fontFamily: "var(--font-body)", margin: 0, lineHeight: 1.5 }}>
+                    Tell us what&apos;s slowing you down — we&apos;ll suggest what to automate first.
+                  </p>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>

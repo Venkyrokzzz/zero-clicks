@@ -24,8 +24,8 @@ export default function BackToTop() {
           aria-label="Back to top"
           style={{
             position: "fixed",
-            bottom: "96px",
-            right: "24px",
+            bottom: "24px",
+            left: "24px",
             zIndex: 40,
             width: "40px",
             height: "40px",
