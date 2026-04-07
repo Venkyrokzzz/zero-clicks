@@ -13,22 +13,18 @@ export default function Pricing() {
     <section
       id="pricing"
       ref={sectionRef}
-      style={{
-        borderTop: "1px solid var(--border)",
-        padding: "140px 48px",
-        background: "transparent",
-      }}
+      style={{ borderTop: "1px solid var(--border)", padding: "140px 48px", background: "transparent" }}
     >
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
 
-        {/* ── Header ─────────────────────────────── */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
           style={{ marginBottom: "48px" }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "18px" }}>
             <h2 style={{
               fontFamily: "var(--font-display)", fontWeight: 600, letterSpacing: "-0.03em",
               fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text-primary)", margin: 0, lineHeight: 1.1,
@@ -39,57 +35,41 @@ export default function Pricing() {
               // 05 Investment
             </div>
           </div>
-
-          {/* Loss aversion anchor — compact single line */}
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: "10px",
-            background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)",
-            borderRadius: "8px", padding: "10px 16px",
-          }}>
+          {/* Loss aversion — single line */}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: "6px", padding: "8px 14px" }}>
             <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", flexShrink: 0, boxShadow: "0 0 6px #ef4444" }} />
             <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>
-              <span style={{ color: "#ef4444", fontWeight: 600 }}>90 min/day × 250 days = £9,375/year lost to admin.</span>
-              {" "}We fix it from £499.
+              <span style={{ color: "#ef4444", fontWeight: 600 }}>90 min/day × 250 days = £9,375/year lost to admin.</span>{" "}We fix it from £499.
             </p>
           </div>
         </motion.div>
 
-        {/* ── Cards grid ─────────────────────────── */}
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1.15fr 1fr", gap: "16px", alignItems: "stretch" }}
-          className="pricing-grid"
-        >
+        {/* Cards — equal 3 cols, Raycast style */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", alignItems: "stretch" }} className="pricing-grid">
           {PACKAGES.map((pkg, i) => (
             <PricingCard key={pkg.name} pkg={pkg} delay={i * 0.1} isInView={isInView} />
           ))}
         </div>
 
-        {/* ── Add-ons ────────────────────────────── */}
+        {/* Add-ons */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          style={{ marginTop: "28px" }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          style={{ marginTop: "24px", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px" }}
         >
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
-              // Add-ons:
-            </span>
-            {PRICING_ADDONS.map((addon) => (
-              <div key={addon.name} style={{
-                background: "var(--bg-surface)", border: "1px solid var(--border)",
-                borderRadius: "6px", padding: "7px 14px",
-                display: "flex", alignItems: "center", gap: "8px",
-              }}>
-                <span style={{ fontSize: "12px", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontWeight: 600 }}>{addon.name}</span>
-                <span style={{ fontSize: "11px", color: "var(--accent)", fontFamily: "var(--font-mono)", fontWeight: 600, background: "var(--accent-dim)", padding: "2px 6px", borderRadius: "3px" }}>{addon.price}</span>
-                <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>{addon.desc}</span>
-              </div>
-            ))}
-          </div>
+          <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono)", letterSpacing: "0.08em", textTransform: "uppercase", marginRight: "4px" }}>
+            Add-ons:
+          </span>
+          {PRICING_ADDONS.map((addon) => (
+            <div key={addon.name} style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "6px", padding: "6px 12px" }}>
+              <span style={{ fontSize: "12px", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontWeight: 600 }}>{addon.name}</span>
+              <span style={{ fontSize: "11px", color: "var(--accent)", fontFamily: "var(--font-mono)", fontWeight: 600 }}>{addon.price}</span>
+              <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>— {addon.desc}</span>
+            </div>
+          ))}
         </motion.div>
 
-        {/* ── Bottom note ────────────────────────── */}
         <p style={{ fontSize: 13, color: "var(--text-muted)", fontFamily: "var(--font-body)", textAlign: "center", marginTop: 40, marginBottom: 0 }}>
           Not sure which?{" "}
           <Link href="/contact" style={{ color: "var(--text-primary)", textDecoration: "underline", textUnderlineOffset: "4px" }}>
@@ -107,6 +87,15 @@ export default function Pricing() {
   );
 }
 
+function CheckIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, marginTop: "1px" }}>
+      <circle cx="12" cy="12" r="11" stroke={active ? "var(--accent)" : "var(--border-mid)"} strokeWidth="1.5" />
+      <polyline points="7 12 10 15 17 9" stroke={active ? "var(--accent)" : "var(--text-muted)"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
 function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; isInView: boolean }) {
   const { name, tagline, price, originalPrice, timeline, features, valueStack, guarantee, scarcity, badge, highlight, cta } = pkg;
   const [hovered, setHovered] = useState(false);
@@ -118,25 +107,27 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
       transition={{ duration: 0.5, delay }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{ position: "relative", display: "flex", flexDirection: "column", height: "100%", transform: hovered ? "translateY(-3px)" : "none", transition: "transform 300ms ease" }}
+      style={{ position: "relative", display: "flex", flexDirection: "column", height: "100%", transform: hovered ? "translateY(-3px)" : "none", transition: "transform 280ms ease" }}
     >
-      {/* Glow border — Pro only */}
+      {/* Glow layers — Pro only */}
       {highlight && (
         <>
-          <div style={{ position: "absolute", inset: -1, borderRadius: "17px", background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 40%, #06b6d4 70%, #3b82f6 100%)", zIndex: 0, animation: "border-breathe 3s ease-in-out infinite" }} />
-          <div style={{ position: "absolute", inset: -6, borderRadius: "22px", background: "linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.1), rgba(6,182,212,0.12))", zIndex: 0, filter: "blur(8px)", animation: "border-breathe 3s ease-in-out infinite", animationDelay: "0.3s" }} />
+          <div style={{ position: "absolute", inset: -1, borderRadius: "17px", background: "linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4, #3b82f6)", zIndex: 0, animation: "border-breathe 3s ease-in-out infinite" }} />
+          <div style={{ position: "absolute", inset: -8, borderRadius: "24px", background: "linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.08), rgba(6,182,212,0.1))", zIndex: 0, filter: "blur(10px)", animation: "border-breathe 3s ease-in-out infinite", animationDelay: "0.4s" }} />
         </>
       )}
 
-      {/* Card body */}
       <div style={{
-        background: highlight ? "var(--bg-surface)" : "var(--bg-card)",
+        background: "var(--bg-surface)",
         border: highlight ? "1px solid transparent" : "1px solid var(--border)",
         borderRadius: "16px",
-        padding: "24px 24px 22px",
+        padding: "28px 24px 24px",
         position: "relative", zIndex: 1,
         display: "flex", flexDirection: "column", height: "100%",
+        boxShadow: highlight ? "0 24px 60px rgba(0,0,0,0.5)" : hovered ? "0 12px 32px rgba(0,0,0,0.3)" : "none",
+        transition: "box-shadow 280ms ease",
       }}>
+
         {/* Badge */}
         {badge && (
           <span style={{
@@ -149,95 +140,109 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
           </span>
         )}
 
-        {/* Top row: name + price */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px" }}>
-          <div>
-            <p style={{ fontSize: 11, color: highlight ? "var(--accent)" : "var(--text-muted)", fontFamily: "var(--font-mono)", fontWeight: 600, margin: "0 0 2px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-              {name}
-            </p>
-            <p style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "var(--font-body)", margin: 0, lineHeight: 1.3 }}>
-              {tagline}
-            </p>
-          </div>
-          <div style={{ textAlign: "right", flexShrink: 0, marginLeft: "12px" }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: "6px", justifyContent: "flex-end" }}>
-              <span style={{ fontSize: "1.9rem", fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: "-0.04em", color: "var(--text-primary)", lineHeight: 1 }}>
-                {price}
+        {/* Name + tagline */}
+        <div style={{ marginBottom: "20px" }}>
+          <p style={{ fontSize: "1rem", fontFamily: "var(--font-display)", fontWeight: 600, color: "var(--text-primary)", margin: "0 0 4px", letterSpacing: "-0.01em" }}>
+            {name}
+          </p>
+          <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontFamily: "var(--font-body)", margin: 0, lineHeight: 1.4 }}>
+            {tagline}
+          </p>
+        </div>
+
+        {/* Price block */}
+        <div style={{ marginBottom: "20px" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "4px" }}>
+            <span style={{ fontSize: "2.6rem", fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: "-0.05em", color: "var(--text-primary)", lineHeight: 1 }}>
+              {price}
+            </span>
+            {originalPrice && (
+              <span style={{ fontSize: "0.9rem", color: "var(--text-muted)", textDecoration: "line-through", opacity: 0.5, fontFamily: "var(--font-body)" }}>
+                {originalPrice}
               </span>
-              {originalPrice && (
-                <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", textDecoration: "line-through", opacity: 0.55 }}>{originalPrice}</span>
-              )}
-            </div>
-            <p style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-body)", margin: "2px 0 0" }}>{timeline}</p>
+            )}
           </div>
+          <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontFamily: "var(--font-body)", margin: 0 }}>
+            {timeline}
+          </p>
+          {/* Value stack savings line — Pro only */}
+          {valueStack && (
+            <p style={{ fontSize: "0.72rem", color: "var(--accent)", fontFamily: "var(--font-mono)", margin: "6px 0 0", fontWeight: 600 }}>
+              Save £497 vs buying separately
+            </p>
+          )}
         </div>
 
         {/* Divider */}
-        <div style={{ borderTop: "1px dashed var(--border)", margin: "14px 0" }} />
+        <div style={{ borderTop: "1px solid var(--border)", marginBottom: "18px" }} />
 
-        {/* Value stack — compact grid, Pro only */}
-        {valueStack && (
-          <div style={{ marginBottom: "12px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "3px 12px", marginBottom: "8px" }}>
-              {valueStack.map((item) => (
-                <>
-                  <span key={item.item + "-label"} style={{ fontSize: "11px", color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>{item.item}</span>
-                  <span key={item.item + "-val"} style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-mono)", textDecoration: "line-through", opacity: 0.6, textAlign: "right" }}>{item.value}</span>
-                </>
-              ))}
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid var(--border)", paddingTop: "6px" }}>
-              <span style={{ fontSize: "11px", color: "var(--accent)", fontFamily: "var(--font-body)", fontWeight: 600 }}>You pay today</span>
-              <span style={{ fontSize: "12px", color: "var(--accent)", fontFamily: "var(--font-mono)", fontWeight: 700 }}>£1,200 <span style={{ fontSize: "10px", textDecoration: "line-through", opacity: 0.6, fontWeight: 400 }}>£1,697</span></span>
-            </div>
-          </div>
-        )}
-
-        {/* Features — compact */}
-        <ul style={{ listStyle: "none", padding: 0, margin: "0 0 14px", display: "flex", flexDirection: "column", gap: 7, flex: 1 }}>
+        {/* Features */}
+        <ul style={{ listStyle: "none", padding: 0, margin: "0 0 20px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
           {features.map((feature) => (
-            <li key={feature} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                stroke={highlight ? "var(--accent)" : "var(--text-muted)"}
-                strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                style={{ marginTop: "2px", flexShrink: 0 }}>
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              <span style={{ fontSize: 12, color: "var(--text-secondary)", fontFamily: "var(--font-body)", lineHeight: 1.4 }}>{feature}</span>
+            <li key={feature} style={{ display: "flex", alignItems: "flex-start", gap: "9px" }}>
+              <CheckIcon active={highlight} />
+              <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontFamily: "var(--font-body)", lineHeight: 1.45 }}>
+                {feature}
+              </span>
             </li>
           ))}
+          {/* Value stack items as features — Pro only */}
+          {valueStack && (
+            <>
+              <li style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                <div style={{ width: "15px", height: "1px", background: "var(--border-mid)", flexShrink: 0 }} />
+                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontFamily: "var(--font-mono)", letterSpacing: "0.06em" }}>
+                  INCLUDES
+                </span>
+              </li>
+              {valueStack.map((item) => (
+                <li key={item.item} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "9px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                    <CheckIcon active={true} />
+                    <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>{item.item}</span>
+                  </div>
+                  <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontFamily: "var(--font-mono)", textDecoration: "line-through", opacity: 0.5, flexShrink: 0 }}>{item.value}</span>
+                </li>
+              ))}
+            </>
+          )}
         </ul>
 
-        {/* Guarantee + Scarcity inline */}
+        {/* Guarantee + scarcity */}
         {(guarantee || scarcity) && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "14px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "16px" }}>
             {guarantee && (
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.18)", borderRadius: "6px", padding: "5px 10px" }}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.18)", borderRadius: "5px", padding: "4px 9px" }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
-                <span style={{ fontSize: "10px", color: "#10b981", fontFamily: "var(--font-body)" }}>{guarantee}</span>
+                <span style={{ fontSize: "10px", color: "#10b981", fontFamily: "var(--font-body)", lineHeight: 1.3 }}>{guarantee}</span>
               </div>
             )}
             {scarcity && (
-              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#ef4444", boxShadow: "0 0 5px #ef4444", animation: "status-pulse 1.5s ease-in-out infinite" }} />
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#ef4444", boxShadow: "0 0 4px #ef4444", animation: "status-pulse 1.5s ease-in-out infinite", flexShrink: 0 }} />
                 <span style={{ fontSize: "10px", color: "#ef4444", fontFamily: "var(--font-mono)", fontWeight: 600 }}>{scarcity}</span>
               </div>
             )}
           </div>
         )}
 
-        {/* CTA */}
+        {/* CTA — pinned to bottom */}
         <Link href="/contact" style={{
-          background: highlight ? "var(--text-primary)" : "rgba(255,255,255,0.04)",
+          background: highlight ? "var(--text-primary)" : "rgba(255,255,255,0.05)",
           color: highlight ? "#000" : "var(--text-primary)",
-          border: highlight ? "none" : "1px solid var(--border)",
-          width: "100%", padding: "11px", borderRadius: 7,
-          fontSize: 13, fontFamily: "var(--font-body)", fontWeight: 700,
+          border: highlight ? "none" : "1px solid var(--border-mid)",
+          width: "100%", padding: "11px 16px",
+          borderRadius: "8px", fontSize: "13px",
+          fontFamily: "var(--font-body)", fontWeight: 600,
           textDecoration: "none", textAlign: "center", display: "block",
-          transition: "all 0.2s ease",
-        }}>
+          letterSpacing: "0.01em",
+          transition: "opacity 200ms ease",
+        }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "0.85"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+        >
           {cta}
         </Link>
       </div>
