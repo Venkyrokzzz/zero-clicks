@@ -103,19 +103,34 @@ function PricingCard({
         transition: "transform 300ms ease",
       }}
     >
-      {/* Animated Gradient Border for Pro Tier */}
+      {/* Breathing glow border for Pro Tier */}
       {highlight && (
-        <div
-          style={{
-            position: "absolute",
-            inset: -1,
-            borderRadius: "17px",
-            background: "conic-gradient(from 180deg at 50% 50%, var(--border-strong) 0deg, var(--accent) 180deg, var(--border-strong) 360deg)",
-            opacity: 1,
-            zIndex: 0,
-            animation: "spin 4s linear infinite",
-          }}
-        />
+        <>
+          {/* Gradient border layer */}
+          <div
+            style={{
+              position: "absolute",
+              inset: -1,
+              borderRadius: "17px",
+              background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 40%, #06b6d4 70%, #3b82f6 100%)",
+              zIndex: 0,
+              animation: "border-breathe 3s ease-in-out infinite",
+            }}
+          />
+          {/* Soft outer glow */}
+          <div
+            style={{
+              position: "absolute",
+              inset: -6,
+              borderRadius: "22px",
+              background: "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.12), rgba(6,182,212,0.15))",
+              zIndex: 0,
+              filter: "blur(8px)",
+              animation: "border-breathe 3s ease-in-out infinite",
+              animationDelay: "0.3s",
+            }}
+          />
+        </>
       )}
 
       {/* Main Card Content */}
