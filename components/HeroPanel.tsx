@@ -3,7 +3,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import WorkflowAnimation from "./WorkflowAnimation";
 
 /* ── Dotted connector with animated travelling squares ── */
 function DottedConnector({ color = "#ffffff", delay = 0 }: { color?: string; delay?: number }) {
@@ -253,18 +252,6 @@ export default function HeroPanel() {
         ))}
       </div>
 
-      {/* ── Divider ──────────────────────────────────────── */}
-      <div style={{ height: "1px", background: "rgba(255,255,255,0.05)", margin: "0 32px", position: "relative", zIndex: 2 }} />
-
-      {/* ── WorkflowAnimation ────────────────────────────── */}
-      <div style={{
-        padding: "28px 48px 32px",
-        display: "flex", justifyContent: "center",
-        background: "rgba(3, 4, 10, 0.5)",
-        position: "relative", zIndex: 2,
-      }}>
-        <WorkflowAnimation />
-      </div>
     </motion.div>
   );
 }
