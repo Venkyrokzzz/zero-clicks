@@ -172,7 +172,7 @@ export default function HeroPanel() {
       {/* ── Stats row ────────────────────────────────────── */}
       <div style={{
         display: "flex", justifyContent: "center", gap: "72px",
-        paddingTop: "4px", borderTop: "1px solid rgba(255,255,255,0.05)",
+        borderTop: "1px solid rgba(255,255,255,0.05)",
         paddingTop: "20px",
       }}>
         {[
