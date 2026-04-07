@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
+function requireAuth(req: NextRequest): NextResponse | null {
+  const secret = req.headers.get("x-dashboard-secret");
+  if (!process.env.DASHBOARD_SECRET || secret !== process.env.DASHBOARD_SECRET) {
+    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+  }
+  return null;
+}
+
 // Mock data - replace with actual Google Sheets/database call
 const mockReviews = [
   {
@@ -27,6 +35,8 @@ const mockReviews = [
 ];
 
 export async function GET(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
   try {
     // TODO: Fetch from Google Sheets API
     // const response = await fetch('https://sheets.googleapis.com/...');
@@ -49,6 +59,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const authError = requireAuth(request);
+  if (authError) return authError;
   try {
     const body = await request.json();
     const { id, status } = body;

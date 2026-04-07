@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import Navbar from "../components/Navbar";
+import { ThemeProvider } from "../components/ThemeProvider";
 
 const interBody = Inter({
   subsets: ["latin"],
@@ -51,32 +52,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${interBody.variable} ${interDisplay.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${interBody.variable} ${interDisplay.variable}`}>
       <head>
-        {/* Critical inline CSS — guarantees dark theme before any stylesheet loads */}
-        <style dangerouslySetInnerHTML={{ __html: `
-          :root {
-            --bg: #000000;
-            --bg-surface: #0A0A0A;
-            --bg-card: #121212;
-            --bg-hover: #1E1E1E;
-            --text-primary: #FFFFFF;
-            --text-secondary: #A1A1AA;
-            --text-muted: #71717A;
-            --accent: #FF6363;
-            --accent-dim: rgba(255,99,99,0.1);
-            --accent-glow: rgba(255,99,99,0.25);
-            --border: rgba(255,255,255,0.08);
-            --border-mid: rgba(255,255,255,0.12);
-            --border-strong: rgba(255,255,255,0.2);
-            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-          }
-          html, body {
-            background-color: #09090b !important;
-            color: #FFFFFF !important;
-            margin: 0;
-            -webkit-font-smoothing: antialiased;
-          }
+        {/* Anti-flash script — sets data-theme BEFORE first paint, prevents white/dark flash */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var stored = localStorage.getItem('zc-theme');
+              var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+              var theme = (stored === 'light' || stored === 'dark') ? stored : (prefersDark ? 'dark' : 'light');
+              document.documentElement.setAttribute('data-theme', theme);
+            } catch(e) {
+              document.documentElement.setAttribute('data-theme', 'dark');
+            }
+          })();
         `}} />
         {/*
          * ── Analytics placeholder ─────────────────────────────────────
@@ -90,9 +79,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
          * ──────────────────────────────────────────────────────────────
          */}
       </head>
-      <body style={{ backgroundColor: '#09090b', color: '#FFFFFF', margin: 0 }}>
-        <Navbar />
-        {children}
+      <body style={{ margin: 0 }}>
+        <ThemeProvider>
+          <Navbar />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

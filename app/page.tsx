@@ -105,18 +105,10 @@ export default function Home() {
               lineHeight: 1.05,
             }}
           >
-            <span style={{ display: 'block', color: '#ffffff', marginBottom: '8px' }}>
+            <span style={{ display: 'block', marginBottom: '8px' }} className="hero-heading">
               You run the business.
             </span>
-            <span
-              style={{
-                display: 'block',
-                background: 'linear-gradient(to bottom, #ffffff, #ffffff 60%, #a1a1aa)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
+            <span className="hero-heading" style={{ display: 'block' }}>
               AI runs everything else.
             </span>
           </motion.h1>
@@ -127,7 +119,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             style={{
               fontSize: '1.125rem',
-              color: '#a1a1aa',
+              color: 'var(--text-secondary)',
               maxWidth: '640px',
               marginLeft: 'auto',
               marginRight: 'auto',
@@ -157,8 +149,8 @@ export default function Home() {
               { val: '48 hrs', label: 'to go live' },
             ].map((s) => (
               <div key={s.val} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.03em', lineHeight: 1 }}>{s.val}</div>
-                <div style={{ fontSize: '11px', color: '#71717a', letterSpacing: '0.06em', textTransform: 'uppercase' as const, marginTop: '4px' }}>{s.label}</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.03em', lineHeight: 1 }}>{s.val}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase' as const, marginTop: '4px' }}>{s.label}</div>
               </div>
             ))}
           </motion.div>
@@ -183,8 +175,8 @@ export default function Home() {
                 alignItems: 'center',
                 gap: '10px',
                 padding: '14px 28px',
-                background: '#ffffff',
-                color: '#0a0a0f',
+                background: 'var(--text-primary)',
+                color: 'var(--bg)',
                 fontSize: '14px',
                 fontWeight: 600,
                 textDecoration: 'none',
@@ -206,23 +198,23 @@ export default function Home() {
                 alignItems: 'center',
                 gap: '10px',
                 padding: '14px 24px',
-                background: 'rgba(24, 24, 27, 0.5)',
-                color: '#ffffff',
+                background: 'var(--bg-card)',
+                color: 'var(--text-primary)',
                 fontSize: '14px',
                 fontWeight: 500,
                 textDecoration: 'none',
                 borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                border: '1px solid var(--border-mid)',
                 backdropFilter: 'blur(8px)',
                 transition: 'background 200ms ease',
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'rgba(24, 24, 27, 0.7)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'rgba(24, 24, 27, 0.5)')}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)')}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--bg-card)')}
             >
               See the demo
               <kbd style={{
-                background: 'rgba(255,255,255,0.1)',
-                color: 'rgba(255,255,255,0.5)',
+                background: 'var(--bg-hover)',
+                color: 'var(--text-muted)',
                 padding: '2px 6px',
                 borderRadius: '4px',
                 fontSize: '12px',

@@ -71,8 +71,7 @@ export default function DemoProcessingPanel({ scenario }: Props) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            systemPrompt: scenario.systemPrompt,
-            fullText: scenario.fullText,
+            scenarioId: scenario.id,
           }),
         })
           .then((r) => r.json())

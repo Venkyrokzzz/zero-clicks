@@ -82,6 +82,7 @@ export default function Hero() {
 
         {/* Headline */}
         <h1
+          className="hero-heading"
           style={{
             fontFamily: "Inter, system-ui, sans-serif",
             fontWeight: 700,
@@ -89,10 +90,6 @@ export default function Hero() {
             lineHeight: 1.05,
             letterSpacing: "-0.04em",
             margin: "0 0 24px",
-            background: "linear-gradient(to bottom, #ffffff, #ffffff 60%, #71717a)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
           }}
         >
           <motion.span
@@ -117,7 +114,7 @@ export default function Hero() {
           transition={{ duration: 0.6, ease, delay: 0.25 }}
           style={{
             fontSize: "1.15rem",
-            color: "#A1A1AA",
+            color: "var(--text-secondary)",
             lineHeight: 1.7,
             marginBottom: "48px",
             fontFamily: "Inter, system-ui, sans-serif",
@@ -153,20 +150,20 @@ export default function Hero() {
               textDecoration: "none",
               padding: "12px 20px 12px 24px",
               borderRadius: "8px",
-              background: "rgba(255,255,255,0.05)",
+              background: "var(--bg-hover)",
               border: "1px solid var(--border-mid)",
               transition: "all 200ms ease",
             }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.1)";
+              (e.currentTarget as HTMLElement).style.background = "var(--bg-card)";
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
+              (e.currentTarget as HTMLElement).style.background = "var(--bg-hover)";
             }}
           >
             <span>See the demo</span>
-            <kbd style={{ 
-              background: "rgba(255,255,255,0.1)", 
+            <kbd style={{
+              background: "var(--bg-surface)",
               color: "var(--text-muted)",
               padding: "2px 6px", 
               borderRadius: "4px",

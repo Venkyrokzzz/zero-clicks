@@ -4,23 +4,46 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --bg:           #09090b;
-    --bg-surface:   #0e0e10;
-    --bg-card:      #121212;
-    --bg-hover:     #1E1E1E;
-    --text-primary: #FFFFFF;
-    --text-secondary: #A1A1AA;
-    --text-muted:   #71717A;
-    --accent:       #FF6363;
-    --accent-dim:   rgba(255,99,99,0.1);
-    --accent-glow:  rgba(255,99,99,0.25);
-    --border:       rgba(255,255,255,0.08);
-    --border-mid:   rgba(255,255,255,0.12);
-    --border-strong:rgba(255,255,255,0.2);
-    --font-display: var(--font-display, 'Inter', system-ui, sans-serif);
-    --font-body:    var(--font-body, 'Inter', system-ui, sans-serif);
-    --font-mono:    'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  /* ── Dark theme (default) ── */
+  :root,
+  [data-theme="dark"] {
+    --bg:              #050810;
+    --bg-surface:      #080c18;
+    --bg-card:         #0c1020;
+    --bg-hover:        #111828;
+    --bg-navbar:       rgba(10,10,16,0.96);
+    --bg-navbar-mobile:rgba(10,10,16,0.98);
+    --text-primary:    #FFFFFF;
+    --text-secondary:  #A1A1AA;
+    --text-muted:      #71717A;
+    --accent:          #3B82F6;
+    --accent-dim:      rgba(59,130,246,0.1);
+    --accent-glow:     rgba(59,130,246,0.25);
+    --border:          rgba(255,255,255,0.08);
+    --border-mid:      rgba(255,255,255,0.12);
+    --border-strong:   rgba(255,255,255,0.2);
+    --font-display:    var(--font-display, 'Inter', system-ui, sans-serif);
+    --font-body:       var(--font-body, 'Inter', system-ui, sans-serif);
+    --font-mono:       'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+
+  /* ── Light theme ── */
+  [data-theme="light"] {
+    --bg:              #F8F9FB;
+    --bg-surface:      #F0F2F5;
+    --bg-card:         #FFFFFF;
+    --bg-hover:        #E8EBF0;
+    --bg-navbar:       rgba(248,249,251,0.96);
+    --bg-navbar-mobile:rgba(248,249,251,0.99);
+    --text-primary:    #0F0F11;
+    --text-secondary:  #4B5563;
+    --text-muted:      #9CA3AF;
+    --accent:          #2563EB;
+    --accent-dim:      rgba(37,99,235,0.08);
+    --accent-glow:     rgba(37,99,235,0.2);
+    --border:          rgba(0,0,0,0.08);
+    --border-mid:      rgba(0,0,0,0.12);
+    --border-strong:   rgba(0,0,0,0.2);
   }
 
   html {
@@ -29,11 +52,13 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 250ms ease, color 250ms ease;
   }
 
   body {
     background-color: var(--bg);
     font-family: var(--font-body);
+    transition: background-color 250ms ease;
   }
 
   h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.02em; }
@@ -44,6 +69,14 @@
   ::selection { background: var(--accent-dim); color: var(--text-primary); }
   *:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 
+}
+
+/* Hero gradient heading — uses CSS vars so it updates on theme switch */
+.hero-heading {
+  background: linear-gradient(to bottom, var(--text-primary), var(--text-primary) 60%, var(--text-muted));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Marquee */
@@ -68,6 +101,11 @@
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
+}
+
+/* Pricing card gradient border spin */
+@keyframes spin {
+  100% { transform: rotate(360deg); }
 }
 
 /* ── Atmospheric Glow ────────────────────────── */

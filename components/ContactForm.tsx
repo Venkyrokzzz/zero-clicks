@@ -46,11 +46,13 @@ export default function ContactForm() {
   const [errorMsg, setErrorMsg] = useState("");
   const [data, setData] = useState<FormData>({ name: "", email: "", company: "", budget: "", message: "" });
 
+  const ALLOWED_SERVICES = ["Inbox Autopilot", "Reputation Manager", "Lead Capture", "Full Ops Autopilot"];
+
   useEffect(() => {
-    if (serviceParam) {
+    if (serviceParam && ALLOWED_SERVICES.includes(serviceParam)) {
       setData(prev => ({ ...prev, message: `I'm interested in your ${serviceParam} service.` }));
     }
-  }, [serviceParam]);
+  }, [serviceParam]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -71,18 +73,13 @@ export default function ContactForm() {
     setFormState("submitting");
     setErrorMsg("");
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          access_key: "53cf9ade-73a5-4e1c-a684-d7bab8607d35",
-          subject: `New enquiry from ${data.name} — Zero Clicks`,
-          from_name: "Zero Clicks Website",
-          ...data,
-        }),
+        body: JSON.stringify(data),
       });
       const json = await res.json();
-      if (!json.success) { setErrorMsg("Something went wrong. Email me directly at zeroclicks.hq@gmail.com"); setFormState("error"); return; }
+      if (!res.ok || !json.success) { setErrorMsg("Something went wrong. Email me directly at zeroclicks.hq@gmail.com"); setFormState("error"); return; }
       setFormState("success");
     } catch {
       setErrorMsg("Something went wrong. Email me directly at zeroclicks.hq@gmail.com");

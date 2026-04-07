@@ -40,13 +40,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const { name, email, company, message } = body;
+  const { name, email, company, message, budget } = body as Record<string, string>;
 
   if (!name || !email || !message) {
     return NextResponse.json(
       { error: "Name, email, and message are required." },
       { status: 400 }
     );
+  }
+
+  // ── Length limits ─────────────────────────────────────────────────
+  if (name.length > 100 || email.length > 254 || message.length > 5000 || (company && company.length > 200)) {
+    return NextResponse.json({ error: "Input exceeds maximum length." }, { status: 400 });
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -68,6 +73,7 @@ export async function POST(req: NextRequest) {
         email,
         company: company || "",
         message,
+        budget: budget || "",
         subject: `New enquiry from ${name} — Zero Clicks`,
       }),
     });

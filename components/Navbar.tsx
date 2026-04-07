@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { SITE } from "@/lib/content";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggle from "./ThemeToggle";
 
 const PRODUCTS = [
   { label: "Inbox Autopilot", href: "/#services", description: "Email handled 24/7" },
@@ -64,7 +65,7 @@ export default function Navbar() {
           right: 0,
           zIndex: 50,
           borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
-          backgroundColor: scrolled || mobileOpen ? "rgba(10,10,16,0.96)" : "transparent",
+          backgroundColor: scrolled || mobileOpen ? "var(--bg-navbar)" : "transparent",
           backdropFilter: scrolled || mobileOpen ? "blur(12px)" : "none",
           transition: "border-color 250ms ease, background-color 250ms ease",
         }}
@@ -231,6 +232,8 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
+            <ThemeToggle />
+
             <Link
               href="/contact"
               style={{
@@ -303,7 +306,7 @@ export default function Navbar() {
               style={{
                 overflow: "hidden",
                 borderTop: "1px solid var(--border)",
-                background: "rgba(10,10,16,0.98)",
+                background: "var(--bg-navbar-mobile)",
               }}
             >
               <div style={{ padding: "16px 24px 24px", display: "flex", flexDirection: "column", gap: "4px" }}>

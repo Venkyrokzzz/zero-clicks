@@ -117,10 +117,6 @@ function PricingCard({
           }}
         />
       )}
-      {/* Ensure animation is defined for the conic spin */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-      `}} />
 
       {/* Main Card Content */}
       <div

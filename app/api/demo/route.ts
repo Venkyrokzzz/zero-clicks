@@ -1,6 +1,7 @@
 // app/api/demo/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { DEMO_SCENARIOS } from "@/lib/content";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -39,28 +40,34 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: { systemPrompt: string; fullText: string };
+  let body: { scenarioId: string };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const { systemPrompt, fullText } = body;
+  const { scenarioId } = body;
 
-  if (!systemPrompt || !fullText) {
+  if (!scenarioId) {
     return NextResponse.json(
-      { error: "systemPrompt and fullText are required." },
+      { error: "scenarioId is required." },
       { status: 400 }
     );
+  }
+
+  // Look up scenario server-side — never trust client-supplied prompts
+  const scenario = DEMO_SCENARIOS.find(s => s.id === scenarioId);
+  if (!scenario) {
+    return NextResponse.json({ error: "Invalid scenario." }, { status: 400 });
   }
 
   try {
     const message = await client.messages.create({
       model: "claude-haiku-4-5",
       max_tokens: 256,
-      system: systemPrompt,
-      messages: [{ role: "user", content: fullText }],
+      system: scenario.systemPrompt,
+      messages: [{ role: "user", content: scenario.fullText }],
     });
 
     const text =
@@ -68,10 +75,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ response: text });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("Anthropic API error:", message);
+    console.error("Anthropic API error:", err);
     return NextResponse.json(
-      { error: message },
+      { error: "AI service temporarily unavailable." },
       { status: 502 }
     );
   }
