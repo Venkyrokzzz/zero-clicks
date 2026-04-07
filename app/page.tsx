@@ -12,7 +12,7 @@ const WaveBackground = dynamic(() => import('@/components/WaveBackground'), { ss
 
 // Flagship Sections
 const ProofBar = dynamic(() => import('@/components/ProofBar'), { ssr: false });
-const DemoStrip = dynamic(() => import('@/components/DemoStrip'), { ssr: false });
+const WorkflowReveal = dynamic(() => import('@/components/WorkflowReveal'), { ssr: false });
 const Services = dynamic(() => import('@/components/Services'), { ssr: false });
 const HowItWorks = dynamic(() => import('@/components/HowItWorks'), { ssr: false });
 const FeaturedProject = dynamic(() => import('@/components/FeaturedProject'), { ssr: false });
@@ -188,7 +188,7 @@ export default function Home() {
       {/* Flagship Content Sections — z:10 keeps them above the wave canvas */}
       <div style={{ position: 'relative', zIndex: 10 }}>
         <ProofBar />
-        <DemoStrip />
+        <WorkflowReveal />
 
         <section id="services"><Services /></section>
         <section id="how-it-works"><HowItWorks /></section>
