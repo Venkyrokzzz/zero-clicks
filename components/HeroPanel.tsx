@@ -177,7 +177,7 @@ export default function HeroPanel() {
       }}>
         {[
           { val: "45 min", label: "SAVED DAILY"  },
-          { val: "£8/mo",  label: "RUNNING COST" },
+          { val: "24/7",   label: "ALWAYS ON"    },
           { val: "48 hrs", label: "TO GO LIVE"   },
         ].map(s => (
           <div key={s.val} style={{ textAlign: "center" }}>
