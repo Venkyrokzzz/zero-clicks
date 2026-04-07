@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 
 // Hero Components
-import WorkflowAnimation from '@/components/WorkflowAnimation';
+import HeroPanel from '@/components/HeroPanel';
 import MagneticButton from '@/components/MagneticButton';
 import Link from 'next/link';
 
@@ -200,127 +200,7 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* ── Hero Showcase Panel ─────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-          style={{
-            position: 'relative',
-            zIndex: 10,
-            width: '100%',
-            maxWidth: '900px',
-            marginBottom: '40px',
-            borderRadius: '16px',
-            border: '1px solid rgba(255,255,255,0.08)',
-            background: 'rgba(8, 12, 24, 0.75)',
-            backdropFilter: 'blur(24px)',
-            boxShadow: '0 40px 100px rgba(0,0,0,0.55), 0 0 0 1px rgba(59,130,246,0.06)',
-            overflow: 'hidden',
-          }}
-        >
-          {/* ── Pipeline overview header ────────────────────── */}
-          <div style={{
-            padding: '22px 28px 18px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0,
-            overflowX: 'auto' as const,
-          }}>
-            {[
-              { icon: '✉', label: 'TASK INPUT',    sub: 'Email / review / form',  color: '#60a5fa', active: false },
-              { icon: '⚡', label: 'n8n ENGINE',    sub: 'Claude AI + n8n',        color: '#a855f7', active: true  },
-              { icon: '📥', label: 'EMAIL TRIAGE',  sub: 'Classify & prioritise',  color: '#ef4444', active: false },
-              { icon: '↗', label: 'LEAD ROUTING',  sub: 'Score & push to CRM',    color: '#10b981', active: false },
-              { icon: '💬', label: 'REPLY DRAFTING',sub: 'In your voice, instant', color: '#f59e0b', active: false },
-            ].map((node, i, arr) => (
-              <div key={node.label} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                {/* Node */}
-                <div style={{
-                  padding: '10px 14px',
-                  borderRadius: '10px',
-                  border: `1px solid ${node.active ? node.color + '55' : 'rgba(255,255,255,0.08)'}`,
-                  background: node.active ? node.color + '14' : 'rgba(255,255,255,0.02)',
-                  boxShadow: node.active ? `0 0 24px ${node.color}22` : 'none',
-                  display: 'flex',
-                  flexDirection: 'column' as const,
-                  alignItems: 'center',
-                  gap: '6px',
-                  minWidth: '108px',
-                  transition: 'all 300ms ease',
-                }}>
-                  <div style={{
-                    width: '36px', height: '36px', borderRadius: '8px',
-                    background: node.active ? node.color + '22' : 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${node.active ? node.color + '44' : 'rgba(255,255,255,0.08)'}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '16px',
-                  }}>
-                    {node.icon}
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', color: node.active ? node.color : 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-mono)' }}>
-                      {node.label}
-                    </div>
-                    <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)', marginTop: '2px', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' as const }}>
-                      {node.sub}
-                    </div>
-                  </div>
-                </div>
-                {/* Connector */}
-                {i < arr.length - 1 && (
-                  <div style={{ display: 'flex', alignItems: 'center', padding: '0 6px', flexShrink: 0 }}>
-                    <div style={{ height: '1px', width: '28px', background: 'rgba(255,255,255,0.1)', position: 'relative' }}>
-                      <motion.div
-                        animate={{ left: ['0%', '100%'] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: 'linear', delay: i * 0.4 }}
-                        style={{
-                          position: 'absolute', top: '50%', transform: 'translateY(-50%)',
-                          width: '5px', height: '5px', borderRadius: '50%',
-                          background: arr[i].color,
-                          boxShadow: `0 0 6px ${arr[i].color}`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* ── Panel body: WorkflowAnimation centred ───────── */}
-          <div style={{
-            padding: '32px 28px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-            background: 'rgba(4, 6, 14, 0.4)',
-          }}>
-            <WorkflowAnimation />
-          </div>
-
-          {/* ── Panel footer: proof stats ────────────────────── */}
-          <div style={{
-            padding: '14px 28px',
-            borderTop: '1px solid rgba(255,255,255,0.05)',
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '48px',
-            flexWrap: 'wrap' as const,
-          }}>
-            {[
-              { val: '45 min', label: 'saved daily' },
-              { val: '£8/mo',  label: 'running cost' },
-              { val: '48 hrs', label: 'to go live' },
-            ].map(s => (
-              <div key={s.val} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.03em', lineHeight: 1 }}>{s.val}</div>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginTop: '3px' }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+        <HeroPanel />
       </section>
 
       {/* Flagship Content Sections — z:10 keeps them above the wave canvas */}
