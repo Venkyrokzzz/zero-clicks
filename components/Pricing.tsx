@@ -83,7 +83,7 @@ export default function Pricing() {
             display: "grid",
             gridTemplateColumns: "1fr 1.18fr 1fr",
             gap: "20px",
-            alignItems: "start",
+            alignItems: "stretch",
           }}
           className="pricing-grid"
         >
@@ -188,6 +188,7 @@ function PricingCard({
         position: "relative",
         display: "flex",
         flexDirection: "column",
+        height: "100%",
         transform: hovered ? "translateY(-4px)" : "none",
         transition: "transform 300ms ease",
       }}
