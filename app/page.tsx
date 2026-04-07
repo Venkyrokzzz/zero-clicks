@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 
 // Hero Components
-import WorkflowCard from '@/components/WorkflowCard';
+import WorkflowAnimation from '@/components/WorkflowAnimation';
 import MagneticButton from '@/components/MagneticButton';
 import Link from 'next/link';
 
@@ -224,7 +224,7 @@ export default function Home() {
           </motion.div>
         </div>
 
-        <WorkflowCard />
+        <WorkflowAnimation />
       </section>
 
       {/* Flagship Content Sections — z:10 keeps them above the wave canvas */}
