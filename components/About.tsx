@@ -15,33 +15,46 @@ export default function About() {
     <section
       style={{
         borderTop: "1px solid var(--border)",
-        padding: "120px 48px",
+        padding: "140px 48px",
         background: "transparent",
       }}
     >
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        {/* Section label row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, ease }}
+          style={{ marginBottom: "64px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}
+        >
+          <h2 style={{
+            fontFamily: "var(--font-display)", fontWeight: 600, letterSpacing: "-0.03em",
+            fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text-primary)", margin: 0, lineHeight: 1.1,
+          }}>
+            Who builds this.
+          </h2>
+          <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
+            // 06 About
+          </div>
+        </motion.div>
+      </div>
       <motion.div
         ref={ref}
         initial={{ opacity: 0, y: 24 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.7, ease }}
-        style={{ maxWidth: "1200px", margin: "0 auto" }}
+        style={{ maxWidth: "1100px", margin: "0 auto" }}
         className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-start"
       >
         {/* Left */}
         <div>
-          <p style={{
-            fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase",
-            color: "var(--accent)", marginBottom: "12px", fontFamily: "var(--font-body)", fontWeight: 600,
-          }}>
-            About
-          </p>
-          <h2 style={{
-            fontFamily: "var(--font-display)", fontWeight: 400,
-            fontSize: "clamp(1.8rem, 3vw, 2.6rem)", color: "var(--text-primary)",
-            margin: 0, lineHeight: 1.15,
+          <h3 style={{
+            fontFamily: "var(--font-display)", fontWeight: 500,
+            fontSize: "clamp(1.6rem, 3vw, 2.2rem)", color: "var(--text-primary)",
+            margin: 0, lineHeight: 1.2, letterSpacing: "-0.02em",
           }}>
             {ABOUT.heading}
-          </h2>
+          </h3>
         </div>
 
         {/* Right */}

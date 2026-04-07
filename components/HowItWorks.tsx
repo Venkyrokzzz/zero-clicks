@@ -152,7 +152,7 @@ export default function HowItWorks() {
         background: "transparent",
       }}
     >
-      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         <motion.div
           ref={headerRef}
           initial={{ opacity: 0, y: 20 }}

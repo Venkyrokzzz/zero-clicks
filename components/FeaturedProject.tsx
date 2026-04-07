@@ -20,7 +20,7 @@ export default function FeaturedProject() {
         position: "relative",
       }}
     >
-      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         {/* Header */}
         <motion.div
           ref={ref}
@@ -39,7 +39,7 @@ export default function FeaturedProject() {
             </h2>
           </div>
           <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
-            // 03 Case Study
+            // 03 Work
           </div>
         </motion.div>
 

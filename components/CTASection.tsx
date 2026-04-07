@@ -16,7 +16,7 @@ export default function CTASection() {
     <section
       style={{
         borderTop: "1px solid var(--border)",
-        padding: "120px 48px",
+        padding: "140px 48px",
         textAlign: "center",
         position: "relative",
         overflow: "hidden",

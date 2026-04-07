@@ -48,7 +48,7 @@ export default function FAQ() {
         background: "transparent",
       }}
     >
-      <div style={{ maxWidth: 800, margin: "0 auto" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -65,7 +65,7 @@ export default function FAQ() {
             </h2>
           </div>
           <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
-            // FAQ
+            // 07 FAQ
           </div>
         </motion.div>
 

@@ -19,7 +19,7 @@ export default function Services() {
   const headerInView = useInView(headerRef, { once: true, margin: "-80px" });
 
   return (
-    <section id="services" style={{ padding: "140px 48px", position: "relative" }}>
+    <section id="services" style={{ borderTop: "1px solid var(--border)", padding: "140px 48px", position: "relative", background: "transparent" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         <motion.div
           ref={headerRef}
@@ -31,12 +31,12 @@ export default function Services() {
           <div>
             <h2 style={{
               fontFamily: "var(--font-display)", fontWeight: 600, letterSpacing: "-0.03em",
-              fontSize: "clamp(2rem, 4vw, 3rem)", color: "#f0f0f5", margin: 0, lineHeight: 1.1,
+              fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text-primary)", margin: 0, lineHeight: 1.1,
             }}>
               Automate the boring.
             </h2>
           </div>
-          <div style={{ color: "rgba(120,120,140,0.6)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
+          <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
             // 01 Core Capabilities
           </div>
         </motion.div>

@@ -46,7 +46,7 @@ export default function Testimonials() {
         background: "transparent",
       }}
     >
-      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -63,7 +63,7 @@ export default function Testimonials() {
             </h2>
           </div>
           <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
-            // 04 Testimonials
+            // 04 Client Results
           </div>
         </motion.div>
 

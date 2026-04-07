@@ -36,7 +36,7 @@ export default function Pricing() {
               Simple, transparent pricing.
             </h2>
             <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
-              // 03 Investment
+              // 05 Investment
             </div>
           </div>
 
