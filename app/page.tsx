@@ -113,24 +113,6 @@ export default function Home() {
             </span>
           </motion.h1>
 
-          {/* Subtext */}
-          <motion.p
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            style={{
-              fontSize: '1.125rem',
-              color: 'var(--text-secondary)',
-              maxWidth: '640px',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              marginBottom: '40px',
-              lineHeight: 1.7,
-              fontWeight: 300,
-            }}
-          >
-            We build AI workflows that eliminate repetitive admin — email triage, lead routing, review replies, and more. Powered by n8n and Claude AI. Running 24/7 from day one.
-          </motion.p>
-
           {/* CTA Buttons */}
           <motion.div
             animate={{ opacity: 1, y: 0 }}
