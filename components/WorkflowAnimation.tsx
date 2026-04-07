@@ -206,21 +206,11 @@ export default function WorkflowAnimation() {
         boxShadow: "0 32px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(59,130,246,0.06)",
       }}
     >
-      {/* Header */}
+      {/* Header — just the LIVE indicator */}
       <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        display: "flex", alignItems: "center", justifyContent: "flex-end",
         marginBottom: "14px", paddingBottom: "12px", borderBottom: "1px solid var(--border)",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div style={{ display: "flex", gap: "5px" }}>
-            {["#ff5f57", "#febc2e", "#28c840"].map(c => (
-              <div key={c} style={{ width: 7, height: 7, borderRadius: "50%", background: c }} />
-            ))}
-          </div>
-          <span style={{ fontSize: "10px", color: "var(--text-muted)", fontFamily: "var(--font-body)", marginLeft: "4px" }}>
-            zero-clicks / autopilot.live
-          </span>
-        </div>
         <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
           <div style={{
             width: "6px", height: "6px", borderRadius: "50%", background: "#10b981",
