@@ -142,61 +142,91 @@ export const FEATURED_PROJECT = {
 } as const;
 
 // ── Packages ──────────────────────────────────────────────────────────────────
+export interface ValueStackItem {
+  item: string;
+  value: string;
+}
+
 export interface Package {
   name: string;
+  tagline: string;
   price: string;
+  originalPrice?: string; // crossed-out value stack total
   timeline: string;
   description: string;
   features: string[];
+  valueStack?: ValueStackItem[]; // Hormozi value stacking
+  guarantee?: string;
+  scarcity?: string;
+  badge?: string;
   highlight: boolean;
   cta: string;
 }
 
 export const PACKAGES: Package[] = [
   {
-    name: "Starter",
+    name: "Quick Win",
+    tagline: "Fix your single biggest time drain",
     price: "£499",
     timeline: "Live in 3 days",
-    description: "One automation that eliminates your single biggest time sink — built, tested, and handed over.",
+    description: "One workflow. One problem. Gone.",
     features: [
-      "Save 5+ hours a week from day one",
-      "Works with Gmail, Slack, Sheets or your CRM",
-      "30 days of support — we fix anything that breaks",
-      "Full documentation so you always understand it",
+      "Inbox triage OR review replies OR lead capture",
+      "Saves 5+ hours per week from day one",
+      "Works with Gmail, Sheets, Slack, or your CRM",
+      "30-day support — we fix anything that breaks",
     ],
     highlight: false,
-    cta: "Book a call",
+    cta: "Start here →",
   },
   {
-    name: "Pro",
+    name: "Full Autopilot",
+    tagline: "Your entire inbox and ops — handled",
     price: "£1,200",
+    originalPrice: "£1,697",
     timeline: "Live in 7 days",
-    description: "Your entire inbox and ops workflow automated — email handled, leads captured, alerts sent, everything logged.",
+    description: "Inbox triage, reputation management, and lead capture — all running 24/7 in your voice.",
     features: [
-      "Inbox time drops from 90 min to under 15 min/day",
-      "Up to 3 connected workflows running 24/7",
-      "AI reads and replies to emails in your voice",
-      "Instant Telegram or Slack alerts for urgent items",
-      "Everything logged to Google Sheets automatically",
-      "60-day support + video walkthrough included",
+      "Inbox drops from 90 min to under 15 min/day",
+      "AI replies in your tone — reviews, complaints, leads",
+      "Instant WhatsApp or Telegram alerts for urgent items",
+      "Everything auto-logged to Google Sheets",
+      "Up to 3 workflows running simultaneously",
+      "60-day support + full video walkthrough",
     ],
+    valueStack: [
+      { item: "Inbox Autopilot workflow", value: "£499" },
+      { item: "Reputation Manager workflow", value: "£499" },
+      { item: "Lead Capture workflow", value: "£399" },
+      { item: "60-day priority support", value: "£300" },
+    ],
+    guarantee: "30-day refund if it doesn't save you 30 min/day",
+    scarcity: "2 onboarding spots left this month",
+    badge: "BEST VALUE",
     highlight: true,
-    cta: "Book a call — most popular",
+    cta: "Claim your spot →",
   },
   {
-    name: "Monthly",
-    price: "£350/mo",
-    timeline: "Ongoing partnership",
-    description: "Your automation stack grows every month — new workflows built, existing ones improved, nothing left to break.",
+    name: "Growth Retainer",
+    tagline: "New automations every month",
+    price: "£350",
+    timeline: "per month, cancel anytime",
+    description: "Your automation stack keeps growing — new workflows, ongoing improvements, nothing left to break.",
     features: [
-      "2 new or updated workflows every month",
-      "Priority support — we respond same day",
-      "Monthly review: what saved time, what to improve next",
+      "2 new or updated workflows per month",
+      "Same-day priority support",
+      "Monthly review call — what to automate next",
       "Unlimited small fixes and tweaks",
     ],
     highlight: false,
-    cta: "Let's talk",
+    cta: "Talk to us →",
   },
+];
+
+export const PRICING_ADDONS = [
+  { name: "WhatsApp Alerts", price: "+£99", desc: "Instant WhatsApp notifications for urgent items" },
+  { name: "Sheets Dashboard", price: "+£99", desc: "Auto-logging to a live Google Sheets ops dashboard" },
+  { name: "Multi-Venue", price: "+£199/venue", desc: "Same workflows replicated across additional sites" },
 ];
 
 // ── CTA section ───────────────────────────────────────────────────────────────
