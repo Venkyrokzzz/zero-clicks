@@ -1,35 +1,44 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
-const TESTIMONIALS = [
+const PAIN_POINTS = [
   {
-    quote:
-      "We used to spend the first 2 hours every morning just triaging emails. Now the AI does it overnight — I wake up to a sorted inbox and drafted replies waiting for me.",
-    author: "James Whitfield",
-    role: "Owner, The Anchor Inn",
-    location: "Bristol, UK",
-    initials: "JW",
-    color: "var(--text-primary)",
+    time: "Mon 7:14am",
+    scenario: "23 unread emails. A complaint from Saturday night. A Christmas party enquiry from three weeks ago you never replied to. Two supplier quotes sitting there. You haven't even unlocked the front door yet.",
+    outcome: "Inbox Autopilot triages all of it overnight. You walk in to a sorted inbox and drafted replies.",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+      </svg>
+    ),
+    accent: "rgba(239,68,68,0.7)",
+    accentDim: "rgba(239,68,68,0.08)",
   },
   {
-    quote:
-      "Venky built us a lead capture workflow in 3 days. It pulls enquiries from our website, enriches them, and drops them straight into our CRM. We've not missed a lead since.",
-    author: "Sarah Chen",
-    role: "Operations Manager, Meridian Events",
-    location: "London, UK",
-    initials: "SC",
-    color: "var(--text-primary)",
+    time: "Fri 11:47pm",
+    scenario: "Someone left a 1-star Google review while you were doing last orders. By Monday it had 60 views and no response. Everyone who searched your pub saw it sitting there, ignored.",
+    outcome: "Reputation Manager drafts a warm, human reply within minutes. You approve with one tap — or it sends automatically.",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    ),
+    accent: "rgba(251,191,36,0.7)",
+    accentDim: "rgba(251,191,36,0.08)",
   },
   {
-    quote:
-      "I was sceptical about AI. But this isn't ChatGPT giving generic answers — it's a workflow that knows our pub, our tone, our regulars. It actually works.",
-    author: "Mark O'Brien",
-    role: "General Manager, The Feathers",
-    location: "Manchester, UK",
-    initials: "MO",
-    color: "var(--text-primary)",
+    time: "Thu 2:31pm",
+    scenario: "A corporate events manager emailed about a £3,200 Christmas party for 45 people. Busy service. It got buried. They chased once. No reply. They booked somewhere else. You found the original email two weeks later.",
+    outcome: "Lead Capture flags high-value enquiries instantly and drafts a reply in your voice — before anyone else gets a chance.",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    ),
+    accent: "rgba(255,109,90,0.7)",
+    accentDim: "rgba(255,109,90,0.08)",
   },
 ];
 
@@ -40,13 +49,10 @@ export default function Testimonials() {
   return (
     <section
       ref={sectionRef}
-      style={{
-        borderTop: "1px solid var(--border)",
-        padding: "140px 48px",
-        background: "transparent",
-      }}
+      style={{ borderTop: "1px solid var(--border)", padding: "140px 48px", background: "transparent" }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -59,148 +65,110 @@ export default function Testimonials() {
               fontFamily: "var(--font-display)", fontWeight: 600, letterSpacing: "-0.03em",
               fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text-primary)", margin: 0, lineHeight: 1.1,
             }}>
-              Don't just take our word for it.
+              Sound familiar?
             </h2>
           </div>
           <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
-            // 04 Client Results
+            // 04 The Problem
           </div>
         </motion.div>
 
-        {/* Cards grid */}
+        {/* Pain point cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t, i) => (
-            <TestimonialCard key={t.author} testimonial={t} delay={i * 0.1} isInView={isInView} />
+          {PAIN_POINTS.map((p, i) => (
+            <PainCard key={i} item={p} delay={i * 0.12} isInView={isInView} />
           ))}
         </div>
 
-        <p
+        {/* Bottom line */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
           style={{
-            fontSize: "12px",
-            color: "var(--text-muted)",
-            fontFamily: "var(--font-body)",
-            textAlign: "center",
-            marginTop: 48,
-            marginBottom: 0,
-            opacity: 0.5,
+            fontSize: "13px", color: "var(--text-muted)", fontFamily: "var(--font-body)",
+            textAlign: "center", marginTop: 48, marginBottom: 0,
           }}
         >
-          All clients based in the UK · Names used with permission
-        </p>
+          Every one of these happens in UK pubs every single week. None of them have to.
+        </motion.p>
       </div>
     </section>
   );
 }
 
-function TestimonialCard({
-  testimonial,
+function PainCard({
+  item,
   delay,
   isInView,
 }: {
-  testimonial: (typeof TESTIMONIALS)[number];
+  item: typeof PAIN_POINTS[number];
   delay: number;
   isInView: boolean;
 }) {
-  const { quote, author, role, location, initials } = testimonial;
-  const [hovered, setHovered] = useState(false);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
-      transition={{ duration: 0.5, delay }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
       style={{
         background: "var(--bg-surface)",
         border: "1px solid var(--border)",
         borderRadius: "16px",
-        padding: 36,
-        height: "100%",
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        transition: "all 300ms ease",
-        transform: hovered ? "translateY(-2px)" : "none",
-        boxShadow: hovered ? "0 20px 40px rgba(0,0,0,0.4)" : "none",
+        height: "100%",
       }}
     >
-      {/* Quote mark (simplified abstract svg) */}
-      <div style={{ marginBottom: 24 }}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--text-primary)" opacity="0.2">
-          <path d="M14.017 18L14.017 10.609C14.017 4.905 17.748 1.039 23 0L23.995 2.151C21.563 3.068 20 5.789 20 8H24V18H14.017ZM0 18V10.609C0 4.905 3.748 1.038 9 0L9.996 2.151C7.563 3.068 6 5.789 6 8H9.983L9.983 18L0 18Z" />
-        </svg>
+      {/* Time stamp header */}
+      <div style={{
+        padding: "14px 20px",
+        borderBottom: "1px solid var(--border)",
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        background: item.accentDim,
+      }}>
+        <div style={{ color: item.accent }}>{item.icon}</div>
+        <span style={{
+          fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 600,
+          color: item.accent, letterSpacing: "0.06em",
+        }}>
+          {item.time}
+        </span>
       </div>
 
-      {/* Quote text */}
-      <p
-        style={{
-          fontSize: "0.95rem",
-          color: "var(--text-secondary)",
-          lineHeight: 1.7,
-          fontFamily: "var(--font-body)",
-          margin: 0,
-        }}
-      >
-        "{quote}"
-      </p>
+      {/* Scenario */}
+      <div style={{ padding: "24px 20px", flex: 1 }}>
+        <p style={{
+          fontSize: "0.875rem", color: "var(--text-secondary)", fontFamily: "var(--font-body)",
+          lineHeight: 1.7, margin: 0,
+        }}>
+          {item.scenario}
+        </p>
+      </div>
 
-      {/* Divider + Author */}
-      <div
-        style={{
-          borderTop: "1px dashed var(--border)",
-          marginTop: "auto",
-          paddingTop: 24,
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-        }}
-      >
-        {/* Abstract Avatar */}
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid var(--border)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 12,
-            fontFamily: "var(--font-mono)",
-            fontWeight: 500,
-            color: "var(--text-muted)",
-            flexShrink: 0,
-          }}
-        >
-          {initials}
-        </div>
-
-        {/* Author info */}
-        <div>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "0.95rem",
-              color: "var(--text-primary)",
-              fontWeight: 500,
-              margin: 0,
-              marginBottom: 2,
-            }}
-          >
-            {author}
-          </p>
-          <p
-            style={{
-              fontSize: 12,
-              color: "var(--text-muted)",
-              fontFamily: "var(--font-body)",
-              margin: 0,
-            }}
-          >
-            {role} &middot; {location}
-          </p>
-        </div>
+      {/* Outcome */}
+      <div style={{
+        padding: "16px 20px",
+        borderTop: "1px dashed var(--border)",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "10px",
+        background: "rgba(255,255,255,0.015)",
+      }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+          strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          style={{ marginTop: "2px", flexShrink: 0 }}>
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <p style={{
+          fontSize: "0.8rem", color: "var(--text-secondary)", fontFamily: "var(--font-body)",
+          lineHeight: 1.6, margin: 0,
+        }}>
+          {item.outcome}
+        </p>
       </div>
     </motion.div>
   );
