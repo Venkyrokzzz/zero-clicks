@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zero Clicks — Progress Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #080f1f;
+      color: #e2e8f0;
+      font-family: 'Arial', sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #0f1a3e 0%, #1a2f6e 60%, #1e3a8a 100%);
+      border-radius: 16px;
+      padding: 36px 40px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .header-left { display: flex; align-items: center; gap: 18px; }
+    .logo {
+      width: 56px; height: 56px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800; color: #fff;
+    }
+    .header h1 { font-size: 22px; font-weight: 700; color: #fff; }
+    .header p { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 3px; font-style: italic; }
+    .date-badge {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: #93c5fd;
+      letter-spacing: 0.05em;
+    }
+
+    /* OVERALL PROGRESS */
+    .overall {
+      background: #0d1730;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+    }
+    .overall-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 14px;
+    }
+    .overall-top h2 { font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; }
+    .overall-pct { font-size: 36px; font-weight: 800; color: #fff; }
+    .overall-pct span { font-size: 16px; color: #64748b; font-weight: 400; }
+    .bar-track {
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+      transition: width 1s ease;
+    }
+    .bar-label {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #475569;
+    }
+
+    /* GRID */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+
+    /* CARDS */
+    .card {
+      background: #0d1730;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 24px 26px;
+    }
+    .card-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #475569;
+      margin-bottom: 16px;
+    }
+
+    /* STAT */
+    .stat { font-size: 40px; font-weight: 800; color: #fff; line-height: 1; }
+    .stat span { font-size: 16px; color: #475569; font-weight: 400; margin-left: 4px; }
+    .stat-sub { margin-top: 6px; font-size: 13px; color: #64748b; }
+
+    /* TASK LIST */
+    .task { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+    .task:last-child { margin-bottom: 0; }
+    .task-icon {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; flex-shrink: 0; margin-top: 1px;
+    }
+    .done { background: #14532d; color: #4ade80; }
+    .pending { background: #1e1e3a; color: #60a5fa; border: 1px solid #1e3a8a; }
+    .waiting { background: #3b1f00; color: #fb923c; }
+    .task-text { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+    .task-text strong { color: #e2e8f0; font-weight: 600; }
+
+    /* OUTREACH TABLE */
+    .outreach { background: #0d1730; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 24px 26px; margin-bottom: 24px; }
+    .outreach-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; margin-bottom: 18px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left;
+      font-size: 11px;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0 0 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    td {
+      padding: 12px 0;
+      font-size: 13px;
+      color: #94a3b8;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    td:first-child { color: #e2e8f0; font-weight: 500; }
+    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .badge-sent { background: #14532d; color: #4ade80; }
+    .badge-pending { background: #1e1e3a; color: #60a5fa; border: 1px solid #1e3a8a; }
+    .badge-blocked { background: #3b1f00; color: #fb923c; }
+
+    /* FEEDBACK */
+    .feedback { background: #0d1730; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 24px 26px; margin-bottom: 24px; }
+    .feedback-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; margin-bottom: 16px; }
+    .feedback-item {
+      display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start;
+    }
+    .feedback-item:last-child { margin-bottom: 0; }
+    .feedback-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
+    }
+    .green { background: #4ade80; }
+    .orange { background: #fb923c; }
+    .blue { background: #60a5fa; }
+    .feedback-text { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+    .feedback-text strong { color: #e2e8f0; }
+
+    /* NEXT STEPS */
+    .next { background: linear-gradient(135deg, rgba(15,26,62,0.8), rgba(30,58,138,0.4)); border: 1px solid rgba(59,130,246,0.2); border-radius: 14px; padding: 24px 26px; }
+    .next-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #3b82f6; margin-bottom: 16px; }
+    .next-item { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; font-size: 13px; color: #94a3b8; }
+    .next-num {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(59,130,246,0.15); color: #60a5fa;
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .next-item:last-child { margin-bottom: 0; }
+
+    /* MINI PROGRESS */
+    .mini-bar-track { background: rgba(255,255,255,0.05); border-radius: 100px; height: 6px; margin-top: 10px; overflow: hidden; }
+    .mini-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, #1e3a8a, #3b82f6); }
+    .mini-label { display: flex; justify-content: space-between; font-size: 11px; color: #475569; margin-top: 6px; }
+
+    /* TIMELINE */
+    .timeline { background: #0d1730; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 24px 26px; margin-bottom: 24px; }
+    .timeline-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; margin-bottom: 20px; }
+    .tl-group { margin-bottom: 24px; }
+    .tl-group:last-child { margin-bottom: 0; }
+    .tl-date {
+      font-size: 11px; font-weight: 700; color: #3b82f6;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 12px; padding-bottom: 8px;
+      border-bottom: 1px solid rgba(59,130,246,0.15);
+    }
+    .tl-item { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+    .tl-item:last-child { margin-bottom: 0; }
+    .tl-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #4ade80; flex-shrink: 0; margin-top: 5px;
+    }
+    .tl-dot.amber { background: #fbbf24; }
+    .tl-text { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+    .tl-text strong { color: #e2e8f0; font-weight: 600; }
+    .tl-tag {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      padding: 1px 7px; border-radius: 100px; margin-left: 6px;
+      vertical-align: middle;
+    }
+    .tag-site { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    .tag-outreach { background: rgba(74,222,128,0.1); color: #4ade80; }
+    .tag-system { background: rgba(251,191,36,0.1); color: #fbbf24; }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">Z</div>
+        <div>
+          <h1>Zero Clicks</h1>
+          <p>Your pub. Your voice. Zero admin.</p>
+        </div>
+      </div>
+      <div class="date-badge">9 April 2026</div>
+    </div>
+
+    <!-- OVERALL PROGRESS -->
+    <div class="overall">
+      <div class="overall-top">
+        <h2>Overall Project Progress</h2>
+        <div class="overall-pct">65% <span>complete</span></div>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width: 65%;"></div>
+      </div>
+      <div class="bar-label">Website built and deployed · Outreach system built · First email sent · 4 emails remaining · Template needs final polish</div>
+    </div>
+
+    <!-- STATS GRID -->
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-title">Outreach Sent</div>
+        <div class="stat">1 <span>/ 5</span></div>
+        <div class="stat-sub">The Devonshire, Soho</div>
+        <div class="mini-bar-track">
+          <div class="mini-bar-fill" style="width: 20%;"></div>
+        </div>
+        <div class="mini-label"><span>Sent</span><span>20%</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Template Status</div>
+        <div class="stat" style="font-size:28px; padding-top:4px;">✓ Locked</div>
+        <div class="stat-sub" style="margin-top:10px;">Saved to skill file</div>
+        <div class="mini-bar-track">
+          <div class="mini-bar-fill" style="width: 75%; background: linear-gradient(90deg, #14532d, #4ade80);"></div>
+        </div>
+        <div class="mini-label"><span>75% finalised</span><span>Awaiting feedback</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Today's Completions</div>
+        <div class="task">
+          <div class="task-icon done">✓</div>
+          <div class="task-text"><strong>Template built</strong> — logo, tagline, no dashes</div>
+        </div>
+        <div class="task">
+          <div class="task-icon done">✓</div>
+          <div class="task-text"><strong>Skill saved</strong> — draft-outreach-email</div>
+        </div>
+        <div class="task">
+          <div class="task-icon done">✓</div>
+          <div class="task-text"><strong>First email sent</strong> — The Devonshire</div>
+        </div>
+        <div class="task">
+          <div class="task-icon waiting">!</div>
+          <div class="task-text"><strong>Marketing review</strong> — notes coming tomorrow</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Known Fixes Queued</div>
+        <div class="task">
+          <div class="task-icon pending">→</div>
+          <div class="task-text"><strong>Pitch clarity</strong> — add what Zero Clicks actually is</div>
+        </div>
+        <div class="task">
+          <div class="task-icon pending">→</div>
+          <div class="task-text"><strong>Mention AI</strong> — "automated, 24/7, AI-powered"</div>
+        </div>
+        <div class="task">
+          <div class="task-icon pending">→</div>
+          <div class="task-text"><strong>Sound important</strong> — product not freelancer</div>
+        </div>
+        <div class="task">
+          <div class="task-icon pending">→</div>
+          <div class="task-text"><strong>Full friend feedback</strong> — incorporate tomorrow</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline">
+      <div class="timeline-title">Full Progress History</div>
+
+      <!-- WEBSITE -->
+      <div class="tl-group">
+        <div class="tl-date">Website — zeroclicks.vercel.app</div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>Pricing section rebuilt</strong> <span class="tl-tag tag-site">Site</span> — Raycast-inspired, equal height 1fr cards, circular check icons, value stack</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>All sections standardised</strong> <span class="tl-tag tag-site">Site</span> — uniform padding (140px), maxWidth (1100px), borderTop, section numbers added</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>WorkflowReveal built</strong> <span class="tl-tag tag-site">Site</span> — replaced DemoStrip. Clip-path text reveal + live n8n pipeline with 6 nodes and travelling orange dot</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>Fake testimonials removed</strong> <span class="tl-tag tag-site">Site</span> — replaced with real pub owner pain point cards. "Sound familiar?" heading</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>Site deployed</strong> <span class="tl-tag tag-site">Site</span> — live on zeroclicks.vercel.app via GitHub push</div>
+        </div>
+      </div>
+
+      <!-- OUTREACH SYSTEM -->
+      <div class="tl-group">
+        <div class="tl-date">Outreach System</div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>3-email cold sequence written</strong> <span class="tl-tag tag-outreach">Outreach</span> — reputation angle, follow-up, breakup email</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>WhatsApp templates written</strong> <span class="tl-tag tag-outreach">Outreach</span> — follow-up and booking confirmation flows</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>Founding Client agreement drafted</strong> <span class="tl-tag tag-system">System</span> — legal protection for free trial week, anti-ghost clause</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>5 London pubs prospected</strong> <span class="tl-tag tag-outreach">Outreach</span> — award-nominated, high review count, contact emails found</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>Pitch angle confirmed</strong> <span class="tl-tag tag-outreach">Outreach</span> — "2,730 reviews, almost none replied to" — reputation not inbox</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>Calendly connected</strong> <span class="tl-tag tag-system">System</span> — calendly.com/zeroclicks-hq/30min confirmed working</div>
+        </div>
+      </div>
+
+      <!-- EMAIL TEMPLATE -->
+      <div class="tl-group">
+        <div class="tl-date">Email Template</div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>HTML template built</strong> <span class="tl-tag tag-outreach">Outreach</span> — logo header, navy gradient, Calendly CTA, Venky signature</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>draft-outreach-email skill saved</strong> <span class="tl-tag tag-system">System</span> — reusable skill at /Users/venky/.claude/skills/draft-outreach-email/SKILL.md</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>Template iterated 4x</strong> <span class="tl-tag tag-outreach">Outreach</span> — removed dashes, added tagline, fixed greeting to "Hi [Business] team,"</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot amber"></div>
+          <div class="tl-text"><strong>Marketing feedback received (partial)</strong> <span class="tl-tag tag-system">System</span> — pitch clarity + AI mention needed. Full notes tomorrow</div>
+        </div>
+      </div>
+
+      <!-- FIRST SEND -->
+      <div class="tl-group">
+        <div class="tl-date">First Send — 9 April 2026</div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-text"><strong>The Devonshire, Soho</strong> <span class="tl-tag tag-outreach">Outreach</span> — enquiries@devonshiresoho.co.uk · 2,730 reviews · Reputation angle · Sent ✓</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- OUTREACH TABLE -->
+    <div class="outreach">
+      <div class="outreach-title">Pub Outreach Pipeline</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Pub</th>
+            <th>Location</th>
+            <th>Reviews</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>The Devonshire</td>
+            <td>Soho</td>
+            <td>2,730</td>
+            <td><span class="badge badge-sent">Sent</span></td>
+          </tr>
+          <tr>
+            <td>The Marksman</td>
+            <td>Hackney</td>
+            <td>TBC</td>
+            <td><span class="badge badge-blocked">Need email</span></td>
+          </tr>
+          <tr>
+            <td>The French House</td>
+            <td>Soho</td>
+            <td>TBC</td>
+            <td><span class="badge badge-blocked">Need email</span></td>
+          </tr>
+          <tr>
+            <td>The Red Lion &amp; Sun</td>
+            <td>Highgate</td>
+            <td>TBC</td>
+            <td><span class="badge badge-blocked">Need email</span></td>
+          </tr>
+          <tr>
+            <td>Canton Arms</td>
+            <td>Stockwell</td>
+            <td>TBC</td>
+            <td><span class="badge badge-blocked">Need email</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- FEEDBACK -->
+    <div class="feedback">
+      <div class="feedback-title">Feedback Pipeline</div>
+      <div class="feedback-item">
+        <div class="feedback-dot green"></div>
+        <div class="feedback-text"><strong>You (field test):</strong> "Hi there" too cold. Changed to "Hi [Business] team,"</div>
+      </div>
+      <div class="feedback-item">
+        <div class="feedback-dot green"></div>
+        <div class="feedback-text"><strong>You:</strong> Em-dashes in body copy. Removed all instances.</div>
+      </div>
+      <div class="feedback-item">
+        <div class="feedback-dot green"></div>
+        <div class="feedback-text"><strong>You:</strong> Tagline missing from header. Added "Your pub. Your voice. Zero admin."</div>
+      </div>
+      <div class="feedback-item">
+        <div class="feedback-dot orange"></div>
+        <div class="feedback-text"><strong>Marketing friend (partial):</strong> Pitch not clear. Zero Clicks needs a proper one-liner explanation. Needs to sound more like a product.</div>
+      </div>
+      <div class="feedback-item">
+        <div class="feedback-dot blue"></div>
+        <div class="feedback-text"><strong>Marketing friend (full notes):</strong> Coming tomorrow morning.</div>
+      </div>
+    </div>
+
+    <!-- NEXT STEPS -->
+    <div class="next">
+      <div class="next-title">Tomorrow's Plan</div>
+      <div class="next-item">
+        <div class="next-num">1</div>
+        Get full marketing feedback — incorporate all notes
+      </div>
+      <div class="next-item">
+        <div class="next-num">2</div>
+        Rewrite body copy — clear AI pitch, product tone, one-liner explainer
+      </div>
+      <div class="next-item">
+        <div class="next-num">3</div>
+        Lock final template — update skill file
+      </div>
+      <div class="next-item">
+        <div class="next-num">4</div>
+        Find contact emails for remaining 4 pubs
+      </div>
+      <div class="next-item">
+        <div class="next-num">5</div>
+        Fire all 4 emails in one clean run
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

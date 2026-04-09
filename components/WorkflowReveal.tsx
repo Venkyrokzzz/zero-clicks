@@ -83,7 +83,7 @@ function RevealText({
   className?: string;
   style?: React.CSSProperties;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<any>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
@@ -100,7 +100,7 @@ function RevealText({
 }
 
 export default function WorkflowReveal() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<any>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
 
   return (

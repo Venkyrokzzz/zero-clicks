@@ -162,8 +162,11 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
               </span>
             )}
           </div>
-          <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontFamily: "var(--font-body)", margin: 0 }}>
+          <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontFamily: "var(--font-body)", margin: "0 0 2px" }}>
             {timeline}
+          </p>
+          <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontFamily: "var(--font-body)", margin: 0, opacity: 0.6 }}>
+            then £{name === "Full Autopilot" ? "75" : "50"}/month
           </p>
           {/* Value stack savings line — Pro only */}
           {valueStack && (
