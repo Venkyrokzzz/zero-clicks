@@ -57,8 +57,6 @@ export default function Services() {
               icon={serviceIcons[i]}
               delay={i * 0.15}
               accentColor={serviceAccents[i]}
-              ctaLabel={service.title === "Reputation Manager" ? "Connect Google Business →" : undefined}
-              ctaHref={service.title === "Reputation Manager" ? "/connect" : undefined}
             />
           ))}
         </div>
