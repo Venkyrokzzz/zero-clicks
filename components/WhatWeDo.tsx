@@ -101,80 +101,143 @@ export default function WhatWeDo() {
         </motion.div>
 
         {/* Pillars */}
+        {/* Bento grid — Linear inspired */}
         <motion.div
           ref={bodyRef}
           initial={{ opacity: 0 }}
           animate={bodyInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.4 }}
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "auto auto", gap: "16px" }}
           className="what-we-do-grid"
         >
-          {pillars.map((pillar, i) => (
-            <motion.div
-              key={pillar.number}
-              initial={{ opacity: 0, y: 24 }}
-              animate={bodyInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.12, ease }}
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "16px",
-                padding: "36px 32px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "20px",
-              }}
-            >
-              {/* Number + accent line */}
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: "11px",
-                  color: "var(--text-muted)", letterSpacing: "0.1em",
-                }}>
-                  {pillar.number}
-                </span>
-                <div style={{ height: "1px", flex: 1, background: `linear-gradient(90deg, ${pillar.accent}, transparent)` }} />
-              </div>
+          {/* Big card — Reputation Manager */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={bodyInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0, ease }}
+            style={{
+              gridColumn: "1 / 2",
+              gridRow: "1 / 3",
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "20px",
+              padding: "40px 36px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "24px",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Glow accent */}
+            <div style={{
+              position: "absolute", top: 0, right: 0,
+              width: "200px", height: "200px",
+              background: "radial-gradient(circle, rgba(74,222,128,0.08) 0%, transparent 70%)",
+              pointerEvents: "none",
+            }} />
 
-              <h3 style={{
-                fontFamily: "var(--font-display)", fontWeight: 600,
-                fontSize: "1.2rem", color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em",
-              }}>
-                {pillar.title}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.1em" }}>01</span>
+              <div style={{ height: "1px", flex: 1, background: "linear-gradient(90deg, rgba(74,222,128,0.6), transparent)" }} />
+            </div>
+
+            <div>
+              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.6rem", color: "var(--text-primary)", margin: "0 0 8px", letterSpacing: "-0.03em", lineHeight: 1.1 }}>
+                Reputation Manager
               </h3>
+              <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--text-secondary)", fontFamily: "var(--font-body)", lineHeight: 1.7 }}>
+                2,000 reviews. Almost none replied to. Every unanswered review is a missed chance to bring that guest back.
+              </p>
+            </div>
 
-              {/* Problem */}
-              <div style={{
-                padding: "12px 16px",
-                background: "rgba(239,68,68,0.05)",
-                border: "1px solid rgba(239,68,68,0.1)",
-                borderRadius: "8px",
-              }}>
-                <p style={{
-                  margin: 0, fontSize: "13px", color: "#fca5a5",
-                  fontFamily: "var(--font-body)", lineHeight: 1.5,
-                }}>
-                  {pillar.problem}
-                </p>
-              </div>
+            <div style={{ padding: "16px 20px", background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.1)", borderRadius: "10px" }}>
+              <p style={{ margin: 0, fontSize: "13px", color: "#fca5a5", fontFamily: "var(--font-body)", lineHeight: 1.6 }}>
+                2,000 Google reviews. Almost none replied to.
+              </p>
+            </div>
 
-              {/* Solution */}
-              <div style={{
-                padding: "12px 16px",
-                background: "rgba(74,222,128,0.04)",
-                border: "1px solid rgba(74,222,128,0.1)",
-                borderRadius: "8px",
-                marginTop: "auto",
-              }}>
-                <p style={{
-                  margin: 0, fontSize: "13px", color: "var(--text-secondary)",
-                  fontFamily: "var(--font-body)", lineHeight: 1.6,
-                }}>
-                  {pillar.solution}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+            <div style={{ padding: "16px 20px", background: "rgba(74,222,128,0.04)", border: "1px solid rgba(74,222,128,0.12)", borderRadius: "10px", marginTop: "auto" }}>
+              <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", fontFamily: "var(--font-body)", lineHeight: 1.7 }}>
+                AI replies to every review in your voice — warm, personal, on-brand. Every guest feels heard.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "rgba(74,222,128,0.8)", boxShadow: "0 0 8px rgba(74,222,128,0.5)" }} />
+              <span style={{ fontSize: "12px", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>Running 24/7 · Replies in your voice</span>
+            </div>
+          </motion.div>
+
+          {/* Small card — Inbox */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={bodyInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.12, ease }}
+            style={{
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "20px",
+              padding: "32px 28px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div style={{ position: "absolute", top: 0, right: 0, width: "150px", height: "150px", background: "radial-gradient(circle, rgba(96,165,250,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.1em" }}>02</span>
+              <div style={{ height: "1px", flex: 1, background: "linear-gradient(90deg, rgba(96,165,250,0.6), transparent)" }} />
+            </div>
+
+            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.2rem", color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em" }}>
+              Inbox Autopilot
+            </h3>
+            <p style={{ margin: 0, fontSize: "13px", color: "#fca5a5", fontFamily: "var(--font-body)", lineHeight: 1.5, padding: "10px 14px", background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.1)", borderRadius: "8px" }}>
+              90 minutes every morning just sorting emails.
+            </p>
+            <p style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)", fontFamily: "var(--font-body)", lineHeight: 1.6, marginTop: "auto" }}>
+              AI reads, classifies, and drafts replies. You check in twice a day. Nothing gets missed.
+            </p>
+          </motion.div>
+
+          {/* Small card — Lead Capture */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={bodyInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.24, ease }}
+            style={{
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "20px",
+              padding: "32px 28px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div style={{ position: "absolute", top: 0, right: 0, width: "150px", height: "150px", background: "radial-gradient(circle, rgba(192,132,252,0.07) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.1em" }}>03</span>
+              <div style={{ height: "1px", flex: 1, background: "linear-gradient(90deg, rgba(192,132,252,0.6), transparent)" }} />
+            </div>
+
+            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.2rem", color: "var(--text-primary)", margin: 0, letterSpacing: "-0.02em" }}>
+              Lead Capture
+            </h3>
+            <p style={{ margin: 0, fontSize: "13px", color: "#fca5a5", fontFamily: "var(--font-body)", lineHeight: 1.5, padding: "10px 14px", background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.1)", borderRadius: "8px" }}>
+              Booking enquiries going cold before anyone replies.
+            </p>
+            <p style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)", fontFamily: "var(--font-body)", lineHeight: 1.6, marginTop: "auto" }}>
+              AI catches every enquiry and drafts a reply instantly. Zero leads dropped.
+            </p>
+          </motion.div>
         </motion.div>
 
         {/* Bottom tagline */}
@@ -199,6 +262,10 @@ export default function WhatWeDo() {
         @media (max-width: 768px) {
           .what-we-do-grid {
             grid-template-columns: 1fr !important;
+          }
+          .what-we-do-grid > div:first-child {
+            grid-column: 1 !important;
+            grid-row: auto !important;
           }
         }
       `}</style>

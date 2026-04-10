@@ -22,7 +22,7 @@ export const HERO = {
   headlineTop: "Stop doing it manually.",
   headlineBottom: "Let the machines handle it.",
   subtext:
-    "Zero Clicks is an AI automation agency built for UK hospitality. We automate your reviews, inbox, and bookings so your guests feel heard — and you stop losing hours to admin.",
+    "AI automation for UK pubs and restaurants. Reviews replied to. Inbox handled. Leads captured. All in your voice, 24/7.",
   ctaPrimary: {
     label: "Book a free 30-min call",
     href: "/contact",
