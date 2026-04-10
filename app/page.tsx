@@ -13,13 +13,12 @@ const WaveBackground = dynamic(() => import('@/components/WaveBackground'), { ss
 
 // Flagship Sections
 const ProofBar = dynamic(() => import('@/components/ProofBar'), { ssr: false });
+const ProblemStats = dynamic(() => import('@/components/ProblemStats'), { ssr: false });
 const WhatWeDo = dynamic(() => import('@/components/WhatWeDo'), { ssr: false });
-const Services = dynamic(() => import('@/components/Services'), { ssr: false });
-const HowItWorks = dynamic(() => import('@/components/HowItWorks'), { ssr: false });
-const FeaturedProject = dynamic(() => import('@/components/FeaturedProject'), { ssr: false });
 const Testimonials = dynamic(() => import('@/components/Testimonials'), { ssr: false });
 const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
-const About = dynamic(() => import('@/components/About'), { ssr: false });
+const Services = dynamic(() => import('@/components/Services'), { ssr: false });
+const HowItWorks = dynamic(() => import('@/components/HowItWorks'), { ssr: false });
 const FAQ = dynamic(() => import('@/components/FAQ'), { ssr: false });
 const CTASection = dynamic(() => import('@/components/CTASection'), { ssr: false });
 const Footer = dynamic(() => import('@/components/Footer'), { ssr: false });
@@ -205,17 +204,15 @@ export default function Home() {
       {/* Flagship Content Sections — z:10 keeps them above the wave canvas */}
       <div style={{ position: 'relative', zIndex: 10 }}>
         <ProofBar />
+        <ProblemStats />
         <WhatWeDo />
-
-        <section id="services"><Services /></section>
-        <section id="how-it-works"><HowItWorks /></section>
-        <section id="work"><FeaturedProject /></section>
 
         <Testimonials />
 
         <section id="pricing"><Pricing /></section>
+        <section id="services"><Services /></section>
+        <section id="how-it-works"><HowItWorks /></section>
 
-        <About />
         <FAQ />
         <CTASection />
         <Footer />
