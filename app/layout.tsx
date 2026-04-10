@@ -5,7 +5,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
-import Navbar from "../components/Navbar";
+import NavbarWrapper from "../components/NavbarWrapper";
 import { ThemeProvider } from "../components/ThemeProvider";
 
 const interBody = Inter({
@@ -81,7 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body style={{ margin: 0 }}>
         <ThemeProvider>
-          <Navbar />
+          <NavbarWrapper />
           {children}
         </ThemeProvider>
       </body>
