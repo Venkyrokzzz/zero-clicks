@@ -7,7 +7,7 @@ import AntiGravityCard from "./AntiGravityCard";
 
 const ease = [0.25, 0.1, 0.25, 1.0] as const;
 
-const serviceIcons = ["✉️", "📊", "⚡"];
+const serviceIcons = ["✉️", "⭐", "⚡"];
 const serviceAccents = [
   "rgba(255, 100, 100, 1)",   // Email — red
   "rgba(56, 189, 248, 1)",    // CRM — cyan
