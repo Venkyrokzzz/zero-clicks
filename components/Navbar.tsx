@@ -9,12 +9,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 
 const PRODUCTS = [
-  { label: "Inbox Autopilot", href: "/#services", description: "Email handled 24/7" },
+  { label: "Inbox Autopilot", href: "/#how-it-works", description: "Email handled 24/7" },
   { label: "Reputation Manager", href: "/#reputation-manager", description: "Reviews + complaints" },
 ];
 
 const NAV_LINKS = [
-  { label: "Services", href: "/#services" },
+  { label: "Services", href: "/#reputation-manager" },
   { label: "How it works", href: "/#how-it-works" },
 ];
 
