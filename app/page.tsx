@@ -42,12 +42,11 @@ export default function Home() {
         style={{
           position: 'relative',
           zIndex: 10,
-          minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          padding: '0 16px',
+          justifyContent: 'flex-start',
+          padding: '120px 16px 60px',
         }}
       >
 
