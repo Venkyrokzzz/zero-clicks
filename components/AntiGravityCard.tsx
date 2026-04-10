@@ -9,6 +9,8 @@ interface AntiGravityCardProps {
   icon?: React.ReactNode;
   delay?: number;
   accentColor?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 const AntiGravityCard: React.FC<AntiGravityCardProps> = ({
@@ -17,6 +19,8 @@ const AntiGravityCard: React.FC<AntiGravityCardProps> = ({
   icon,
   delay = 0,
   accentColor = "rgba(56, 189, 248, 1)",
+  ctaLabel,
+  ctaHref,
 }) => {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -170,21 +174,44 @@ const AntiGravityCard: React.FC<AntiGravityCardProps> = ({
               {description}
             </p>
 
-            {/* Bottom action hint */}
-            <div
-              style={{
-                marginTop: "auto",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                fontSize: "13px",
-                fontWeight: 500,
-                color: accentColor,
-                opacity: 0.6,
-                transition: "opacity 0.3s ease",
-              }}
-            >
-              Explore →
+            {/* Bottom action */}
+            <div style={{ marginTop: "auto" }}>
+              {ctaHref ? (
+                <a
+                  href={ctaHref}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    color: "#000",
+                    background: accentColor,
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    textDecoration: "none",
+                    transition: "opacity 0.2s ease",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+                >
+                  {ctaLabel || "Get started →"}
+                </a>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    color: accentColor,
+                    opacity: 0.6,
+                  }}
+                >
+                  Explore →
+                </div>
+              )}
             </div>
           </div>
 
