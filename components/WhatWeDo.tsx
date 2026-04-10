@@ -39,7 +39,7 @@ export default function WhatWeDo() {
     <section
       style={{
         borderTop: "1px solid var(--border)",
-        padding: "140px 48px",
+        padding: "140px 48px 0",
         background: "transparent",
       }}
     >
