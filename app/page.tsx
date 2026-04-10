@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import HeroPanel from '@/components/HeroPanel';
 import MagneticButton from '@/components/MagneticButton';
 import Link from 'next/link';
+import { HERO } from '@/lib/content';
 
 const WaveBackground = dynamic(() => import('@/components/WaveBackground'), { ssr: false });
 
@@ -111,6 +112,23 @@ export default function Home() {
               AI runs everything else.
             </span>
           </motion.h1>
+
+          {/* Subtext */}
+          <motion.p
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            style={{
+              fontSize: 'clamp(1rem, 2vw, 1.15rem)',
+              color: 'var(--text-secondary)',
+              lineHeight: 1.6,
+              maxWidth: '680px',
+              margin: '0 auto 40px',
+              fontFamily: 'var(--font-body)',
+              fontWeight: 400,
+            }}
+          >
+            {HERO.subtext}
+          </motion.p>
 
           {/* CTA Buttons */}
           <motion.div
