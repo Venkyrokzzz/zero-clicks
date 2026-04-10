@@ -148,7 +148,7 @@ export default function HowItWorks() {
       id="how-it-works"
       style={{
         borderTop: "1px solid var(--border)",
-        padding: "140px 48px",
+        padding: "80px 48px",
         background: "transparent",
       }}
     >

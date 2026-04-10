@@ -13,7 +13,7 @@ export default function Pricing() {
     <section
       id="pricing"
       ref={sectionRef}
-      style={{ borderTop: "1px solid var(--border)", padding: "140px 48px", background: "transparent" }}
+      style={{ borderTop: "1px solid var(--border)", padding: "80px 48px", background: "transparent" }}
     >
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
 

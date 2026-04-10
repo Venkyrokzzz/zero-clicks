@@ -44,7 +44,7 @@ export default function FAQ() {
       ref={sectionRef}
       style={{
         borderTop: "1px solid var(--border)",
-        padding: "140px 48px",
+        padding: "80px 48px",
         background: "transparent",
       }}
     >

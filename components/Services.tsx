@@ -19,7 +19,7 @@ export default function Services() {
   const headerInView = useInView(headerRef, { once: true, margin: "-80px" });
 
   return (
-    <section id="services" style={{ borderTop: "1px solid var(--border)", padding: "80px 48px 140px", position: "relative", background: "transparent" }}>
+    <section id="services" style={{ borderTop: "1px solid var(--border)", padding: "80px 48px", position: "relative", background: "transparent" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         <motion.div
           ref={headerRef}
