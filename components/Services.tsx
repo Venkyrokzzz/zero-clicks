@@ -26,17 +26,9 @@ export default function Services() {
           initial={{ opacity: 0, y: 20 }}
           animate={headerInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease }}
-          style={{ marginBottom: "64px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}
+          style={{ marginBottom: "40px", display: "flex", justifyContent: "flex-end" }}
         >
-          <div>
-            <h2 style={{
-              fontFamily: "var(--font-display)", fontWeight: 600, letterSpacing: "-0.03em",
-              fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text-primary)", margin: 0, lineHeight: 1.1,
-            }}>
-              Automate the boring.
-            </h2>
-          </div>
-          <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px", paddingBottom: "6px" }}>
+          <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)", fontSize: "13px" }}>
             // 01 Core Capabilities
           </div>
         </motion.div>
