@@ -40,7 +40,7 @@ function SuccessContent() {
         </div>
 
         <p className="text-[#555] text-xs">
-          Questions? Email <a href="mailto:hello@0-clicks.uk" className="text-[#888] hover:text-white transition-colors">hello@0-clicks.uk</a>
+          Questions? Email <a href="mailto:zeroclicks.hq@gmail.com" className="text-[#888] hover:text-white transition-colors">zeroclicks.hq@gmail.com</a>
         </p>
       </div>
     </main>
