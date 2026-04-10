@@ -211,7 +211,6 @@ export default function Home() {
         <Testimonials />
 
         <section id="pricing"><Pricing /></section>
-        <section id="services"><Services /></section>
         <ReputationShowcase />
         <section id="how-it-works"><HowItWorks /></section>
 
