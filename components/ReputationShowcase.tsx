@@ -181,11 +181,6 @@ export default function ReputationShowcase() {
               </div>
             ))}
           </div>
-          <a href="/connect" style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '13px', color: '#000', background: 'white', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap', transition: 'opacity 0.2s' }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-            Get started →
-          </a>
         </motion.div>
       </div>
     </section>
