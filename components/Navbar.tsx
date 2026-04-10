@@ -10,7 +10,7 @@ import ThemeToggle from "./ThemeToggle";
 
 const PRODUCTS = [
   { label: "Inbox Autopilot", href: "/#services", description: "Email handled 24/7" },
-  { label: "Reputation Manager", href: "/#services", description: "Reviews + complaints" },
+  { label: "Reputation Manager", href: "/#reputation-manager", description: "Reviews + complaints" },
 ];
 
 const NAV_LINKS = [

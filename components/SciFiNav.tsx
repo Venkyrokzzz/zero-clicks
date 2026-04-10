@@ -5,8 +5,8 @@ import { motion } from 'framer-motion';
 
 const navLinks = [
   { name: 'Services', href: '#services', id: '01' },
-  { name: 'Process', href: '#how-it-works', id: '02' },
-  { name: 'Results', href: '#work', id: '03' },
+  { name: 'Reputation Manager', href: '#reputation-manager', id: '02' },
+  { name: 'Process', href: '#how-it-works', id: '03' },
   { name: 'Pricing', href: '#pricing', id: '04' },
 ];
 

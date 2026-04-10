@@ -18,6 +18,7 @@ const WhatWeDo = dynamic(() => import('@/components/WhatWeDo'), { ssr: false });
 const Testimonials = dynamic(() => import('@/components/Testimonials'), { ssr: false });
 const Pricing = dynamic(() => import('@/components/Pricing'), { ssr: false });
 const Services = dynamic(() => import('@/components/Services'), { ssr: false });
+const ReputationShowcase = dynamic(() => import('@/components/ReputationShowcase'), { ssr: false });
 const HowItWorks = dynamic(() => import('@/components/HowItWorks'), { ssr: false });
 const FAQ = dynamic(() => import('@/components/FAQ'), { ssr: false });
 const CTASection = dynamic(() => import('@/components/CTASection'), { ssr: false });
@@ -211,6 +212,7 @@ export default function Home() {
 
         <section id="pricing"><Pricing /></section>
         <section id="services"><Services /></section>
+        <ReputationShowcase />
         <section id="how-it-works"><HowItWorks /></section>
 
         <FAQ />
