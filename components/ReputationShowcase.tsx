@@ -98,7 +98,7 @@ export default function ReputationShowcase() {
         {/* Steps */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(2, 1fr)',
           gap: '2px',
           background: 'rgba(255,255,255,0.04)',
           borderRadius: '20px',
