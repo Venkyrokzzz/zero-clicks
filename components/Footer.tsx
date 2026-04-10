@@ -38,9 +38,7 @@ export default function Footer() {
 
         <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
           {[
-            { label: "X/Twitter", href: SITE.twitter },
             { label: "LinkedIn", href: SITE.linkedin },
-            { label: "GitHub", href: SITE.github },
             { label: "Email", href: `mailto:${SITE.email}` },
           ].map(link => (
             <Link

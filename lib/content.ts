@@ -22,7 +22,7 @@ export const HERO = {
   headlineTop: "Stop doing it manually.",
   headlineBottom: "Let the machines handle it.",
   subtext:
-    "We build AI workflows that eliminate repetitive admin — email triage, lead routing, ops alerts, and more. Powered by n8n and Claude AI. Running 24/7 from day one.",
+    "Zero Clicks is an AI automation agency built for UK hospitality. We automate your reviews, inbox, and bookings so your guests feel heard — and you stop losing hours to admin.",
   ctaPrimary: {
     label: "Book a free 30-min call",
     href: "/contact",
@@ -168,7 +168,7 @@ export const PACKAGES: Package[] = [
     name: "Reputation Manager",
     tagline: "Every review replied to. In your voice.",
     price: "£450",
-    timeline: "Live in 48 hours",
+    timeline: "Your automation live in 48 hours",
     description: "AI monitors your Google reviews 24/7 and sends warm, personalised replies automatically — so every guest feels heard.",
     features: [
       "AI reads every new Google review instantly",
@@ -185,7 +185,7 @@ export const PACKAGES: Package[] = [
     tagline: "Reviews and inbox handled. Nothing slips.",
     price: "£799",
     originalPrice: "£949",
-    timeline: "Live in 48 hours",
+    timeline: "Your automation live in 48 hours",
     description: "Reputation Manager and Inbox Autopilot together — every review replied to, every email triaged, every urgent item on your phone.",
     features: [
       "AI replies to every Google review in your voice",
@@ -210,7 +210,7 @@ export const PACKAGES: Package[] = [
     name: "Inbox Autopilot",
     tagline: "Your inbox runs itself.",
     price: "£499",
-    timeline: "Live in 48 hours",
+    timeline: "Your automation live in 48 hours",
     description: "AI reads, sorts, and drafts replies to every email — so you check in twice a day instead of all day.",
     features: [
       "AI classifies every email in under a second",
