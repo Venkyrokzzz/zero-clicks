@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 function requireAuth(req: NextRequest): NextResponse | null {
   const secret = req.headers.get("x-dashboard-secret");
@@ -35,6 +36,13 @@ const mockReviews = [
 ];
 
 export async function GET(request: NextRequest) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    request.headers.get("x-real-ip") ??
+    "unknown";
+  const { allowed } = checkRateLimit(ip, 60);
+  if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
+
   const authError = requireAuth(request);
   if (authError) return authError;
   try {
@@ -59,6 +67,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    request.headers.get("x-real-ip") ??
+    "unknown";
+  const { allowed } = checkRateLimit(ip, 60);
+  if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
+
   const authError = requireAuth(request);
   if (authError) return authError;
   try {

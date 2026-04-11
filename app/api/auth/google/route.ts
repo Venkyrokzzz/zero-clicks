@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit } from '@/lib/rateLimit'
 
 export async function GET(req: NextRequest) {
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+    req.headers.get('x-real-ip') ??
+    'unknown'
+
+  const { allowed } = checkRateLimit(ip, 10)
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many requests.' }, { status: 429 })
+  }
+
   const { searchParams } = new URL(req.url)
   const pubName = searchParams.get('pubName') || ''
   const managerName = searchParams.get('managerName') || ''
   const googleReviewsUrl = searchParams.get('googleReviewsUrl') || ''
+  const telegramChatId = searchParams.get('telegramChatId') || ''
 
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID!,
@@ -17,7 +29,7 @@ export async function GET(req: NextRequest) {
     ].join(' '),
     access_type: 'offline',
     prompt: 'consent',
-    state: Buffer.from(JSON.stringify({ pubName, managerName, googleReviewsUrl })).toString('base64'),
+    state: Buffer.from(JSON.stringify({ pubName, managerName, googleReviewsUrl, telegramChatId })).toString('base64'),
   })
 
   return NextResponse.redirect(

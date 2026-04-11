@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Decode state
-  let state = { pubName: '', managerName: '', googleReviewsUrl: '' }
+  let state = { pubName: '', managerName: '', googleReviewsUrl: '', telegramChatId: '' }
   try {
     state = JSON.parse(Buffer.from(stateRaw || '', 'base64').toString())
   } catch {}
@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
       pubName: state.pubName,
       managerName: state.managerName,
       googleReviewsUrl: state.googleReviewsUrl,
+      chatId: state.telegramChatId,
       email: user.email,
       refreshToken: tokens.refresh_token,
       accessToken: tokens.access_token,
