@@ -161,7 +161,7 @@ export default function Home() {
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.9')}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
             >
-              Book a free 30-min call
+              Book a free 15-min call
               <span style={{ opacity: 0.4, fontSize: '13px' }}>✕</span>
             </Link>
 

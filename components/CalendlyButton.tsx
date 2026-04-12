@@ -31,7 +31,7 @@ export default function CalendlyButton() {
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
       }}
     >
-      Book a free 30-min call →
+      Book a free 15-min call →
     </a>
   );
 }

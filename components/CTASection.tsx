@@ -126,7 +126,7 @@ export default function CTASection() {
           {[
             { icon: "⚡", label: "Response within 24h" },
             { icon: "✓", label: "No hard sell, ever" },
-            { icon: "☎", label: "Free 30-min audit call" },
+            { icon: "☎", label: "Free 15-min audit call" },
           ].map(t => (
             <div key={t.label} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ fontSize: "13px", color: "var(--accent)" }}>{t.icon}</span>

@@ -18,7 +18,7 @@ const FAQS = [
   },
   {
     q: "How long does it take to set up?",
-    a: "Starter workflows go live in 3 days. Pro packages take 7. We start with a 30-minute call to map your current process, then you see daily progress. Most clients are live before they expected to be.",
+    a: "Starter workflows go live in 3 days. Pro packages take 7. We start with a 15-minute call to map your current process, then you see daily progress. Most clients are live before they expected to be.",
   },
   {
     q: "Do I need to know how to code?",

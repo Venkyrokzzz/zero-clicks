@@ -124,7 +124,7 @@ export default function NeuralFlowPage() {
             gap: '16px',
           }}
         >
-          <MagneticButton>Book a free 30-min call</MagneticButton>
+          <MagneticButton>Book a free 15-min call</MagneticButton>
 
           <Link
             href="/demo"

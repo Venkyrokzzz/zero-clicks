@@ -17,7 +17,16 @@ const steps = [
   { number: '04', title: 'You paste. Done.', description: 'Draft is ready to copy. Tap the link, paste into Google Reviews, post.', stat: '30s', statLabel: 'your time', color: 'rgba(74, 222, 128, 1)' },
 ]
 
-function StepCard({ step, icon, delay, inView }: { step: typeof steps[0], icon: ReactNode, delay: number, inView: boolean }) {
+// Per-icon float config: slightly different travel, duration, and initial offset so
+// each icon bobs out of phase with the others — gives a genuine zero-gravity feel.
+const iconFloatConfigs = [
+  { y: [0, -10, 0], duration: 2.8, delay: 0 },
+  { y: [0, -12, 0], duration: 3.2, delay: 0.6 },
+  { y: [0, -9,  0], duration: 2.5, delay: 1.1 },
+  { y: [0, -11, 0], duration: 3.6, delay: 0.3 },
+]
+
+function StepCard({ step, icon, delay, inView, cardIndex }: { step: typeof steps[0], icon: ReactNode, delay: number, inView: boolean, cardIndex: number }) {
   const x = useMotionValue(0)
   const y = useMotionValue(0)
   const mouseXSpring = useSpring(x, { stiffness: 150, damping: 15 })
@@ -26,6 +35,8 @@ function StepCard({ step, icon, delay, inView }: { step: typeof steps[0], icon: 
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-10deg', '10deg'])
   const spotlightX = useTransform(mouseXSpring, [-0.5, 0.5], ['0%', '100%'])
   const spotlightY = useTransform(mouseYSpring, [-0.5, 0.5], ['0%', '100%'])
+
+  const floatCfg = iconFloatConfigs[cardIndex] ?? iconFloatConfigs[0]
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -87,16 +98,25 @@ function StepCard({ step, icon, delay, inView }: { step: typeof steps[0], icon: 
               {step.number}
             </div>
 
-            {/* Icon */}
-            <div style={{
-              width: '44px', height: '44px', borderRadius: '10px',
-              background: step.color.replace('1)', '0.08)'),
-              border: `1px solid ${step.color.replace('1)', '0.2)')}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: step.color, marginBottom: '20px',
-            }}>
+            {/* Icon — floats independently on its own rhythm */}
+            <motion.div
+              animate={{ y: floatCfg.y }}
+              transition={{
+                duration: floatCfg.duration,
+                delay: floatCfg.delay,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              style={{
+                width: '44px', height: '44px', borderRadius: '10px',
+                background: step.color.replace('1)', '0.08)'),
+                border: `1px solid ${step.color.replace('1)', '0.2)')}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: step.color, marginBottom: '20px',
+              }}
+            >
               {icon}
-            </div>
+            </motion.div>
 
             {/* Title */}
             <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1.15rem', color: '#f0f0f5', margin: '0 0 10px 0', letterSpacing: '-0.02em' }}>
@@ -158,7 +178,7 @@ export default function ReputationShowcase() {
         {/* Step Cards — 2x2 AntiGravity grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
           {steps.map((step, i) => (
-            <StepCard key={step.number} step={step} icon={stepIcons[i]} delay={i * 0.12} inView={inView} />
+            <StepCard key={step.number} step={step} icon={stepIcons[i]} delay={i * 0.12} inView={inView} cardIndex={i} />
           ))}
         </div>
 

@@ -9,6 +9,14 @@ export async function GET(req: NextRequest) {
 
   const { allowed } = checkRateLimit(ip, 10)
   if (!allowed) {
+    fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: process.env.TELEGRAM_ALERT_CHAT_ID,
+        text: `⚠️ Rate limit hit on /connect\nIP: ${ip}\nTime: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}`,
+      }),
+    }).catch(() => {})
     return NextResponse.json({ error: 'Too many requests.' }, { status: 429 })
   }
 

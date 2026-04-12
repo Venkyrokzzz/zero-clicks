@@ -24,7 +24,7 @@ export const HERO = {
   subtext:
     "Zero Clicks builds AI automation for UK pubs and restaurants — so your reviews get replied to, your inbox runs itself, and no booking goes unanswered.",
   ctaPrimary: {
-    label: "Book a free 30-min call",
+    label: "Book a free 15-min call",
     href: "/contact",
   },
   ctaSecondary: {
@@ -96,7 +96,7 @@ export const STEPS: Step[] = [
   {
     number: "01",
     title: "Audit",
-    description: "We map your current manual processes in a 30-minute call. No slides, no fluff — just clarity on where your time is going.",
+    description: "We map your current manual processes in a 15-minute call. No slides, no fluff — just clarity on where your time is going.",
     details: ["Map every repetitive task", "Identify integration points", "Estimate time saved per week", "Recommend tool stack"],
   },
   {
@@ -200,7 +200,7 @@ export const PACKAGES: Package[] = [
       { item: "Inbox Autopilot setup", value: "£499" },
       { item: "60-day priority support", value: "£300" },
     ],
-    guarantee: "30-day refund if it does not save you 30 min a day",
+    guarantee: "30-day refund if it does not save you 15 min a day",
     scarcity: "2 onboarding spots left this month",
     badge: "BEST VALUE",
     highlight: true,
@@ -233,7 +233,7 @@ export const PRICING_ADDONS = [
 // ── CTA section ───────────────────────────────────────────────────────────────
 export const CTA_SECTION = {
   heading: "Ready to cut the admin?",
-  subtext: "Book a free 30-minute discovery call. No hard sell — just a clear plan for what we'd automate first and what it'd cost.",
+  subtext: "Book a free 15-minute discovery call. No hard sell — just a clear plan for what we'd automate first and what it'd cost.",
   buttonLabel: "Book a free call",
   buttonHref: "/contact",
   secondaryLabel: "Or email us",

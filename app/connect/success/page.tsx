@@ -26,7 +26,7 @@ function SuccessContent() {
           <h3 className="text-white font-medium text-sm">What happens next</h3>
           <div className="space-y-3">
             {[
-              { icon: '🔍', text: 'We scan your Google Reviews every 30 minutes' },
+              { icon: '🔍', text: 'We scan your Google Reviews every 15 minutes' },
               { icon: '🤖', text: 'AI drafts a reply to every new review' },
               { icon: '🚨', text: 'You get a Telegram alert for 1–2 star complaints only' },
               { icon: '📋', text: 'Copy the draft, paste it into Google — done' },

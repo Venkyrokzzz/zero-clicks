@@ -7,6 +7,16 @@ const nextConfig = {
     serverComponentsExternalPackages: ["three", "@react-three/fiber", "@react-three/rapier", "meshline"],
   },
 
+  async redirects() {
+    return [
+      {
+        source: '/call',
+        destination: 'https://calendly.com/zeroclicks-hq/15min',
+        permanent: false,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {
