@@ -28,11 +28,22 @@ export default function ConnectPage() {
           <p className="text-[#888] text-sm mt-1">Reputation Manager Setup</p>
         </div>
 
+        {/* Offer banner */}
+        <div className="bg-[#0f1a0f] border border-green-900/40 rounded-xl px-5 py-4 mb-6 flex items-start gap-3">
+          <span className="text-green-400 text-lg mt-0.5">✓</span>
+          <div>
+            <p className="text-green-400 text-sm font-semibold">14-day free trial — no card needed</p>
+            <p className="text-[#888] text-xs mt-0.5 leading-relaxed">
+              See your first AI reply go live in your voice. If you love it, it&apos;s £55/month after. Cancel anytime before the trial ends and pay nothing.
+            </p>
+          </div>
+        </div>
+
         {/* Card */}
         <div className="bg-[#111] border border-white/10 rounded-2xl p-8">
           <h2 className="text-white text-xl font-semibold mb-2">Connect your Google Business</h2>
           <p className="text-[#888] text-sm mb-8">
-            We&apos;ll monitor your reviews and draft replies automatically. Setup takes 60 seconds.
+            We&apos;ll monitor your reviews and draft replies in your voice. Setup takes 60 seconds.
           </p>
 
           <div className="space-y-4">

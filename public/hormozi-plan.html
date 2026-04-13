@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero Clicks × Hormozi</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Lexend+Mega:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --card: #161616;
+    --border: #222222;
+    --text: #f0f0f0;
+    --muted: #666;
+    --red: #ff3b3b;
+    --green: #00e676;
+    --gold: #ffd600;
+    --blue: #2979ff;
+    --purple: #aa00ff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lexend', sans-serif;
+    font-size: 18px;
+    line-height: 1.8;
+    letter-spacing: 0.01em;
+    overflow-x: hidden;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(255,214,0,0.06) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(255,214,0,0.1);
+    border: 1px solid rgba(255,214,0,0.3);
+    color: var(--gold);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 100px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+
+  .hero h1 span { color: var(--gold); }
+
+  .hero p {
+    font-size: clamp(18px, 2.5vw, 22px);
+    color: var(--muted);
+    max-width: 560px;
+    animation: fadeDown 0.6s 0.2s ease both;
+    margin-bottom: 48px;
+  }
+
+  .scroll-hint {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    animation: fadeDown 0.6s 0.4s ease both, bounce 2s 1s ease-in-out infinite;
+  }
+
+  /* SECTION */
+  .section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 24px;
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 48px;
+  }
+
+  /* PROBLEM vs SOLUTION */
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 80px;
+  }
+
+  @media (max-width: 600px) { .split { grid-template-columns: 1fr; } }
+
+  .split-card {
+    padding: 40px 32px;
+    background: var(--card);
+  }
+
+  .split-card.bad { border-top: 3px solid var(--red); }
+  .split-card.good { border-top: 3px solid var(--green); }
+
+  .split-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .split-tag.bad { color: var(--red); }
+  .split-tag.good { color: var(--green); }
+
+  .split-price {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+
+  .split-body {
+    font-size: 16px;
+    color: #aaa;
+    line-height: 1.9;
+  }
+
+  /* PRINCIPLES */
+  .principles { display: flex; flex-direction: column; gap: 16px; }
+
+  .principle {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .principle:hover { border-color: #333; }
+  .principle.open { border-color: var(--gold); }
+
+  .principle-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 28px 32px;
+    user-select: none;
+  }
+
+  .principle-num {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--gold);
+    opacity: 0.5;
+    min-width: 32px;
+  }
+
+  .principle-icon {
+    font-size: 28px;
+    min-width: 40px;
+    text-align: center;
+  }
+
+  .principle-title {
+    font-size: clamp(18px, 2.5vw, 22px);
+    font-weight: 700;
+    flex: 1;
+  }
+
+  .principle-arrow {
+    font-size: 20px;
+    color: var(--muted);
+    transition: transform 0.3s;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  .principle.open .principle-arrow { transform: rotate(90deg); color: var(--gold); }
+
+  .principle-body {
+    display: none;
+    padding: 0 32px 32px 32px;
+    padding-left: 124px;
+  }
+
+  @media (max-width: 600px) {
+    .principle-body { padding-left: 32px; }
+  }
+
+  .principle.open .principle-body { display: block; }
+
+  .principle-desc {
+    font-size: 17px;
+    color: #bbb;
+    line-height: 1.9;
+    margin-bottom: 20px;
+  }
+
+  .action-tag {
+    display: inline-block;
+    background: rgba(255,214,0,0.08);
+    border: 1px solid rgba(255,214,0,0.2);
+    color: var(--gold);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 8px;
+    margin-top: 4px;
+  }
+
+  /* NUMBERS */
+  .numbers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 80px;
+  }
+
+  .number-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .number-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .number-card.c1::before { background: var(--gold); }
+  .number-card.c2::before { background: var(--green); }
+  .number-card.c3::before { background: var(--blue); }
+  .number-card.c4::before { background: var(--purple); }
+
+  .number-val {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .number-card.c1 .number-val { color: var(--gold); }
+  .number-card.c2 .number-val { color: var(--green); }
+  .number-card.c3 .number-val { color: var(--blue); }
+  .number-card.c4 .number-val { color: var(--purple); }
+
+  .number-label {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  /* ACTIONS */
+  .actions { display: flex; flex-direction: column; gap: 12px; }
+
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .action-item:hover { border-color: #333; transform: translateX(4px); }
+
+  .action-item.done {
+    border-color: rgba(0,230,118,0.2);
+    background: rgba(0,230,118,0.03);
+  }
+
+  .action-item.done .action-title { text-decoration: line-through; color: var(--muted); }
+
+  .action-check {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s;
+  }
+
+  .action-item.done .action-check {
+    background: var(--green);
+    border-color: var(--green);
+    color: #000;
+  }
+
+  .action-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    transition: color 0.2s;
+  }
+
+  .action-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .action-priority {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .priority-now { background: rgba(255,59,59,0.1); color: var(--red); }
+  .priority-week { background: rgba(41,121,255,0.1); color: var(--blue); }
+  .priority-month { background: rgba(170,0,255,0.1); color: var(--purple); }
+
+  /* BOTTOM */
+  .bottom {
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    padding: 80px 24px;
+    text-align: center;
+  }
+
+  .bottom h2 {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  .bottom h2 span { color: var(--gold); }
+
+  .bottom p {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto 48px;
+  }
+
+  .btn {
+    display: inline-block;
+    background: var(--gold);
+    color: #000;
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    padding: 18px 40px;
+    border-radius: 12px;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn:hover { transform: scale(1.04); box-shadow: 0 8px 32px rgba(255,214,0,0.3); }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 100px;
+    height: 6px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 100px;
+    width: 0;
+    transition: width 1s ease;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">Zero Clicks × Hormozi Playbook</div>
+  <h1>Stop selling.<br><span>Make offers.</span></h1>
+  <p>Alex Hormozi's model applied to Zero Clicks. What to change. What to do. Starting tomorrow.</p>
+  <div class="scroll-hint">↓ scroll to start</div>
+</div>
+
+<hr class="divider">
+
+<!-- THE PROBLEM -->
+<div class="section reveal">
+  <div class="section-label">The Problem</div>
+  <div class="section-title">Your offer is weak.<br>The product is fine.</div>
+
+  <div class="split">
+    <div class="split-card bad">
+      <div class="split-tag bad">❌ What you have now</div>
+      <div class="split-price">£300 setup<br>£55/month</div>
+      <div class="split-body">
+        They pay upfront.<br>
+        They trust you blindly.<br>
+        All the risk is on them.<br>
+        Easy to say no.
+      </div>
+    </div>
+    <div class="split-card good">
+      <div class="split-tag good">✅ Hormozi version</div>
+      <div class="split-price">Free setup.<br>£55/month after.</div>
+      <div class="split-body">
+        They see it work first.<br>
+        14-day free trial.<br>
+        All the risk is on you.<br>
+        Stupid to say no.
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- PRINCIPLES -->
+<div class="section reveal">
+  <div class="section-label">The Framework</div>
+  <div class="section-title">5 Hormozi rules.<br>Applied to you.</div>
+
+  <div class="principles">
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">01</div>
+        <div class="principle-icon">🎯</div>
+        <div class="principle-title">Niche until it hurts</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          "UK hospitality" is too broad.<br><br>
+          <strong>Your niche:</strong> East London pub owners with unanswered 1-star reviews in the last 30 days.<br><br>
+          That's a real person. You know their pain. You can find them on Google Maps in 20 minutes.
+        </div>
+        <span class="action-tag">→ Stop saying hospitality. Say East London pubs.</span>
+      </div>
+    </div>
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">02</div>
+        <div class="principle-icon">🛡️</div>
+        <div class="principle-title">Remove all risk from the buyer</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          Right now the pub owner takes all the risk.<br>
+          They pay £300 and hope you're legit.<br><br>
+          <strong>Flip it:</strong> Free setup. They only pay once they see their first AI reply go live in their voice. 14-day trial. Cancel anytime.
+        </div>
+        <span class="action-tag">→ Kill the £300 barrier. Use it as an upsell later.</span>
+      </div>
+    </div>
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">03</div>
+        <div class="principle-icon">📦</div>
+        <div class="principle-title">Stack the value</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          Don't just sell "review replies." Stack what they get:<br><br>
+          ✅ 24/7 review monitoring<br>
+          ✅ AI reply in their voice<br>
+          ✅ Telegram alert — approve in one tap<br>
+          ✅ Monthly reputation report<br>
+          ✅ Setup done for them — fully managed<br><br>
+          Same product. Feels 5x more valuable.
+        </div>
+        <span class="action-tag">→ List all 5 on the website and in every email.</span>
+      </div>
+    </div>
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">04</div>
+        <div class="principle-icon">📊</div>
+        <div class="principle-title">Volume is the strategy</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          You sent 4 emails. Hormozi sends 1000.<br><br>
+          The maths: 100 emails → 35 opens → 7 replies → 3 calls → 1-2 clients.<br><br>
+          <strong>Your target:</strong> 50 emails per week. The workflow is already built. The only bottleneck is finding verified pubs.
+        </div>
+        <span class="action-tag">→ 2 hours a week finding pubs. Everything else is automated.</span>
+      </div>
+    </div>
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">05</div>
+        <div class="principle-icon">📢</div>
+        <div class="principle-title">Document everything publicly</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          Hormozi says: your journey is your content.<br><br>
+          You built an AI outreach agent, cold email workflow, and error handler in one week — as someone with dyslexia, with a health scare, at midnight.<br><br>
+          <strong>That's a LinkedIn post.</strong> Every client you get, every reply the AI writes, every pub owner who books a call — show it. That post gets you 5 more.
+        </div>
+        <span class="action-tag">→ Post one LinkedIn update per week. Raw and real.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- NUMBERS -->
+<div class="section reveal">
+  <div class="section-label">The Maths</div>
+  <div class="section-title">What the numbers<br>actually look like.</div>
+
+  <div class="numbers">
+    <div class="number-card c1">
+      <div class="number-val">50</div>
+      <div class="number-label">Emails per week<br>target</div>
+    </div>
+    <div class="number-card c2">
+      <div class="number-val">6</div>
+      <div class="number-label">Clients to cover<br>your costs</div>
+    </div>
+    <div class="number-card c3">
+      <div class="number-val">2x</div>
+      <div class="number-label">Better conversion with<br>Hormozi offer</div>
+    </div>
+    <div class="number-card c4">
+      <div class="number-val">47k</div>
+      <div class="number-label">Pubs in the UK.<br>You need 6.</div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 16px; font-size: 14px; color: var(--muted); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">Revenue Progress</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="pb1" data-width="0"></div>
+  </div>
+  <div class="progress-label"><span>£0 MRR today</span><span>£330 target (6 clients)</span></div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="pb2" data-width="8" style="background: var(--blue);"></div>
+  </div>
+  <div class="progress-label"><span>4 emails sent</span><span>50/week target</span></div>
+</div>
+
+<hr class="divider">
+
+<!-- ACTIONS -->
+<div class="section reveal">
+  <div class="section-label">The Plan</div>
+  <div class="section-title">What to do.<br>In order.</div>
+
+  <div class="actions" id="actions">
+
+    <div class="action-item" onclick="toggleDone(this)">
+      <div class="action-check">✓</div>
+      <div>
+        <div class="action-title">Send the 4 Gmail drafts</div>
+        <div class="action-sub">Delete old ones. Review the 4 new ones. Hit send.</div>
+      </div>
+      <span class="action-priority priority-now">Tomorrow</span>
+    </div>
+
+    <div class="action-item" onclick="toggleDone(this)">
+      <div class="action-check">✓</div>
+      <div>
+        <div class="action-title">Change the offer on the website</div>
+        <div class="action-sub">Free setup. Pay after you see it work. £55/month. Cancel anytime.</div>
+      </div>
+      <span class="action-priority priority-now">Tomorrow</span>
+    </div>
+
+    <div class="action-item" onclick="toggleDone(this)">
+      <div class="action-check">✓</div>
+      <div>
+        <div class="action-title">Find 46 more verified East London pubs</div>
+        <div class="action-sub">Google Maps. Unanswered 1-star reviews. Real emails only.</div>
+      </div>
+      <span class="action-priority priority-week">This week</span>
+    </div>
+
+    <div class="action-item" onclick="toggleDone(this)">
+      <div class="action-check">✓</div>
+      <div>
+        <div class="action-title">Write one LinkedIn post</div>
+        <div class="action-sub">"Built an AI outreach agent in one week. Here's what happened." Raw and honest.</div>
+      </div>
+      <span class="action-priority priority-week">This week</span>
+    </div>
+
+    <div class="action-item" onclick="toggleDone(this)">
+      <div class="action-check">✓</div>
+      <div>
+        <div class="action-title">Add Stripe to /connect</div>
+        <div class="action-sub">So clients can pay without chasing. £55/month auto-billed.</div>
+      </div>
+      <span class="action-priority priority-week">This week</span>
+    </div>
+
+    <div class="action-item" onclick="toggleDone(this)">
+      <div class="action-check">✓</div>
+      <div>
+        <div class="action-title">GBP verification — chase it</div>
+        <div class="action-sub">Check status. This is the single biggest technical blocker.</div>
+      </div>
+      <span class="action-priority priority-week">This week</span>
+    </div>
+
+    <div class="action-item" onclick="toggleDone(this)">
+      <div class="action-check">✓</div>
+      <div>
+        <div class="action-title">Scale to 50 emails/week</div>
+        <div class="action-sub">Workflow is built. Just need verified data. 2 hours a week.</div>
+      </div>
+      <span class="action-priority priority-month">This month</span>
+    </div>
+
+    <div class="action-item" onclick="toggleDone(this)">
+      <div class="action-check">✓</div>
+      <div>
+        <div class="action-title">Get first paying client</div>
+        <div class="action-sub">One client. Prove the product works. Then scale.</div>
+      </div>
+      <span class="action-priority priority-month">This month</span>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- WHAT TO SAY -->
+<div class="section reveal">
+  <div class="section-label">Marketing & Messaging</div>
+  <div class="section-title">What to say.<br>Word for word.</div>
+
+  <div class="principles">
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">🌐</div>
+        <div class="principle-icon">💻</div>
+        <div class="principle-title">Website headline</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          <strong>Use this:</strong><br><br>
+          <em style="font-size:20px; color: var(--gold); line-height:1.5;">"Your Google reviews replied to.<br>In your voice. While you sleep."</em><br><br>
+          <strong>Subheadline:</strong><br>
+          <em style="color:#bbb;">"The moment a review lands, our AI drafts a reply that sounds exactly like you. One tap to approve. Done."</em><br><br>
+          <strong>Why it works:</strong> Dream outcome in the headline. No jargon. Speaks directly to a busy pub owner at midnight.
+        </div>
+        <span class="action-tag">→ Replace current homepage hero copy with this</span>
+      </div>
+    </div>
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">📧</div>
+        <div class="principle-icon">✉️</div>
+        <div class="principle-title">Cold email formula</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          <strong>4-line formula that works:</strong><br><br>
+          <em style="color:#bbb;">
+          Line 1: Name the specific pain (the actual review)<br>
+          Line 2: Cost of doing nothing<br>
+          Line 3: What we do in one sentence<br>
+          Line 4: One low-friction CTA<br>
+          </em><br>
+          <strong>Example:</strong><br>
+          <em style="color: var(--gold); font-size: 15px; line-height: 1.8;">
+          "Saw a 1-star review on The Crown and Shuttle sitting unanswered for 3 days.<br>
+          Every day it sits there, someone reads it and picks a different pub.<br>
+          We reply in your voice automatically — you just tap approve.<br>
+          Worth 15 minutes? 0-clicks.uk/call"
+          </em>
+        </div>
+        <span class="action-tag">→ Every email follows this structure. No exceptions.</span>
+      </div>
+    </div>
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">📞</div>
+        <div class="principle-icon">🎯</div>
+        <div class="principle-title">The 15-min demo call script</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          <strong>Don't pitch. Show.</strong><br><br>
+          Min 0–2: "Tell me about your busiest review period — when do most come in?"<br><br>
+          Min 2–5: Pull up their actual Google reviews live on screen. Find a recent one. Say: <em style="color: var(--gold)">"Watch this."</em><br><br>
+          Min 5–10: Run it through Zero Clicks live. Show the AI reply in their voice. Ask: <em style="color: var(--gold)">"Is that how you'd reply?"</em><br><br>
+          Min 10–13: If yes → "That happens automatically, the second every review lands. You just tap approve on Telegram."<br><br>
+          Min 13–15: "Want me to set it up today? Free for 14 days."<br><br>
+          <strong>Close rate: 50%+.</strong> The product sells itself when they see it work on their own pub.
+        </div>
+        <span class="action-tag">→ Never pitch features. Always demo on their actual reviews.</span>
+      </div>
+    </div>
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">💼</div>
+        <div class="principle-icon">🔥</div>
+        <div class="principle-title">Dream 100 — warm before you pitch</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          Cold email converts at 1–2%.<br>
+          Warm outreach converts at 20%+.<br><br>
+          <strong>The move:</strong><br>
+          Week 1 — Find 20 target pubs. Comment genuinely on their Google responses.<br>
+          Week 2 — Follow their socials. Engage. Become a face.<br>
+          Week 3 — Now send the email. You're not a stranger.<br><br>
+          <em style="color: var(--gold)">"Hi, I've been following The Crown and Shuttle — love what you're doing with the courtyard. Noticed one review slipped through unanswered..."</em><br><br>
+          That email gets opened. Gets replied to. Gets booked.
+        </div>
+        <span class="action-tag">→ Pick 20 pubs this week. Warm them for 2 weeks first.</span>
+      </div>
+    </div>
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">📱</div>
+        <div class="principle-icon">✍️</div>
+        <div class="principle-title">LinkedIn content that converts</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          Hormozi says: document the journey. Don't create content — capture reality.<br><br>
+          <strong>5 posts that will work for you:</strong><br><br>
+          1. <em style="color: var(--gold)">"Built an AI agent that writes pub reviews in their voice. Here's what happened when I tested it on a real East London pub."</em><br><br>
+          2. <em style="color: var(--gold)">"Most pubs lose customers to unanswered reviews and don't even know it. Here's the data."</em><br><br>
+          3. <em style="color: var(--gold)">"Sent 4 cold emails to London pubs last night. Here's what the AI wrote — and what I learned."</em><br><br>
+          4. <em style="color: var(--gold)">"Building Zero Clicks with dyslexia, a pacemaker referral, and a Batman wallpaper. An honest update."</em><br><br>
+          5. Before/after: screenshot of unanswered review → screenshot of AI reply generated<br><br>
+          <strong>Post 4 is your best one.</strong> Real story. Real person. People buy from people.
+        </div>
+        <span class="action-tag">→ One post per week. Raw, honest, specific.</span>
+      </div>
+    </div>
+
+    <div class="principle" onclick="toggle(this)">
+      <div class="principle-header">
+        <div class="principle-num">⚡</div>
+        <div class="principle-icon">🚀</div>
+        <div class="principle-title">Product quality — the one fix</div>
+        <div class="principle-arrow">›</div>
+      </div>
+      <div class="principle-body">
+        <div class="principle-desc">
+          Hormozi's rule: <strong>speed of result = perceived value.</strong><br><br>
+          Right now a pub signs up → waits for GBP verification → days pass → they forget you exist.<br><br>
+          <strong>Fix: Give them a result on day one.</strong><br><br>
+          The moment they sign up via /connect — send them an AI reply for one of their existing reviews. Right now. In their inbox. Before they've paid.<br><br>
+          <em style="color: var(--gold)">"Here's what our AI would have replied to your last 3 reviews. Does this sound like you?"</em><br><br>
+          That email gets a reply. That reply becomes a client.
+        </div>
+        <span class="action-tag">→ Build a "welcome reply sample" email into the /connect flow.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- BOTTOM -->
+<div class="bottom reveal">
+  <h2>You need<br><span>6 clients.</span></h2>
+  <p>47,000 pubs in the UK. This is not a market problem. It's a sales problem. And sales is solvable.</p>
+  <button class="btn" onclick="window.location.href='http://localhost:5678'">Open n8n →</button>
+</div>
+
+<script>
+  // Toggle principles
+  function toggle(el) {
+    el.classList.toggle('open');
+  }
+
+  // Toggle done actions
+  function toggleDone(el) {
+    el.classList.toggle('done');
+    const check = el.querySelector('.action-check');
+    check.textContent = el.classList.contains('done') ? '✓' : '✓';
+    updateProgress();
+  }
+
+  // Update progress
+  function updateProgress() {
+    const items = document.querySelectorAll('.action-item');
+    const done = document.querySelectorAll('.action-item.done').length;
+    const pct = (done / items.length) * 100;
+    document.getElementById('pb1').style.width = pct + '%';
+  }
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // Animate progress bars when visible
+  const pbObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const bar = entry.target;
+        const w = bar.dataset.width || 0;
+        setTimeout(() => bar.style.width = w + '%', 300);
+        pbObs.unobserve(bar);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.progress-bar').forEach(b => pbObs.observe(b));
+</script>
+
+</body>
+</html>

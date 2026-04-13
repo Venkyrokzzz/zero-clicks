@@ -39,7 +39,7 @@ export default function Pricing() {
           <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: "6px", padding: "8px 14px" }}>
             <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", flexShrink: 0, boxShadow: "0 0 6px #ef4444" }} />
             <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>
-              <span style={{ color: "#ef4444", fontWeight: 600 }}>90 min/day × 250 days = £9,375/year lost to admin.</span>{" "}We fix it from £499.
+              <span style={{ color: "#ef4444", fontWeight: 600 }}>90 min/day × 250 days = £9,375/year lost to unanswered reviews.</span>{" "}We fix it. Free trial, then £55/month.
             </p>
           </div>
         </motion.div>
@@ -164,9 +164,6 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
           </div>
           <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontFamily: "var(--font-body)", margin: "0 0 2px" }}>
             {timeline}
-          </p>
-          <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontFamily: "var(--font-body)", margin: 0, opacity: 0.6 }}>
-            then £{name === "Full Autopilot" ? "75" : "50"}/month
           </p>
           {/* Value stack savings line — Pro only */}
           {valueStack && (
