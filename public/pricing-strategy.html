@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero Clicks — Pricing Strategy</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Lexend+Mega:wght@700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06060a; --card: #0e0e14; --card2: #111118; --border: #1a1a24;
+    --text: #eeeef0; --muted: #52526a; --muted2: #888;
+    --green: #00e676; --red: #ff3b3b; --gold: #ffd600;
+    --blue: #448aff; --purple: #c158dc; --orange: #ff6d00;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Lexend', sans-serif; font-size: 16px; line-height: 1.7; }
+
+  /* LAYOUT */
+  .hero { padding: 80px 24px 60px; text-align: center; max-width: 800px; margin: 0 auto; }
+  .hero h1 { font-family: 'Lexend Mega', sans-serif; font-size: clamp(30px, 5vw, 56px); font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 16px; }
+  .hero h1 span { color: var(--gold); }
+  .hero p { color: var(--muted2); font-size: 16px; max-width: 560px; margin: 0 auto; }
+  .section { padding: 64px 24px 0; max-width: 1020px; margin: 0 auto; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .section-title { font-family: 'Lexend Mega', sans-serif; font-size: clamp(20px, 3.5vw, 32px); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 28px; line-height: 1.2; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 64px 0 0; }
+
+  /* ALERTS */
+  .alert { border-radius: 12px; padding: 16px 20px; font-size: 14px; line-height: 1.7; margin-bottom: 24px; }
+  .alert.warn { background: rgba(255,214,0,0.05); border: 1px solid rgba(255,214,0,0.2); color: #ccc; }
+  .alert.warn strong { color: var(--gold); }
+  .alert.info { background: rgba(68,138,255,0.05); border: 1px solid rgba(68,138,255,0.2); color: #ccc; }
+  .alert.info strong { color: var(--blue); }
+  .alert.green { background: rgba(0,230,118,0.05); border: 1px solid rgba(0,230,118,0.2); color: #ccc; }
+  .alert.green strong { color: var(--green); }
+
+  /* TABLES */
+  .tbl-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); min-width: 600px; }
+  thead th { padding: 12px 14px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.015); }
+  thead th.r { text-align: right; }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; color: #bbb; vertical-align: top; }
+  tbody td.r { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  tbody td.bold { font-weight: 700; color: var(--text); font-size: 14px; }
+  tbody tr:last-child td { border-bottom: none; }
+  .pos { color: var(--green) !important; font-weight: 700; }
+  .neg { color: var(--red) !important; font-weight: 700; }
+  .warn-c { color: var(--gold) !important; font-weight: 600; }
+  .hl { background: rgba(0,230,118,0.03); }
+  .hl td { border-top: 1px solid rgba(0,230,118,0.12) !important; }
+  .hl2 { background: rgba(255,214,0,0.03); }
+  .hl2 td { border-top: 1px solid rgba(255,214,0,0.12) !important; }
+
+  /* PUB CARDS */
+  .pub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  @media (max-width: 680px) { .pub-grid { grid-template-columns: 1fr; } }
+  .pub-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .pub-card-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .pub-name { font-size: 15px; font-weight: 700; }
+  .pub-type-tag { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .tag-ignorer { background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.25); color: var(--red); }
+  .tag-manual { background: rgba(68,138,255,0.1); border: 1px solid rgba(68,138,255,0.25); color: var(--blue); }
+  .tag-rare { background: rgba(255,109,0,0.1); border: 1px solid rgba(255,109,0,0.25); color: var(--orange); }
+  .tag-founder { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.25); color: var(--green); }
+  .pub-card-body { padding: 16px 20px; }
+  .pub-detail { font-size: 13px; color: var(--muted2); margin-bottom: 8px; line-height: 1.6; }
+  .pub-detail strong { color: var(--text); }
+  .pub-angle { margin-top: 12px; padding: 12px 14px; background: rgba(255,214,0,0.05); border: 1px solid rgba(255,214,0,0.12); border-radius: 10px; font-size: 13px; color: #ccc; line-height: 1.6; }
+  .pub-angle-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); margin-bottom: 5px; }
+  .pub-price-rec { margin-top: 12px; padding: 12px 14px; background: rgba(0,230,118,0.04); border: 1px solid rgba(0,230,118,0.12); border-radius: 10px; font-size: 13px; color: #ccc; }
+  .pub-price-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); margin-bottom: 5px; }
+
+  /* PRICING TIER CARDS */
+  .tier-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  @media (max-width: 720px) { .tier-grid { grid-template-columns: 1fr; } }
+  .tier-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; position: relative; }
+  .tier-card.featured { border-color: rgba(255,214,0,0.35); background: linear-gradient(160deg, rgba(255,214,0,0.04) 0%, var(--card) 60%); }
+  .tier-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; padding: 4px 14px; border-radius: 100px; white-space: nowrap; }
+  .tier-name { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 10px; }
+  .tier-price { font-family: 'Lexend Mega', sans-serif; font-size: 38px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+  .tier-setup { font-size: 13px; color: var(--muted2); margin-bottom: 18px; }
+  .tier-item { display: flex; gap: 8px; font-size: 13px; color: #bbb; margin-bottom: 8px; line-height: 1.5; }
+  .tier-item::before { content: '—'; color: var(--border); flex-shrink: 0; margin-top: 1px; }
+  .tier-item.yes::before { content: '✓'; color: var(--green); }
+  .tier-item.no::before { content: '✗'; color: var(--red); }
+  .tier-cta { margin-top: 20px; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; text-align: center; display: block; }
+  .cta-gold { background: var(--gold); color: #000; }
+  .cta-outline { border: 1px solid var(--border); color: var(--muted2); }
+
+  /* STRATEGY CARDS */
+  .strategy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  @media (max-width: 680px) { .strategy-grid { grid-template-columns: 1fr; } }
+  .strategy-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+  .strategy-icon { font-size: 22px; margin-bottom: 10px; }
+  .strategy-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .strategy-body { font-size: 13px; color: var(--muted2); line-height: 1.7; }
+  .strategy-example { margin-top: 10px; padding: 10px 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 12px; color: #999; font-style: italic; line-height: 1.6; }
+
+  /* SCENARIO OUTCOME ROWS */
+  .outcome-block { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 14px; }
+  .outcome-header { display: grid; grid-template-columns: 220px 1fr 1fr 1fr; padding: 10px 18px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); gap: 12px; }
+  .outcome-row { display: grid; grid-template-columns: 220px 1fr 1fr 1fr; padding: 13px 18px; border-bottom: 1px solid var(--border); font-size: 13px; gap: 12px; align-items: start; }
+  .outcome-row:last-child { border-bottom: none; }
+  .outcome-name { font-weight: 700; color: var(--text); font-size: 14px; }
+  .outcome-sub { font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+  .outcome-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; }
+  @media (max-width: 700px) { .outcome-header, .outcome-row { grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; } }
+
+  /* PAIN CALC */
+  .pain-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+  @media (max-width: 720px) { .pain-grid { grid-template-columns: 1fr 1fr; } }
+  .pain-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 16px; text-align: center; }
+  .pain-val { font-family: 'Lexend Mega', sans-serif; font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 5px; }
+  .pain-label { font-size: 11px; color: var(--muted2); line-height: 1.4; }
+
+  /* OBJECTION CARDS */
+  .objection-block { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 14px; }
+  .objection-q { font-size: 15px; font-weight: 700; color: var(--red); margin-bottom: 10px; }
+  .objection-a { font-size: 14px; color: #bbb; line-height: 1.7; }
+  .objection-a strong { color: var(--text); }
+  .objection-price { display: inline-block; padding: 3px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.2); color: var(--green); margin: 0 2px; }
+
+  /* FINAL */
+  .final-box { background: var(--card); border: 1px solid rgba(0,230,118,0.2); border-radius: 20px; padding: 40px; text-align: center; }
+  .final-box h2 { font-family: 'Lexend Mega', sans-serif; font-size: clamp(24px, 4vw, 38px); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .final-box h2 span { color: var(--green); }
+  .final-box p { color: var(--muted2); font-size: 15px; max-width: 520px; margin: 0 auto 24px; line-height: 1.7; }
+  .pill { display: inline-block; padding: 9px 18px; border-radius: 100px; font-size: 13px; font-weight: 700; margin: 5px; }
+  .pill-g { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3); color: var(--green); }
+  .pill-y { background: rgba(255,214,0,0.1); border: 1px solid rgba(255,214,0,0.3); color: var(--gold); }
+  .pill-r { background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.3); color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>4 real pubs.<br><span>Every scenario.</span><br>Every price play.</h1>
+  <p>Based on your actual East London outreach batch — Crown & Shuttle, Old Blue Last, Red Lion, Stag's Head. What each one looks like, what to charge, how to position it.</p>
+</div>
+
+<hr>
+
+<!-- SECTION 1: THE 4 REAL PROSPECTS -->
+<div class="section">
+  <div class="section-label">Section 1 — Your Real Prospects</div>
+  <div class="section-title">The 4 pubs. The situation. The angle.</div>
+
+  <div class="pub-grid">
+
+    <!-- PUB 1 -->
+    <div class="pub-card">
+      <div class="pub-card-header">
+        <div>
+          <div class="pub-name">The Crown and Shuttle</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px;">info@crownandshuttle.com · Shoreditch</div>
+        </div>
+        <span class="pub-type-tag tag-ignorer">The Ignorer</span>
+      </div>
+      <div class="pub-card-body">
+        <div class="pub-detail"><strong>Situation:</strong> Unanswered 1-star review sitting live on Google. Every person who searches them sees it. No reply = no defence = losing bookings.</div>
+        <div class="pub-detail"><strong>Their mindset:</strong> "We'll get to it" — they never do. Time-poor, busy, embarrassed but not enough to act.</div>
+        <div class="pub-angle">
+          <div class="pub-angle-label">What to say</div>
+          "You've got a 1-star review with no reply — every potential customer sees that and walks away. We fix it in 24 hours and make sure it never happens again."
+        </div>
+        <div class="pub-price-rec">
+          <div class="pub-price-label">Pricing play</div>
+          <strong>Standard rate.</strong> £350 setup + £55/month. Pain is obvious and visible. No discount needed — they already feel it.
+        </div>
+      </div>
+    </div>
+
+    <!-- PUB 2 -->
+    <div class="pub-card">
+      <div class="pub-card-header">
+        <div>
+          <div class="pub-name">The Old Blue Last</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px;">managers@theoldbluelast.com · Shoreditch</div>
+        </div>
+        <span class="pub-type-tag tag-ignorer">The Ignorer</span>
+      </div>
+      <div class="pub-card-body">
+        <div class="pub-detail"><strong>Situation:</strong> Same — unanswered 1-star review. Music venue / pub. Reputation matters to their crowd. Young audience checks Google before every visit.</div>
+        <div class="pub-detail"><strong>Their mindset:</strong> Managers' email suggests a team — multiple people, no one owns it. Classic "someone else's job" problem.</div>
+        <div class="pub-angle">
+          <div class="pub-angle-label">What to say</div>
+          "Nobody in your team is responsible for reviews — so nothing gets done. We take that off everyone's plate permanently for £55/month."
+        </div>
+        <div class="pub-price-rec">
+          <div class="pub-price-label">Pricing play</div>
+          <strong>Standard rate.</strong> £350 + £55/mo. Possibly upsell to Full Autopilot (inbox too) given team size. More channels = more value.
+        </div>
+      </div>
+    </div>
+
+    <!-- PUB 3 -->
+    <div class="pub-card">
+      <div class="pub-card-header">
+        <div>
+          <div class="pub-name">Red Lion Hoxton</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px;">redlionenquieries@gmail.com · Hoxton</div>
+        </div>
+        <span class="pub-type-tag tag-ignorer">The Ignorer</span>
+      </div>
+      <div class="pub-card-body">
+        <div class="pub-detail"><strong>Situation:</strong> Unanswered 1-star review. Gmail address = likely solo owner or small team. More personal. Less corporate.</div>
+        <div class="pub-detail"><strong>Their mindset:</strong> Overwhelmed owner wearing 10 hats. Reviews are the last thing on their mind until they cost them a booking.</div>
+        <div class="pub-angle">
+          <div class="pub-angle-label">What to say</div>
+          "You're running the whole pub — reviews are the last thing you have time for. We handle it so you don't have to think about it again."
+        </div>
+        <div class="pub-price-rec">
+          <div class="pub-price-label">Pricing play</div>
+          <strong>Softest sell — standard rate.</strong> £350 + £55/mo. Could offer a "Founder Rate" (see below) to get this first solo owner across the line as a testimonial case.
+        </div>
+      </div>
+    </div>
+
+    <!-- PUB 4 -->
+    <div class="pub-card">
+      <div class="pub-card-header">
+        <div>
+          <div class="pub-name">The Stag's Head Hoxton</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px;">stagsheadhoxton@outlook.com · Hoxton</div>
+        </div>
+        <span class="pub-type-tag tag-manual">The Manual Replier</span>
+      </div>
+      <div class="pub-card-body">
+        <div class="pub-detail"><strong>Situation:</strong> Already replies to reviews manually. Not the pain angle. Different angle: they value reviews enough to act — now show them they're wasting time doing it manually.</div>
+        <div class="pub-detail"><strong>Their mindset:</strong> "I do this already — why do I need you?" Must reframe from "you need help" to "you'd do this better, faster, at scale."</div>
+        <div class="pub-angle">
+          <div class="pub-angle-label">What to say</div>
+          "You already reply to reviews — which means you know they matter. We do it instantly, in your exact voice, the second a review lands. You get time back. Quality goes up."
+        </div>
+        <div class="pub-price-rec">
+          <div class="pub-price-label">Pricing play</div>
+          <strong>Toughest sell — earn it.</strong> Offer a free 7-day live demo — let them see their own voice come back in AI replies before paying £350. Once they see it, closing is easy.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr>
+
+<!-- SECTION 2: SCENARIO TABLES PER PROSPECT -->
+<div class="section">
+  <div class="section-label">Section 2 — Scenarios Per Prospect</div>
+  <div class="section-title">What plays out. What you earn. What you risk.</div>
+
+  <div class="alert info">
+    <strong>Each prospect has 3 scenarios:</strong> They sign up and stay, they sign up and leave early, they don't respond. See the numbers for each.
+  </div>
+
+  <!-- THE IGNORERS — CROWN, OLD BLUE LAST, RED LION -->
+  <div style="font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px;">Crown & Shuttle / Old Blue Last / Red Lion Hoxton (same type — Ignorers)</div>
+
+  <div class="outcome-block">
+    <div class="outcome-header">
+      <span>Scenario</span><span>What happens</span><span>You earn</span><span>Verdict</span>
+    </div>
+    <div class="outcome-row hl">
+      <div><div class="outcome-name">✅ They sign up, stay 6+ months</div><div class="outcome-sub">Best case — standard flow</div></div>
+      <div style="font-size:13px;color:#bbb;line-height:1.6;">Pays £350 setup. Pays £55/mo. Stays because reviews go up and they notice. Zero effort from them.</div>
+      <div><span class="outcome-val pos">£392</span><span style="font-size:11px;color:var(--muted);display:block;margin-top:3px;">£680 revenue − £288 costs (£60+£72+£156)</span></div>
+      <div style="color:var(--green);font-weight:700;font-size:13px;">Strong win. Target this.</div>
+    </div>
+    <div class="outcome-row">
+      <div><div class="outcome-name">⚠️ Signs up, cancels month 2</div><div class="outcome-sub">Early churn</div></div>
+      <div style="font-size:13px;color:#bbb;line-height:1.6;">Pays £350 setup + 2 months (£110). Uses 30-day guarantee to exit.</div>
+      <div><span class="outcome-val pos">£324</span><span style="font-size:11px;color:var(--muted);display:block;margin-top:3px;">£460 in − £136 costs (£60+£24+£52)</span></div>
+      <div style="color:var(--gold);font-weight:700;font-size:13px;">Still profitable. Setup fee saved you.</div>
+    </div>
+    <div class="outcome-row">
+      <div><div class="outcome-name">❌ No reply to email</div><div class="outcome-sub">Ghost</div></div>
+      <div style="font-size:13px;color:#bbb;line-height:1.6;">Doesn't respond. Day 4 follow-up fires automatically via n8n. You spend 0 extra time.</div>
+      <div><span class="outcome-val" style="color:var(--muted)">£0</span><span style="font-size:11px;color:var(--muted);display:block;margin-top:3px;">Zero cost to you — automated</span></div>
+      <div style="color:var(--muted);font-size:13px;">Move on. Pipeline is your fix.</div>
+    </div>
+    <div class="outcome-row">
+      <div><div class="outcome-name">❌ Demands full refund incl. setup</div><div class="outcome-sub">Worst case</div></div>
+      <div style="font-size:13px;color:#bbb;line-height:1.6;">Refunds £350 + £55. You already spent £60 time + £38 costs. T&Cs prevent this.</div>
+      <div><span class="outcome-val neg">−£98</span><span style="font-size:11px;color:var(--muted);display:block;margin-top:3px;">Only if no T&Cs. With T&Cs: +£290.</span></div>
+      <div style="color:var(--red);font-weight:700;font-size:13px;">Lock in T&Cs. Setup non-refundable.</div>
+    </div>
+  </div>
+
+  <!-- THE STAG'S HEAD -->
+  <div style="font-size: 12px; font-weight: 700; color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase; margin: 28px 0 12px;">Stag's Head Hoxton (Manual Replier — different playbook)</div>
+
+  <div class="outcome-block">
+    <div class="outcome-header">
+      <span>Scenario</span><span>What happens</span><span>You earn</span><span>Verdict</span>
+    </div>
+    <div class="outcome-row hl">
+      <div><div class="outcome-name">✅ 7-day demo → signs up</div><div class="outcome-sub">Recommended approach</div></div>
+      <div style="font-size:13px;color:#bbb;line-height:1.6;">Show them 7 days of AI replies in their own voice. They're impressed. Closingnow easy. Pays £350 + £55/mo.</div>
+      <div><span class="outcome-val pos">£290+</span><span style="font-size:11px;color:var(--muted);display:block;margin-top:3px;">From month 1 onwards, same as above</span></div>
+      <div style="color:var(--green);font-weight:700;font-size:13px;">Highest conversion path.</div>
+    </div>
+    <div class="outcome-row">
+      <div><div class="outcome-name">⚠️ Likes demo, haggles on price</div><div class="outcome-sub">Common with manual repliers</div></div>
+      <div style="font-size:13px;color:#bbb;line-height:1.6;">They say "£350 is a lot". Offer: waive setup fee for 3-month commitment upfront. £55×3 = £165 paid today.</div>
+      <div><span class="outcome-val warn-c">£23/mo</span><span style="font-size:11px;color:var(--muted);display:block;margin-top:3px;">(£165 − £60 time − £36 variable) ÷ 3</span></div>
+      <div style="color:var(--gold);font-size:13px;">Only worth it for a reference client / testimonial.</div>
+    </div>
+    <div class="outcome-row">
+      <div><div class="outcome-name">⚠️ Demo but doesn't convert</div><div class="outcome-sub">Demo didn't land</div></div>
+      <div style="font-size:13px;color:#bbb;line-height:1.6;">Ran 7-day demo, didn't sign up. You spent ~1hr setup time for the demo.</div>
+      <div><span class="outcome-val neg">−£20</span><span style="font-size:11px;color:var(--muted);display:block;margin-top:3px;">1hr your time. No cash cost.</span></div>
+      <div style="color:var(--muted);font-size:13px;">Learn and move on. Improve demo.</div>
+    </div>
+    <div class="outcome-row">
+      <div><div class="outcome-name">❌ "We prefer to do it ourselves"</div><div class="outcome-sub">Hard no</div></div>
+      <div style="font-size:13px;color:#bbb;line-height:1.6;">They're proud of doing it. Won't pay. Ask if you can use them for a case study in 6 months if they change their mind.</div>
+      <div><span class="outcome-val" style="color:var(--muted)">£0</span><span style="font-size:11px;color:var(--muted);display:block;margin-top:3px;">Zero cost — just time on the email</span></div>
+      <div style="color:var(--muted);font-size:13px;">Low priority. Focus on Ignorers.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- SECTION 3: THE PAIN NUMBERS — WHAT NOT REPLYING COSTS THEM -->
+<div class="section">
+  <div class="section-label">Section 3 — The Pain Numbers</div>
+  <div class="section-title">What ignoring reviews costs them — use these in your pitch</div>
+
+  <div class="alert warn">
+    <strong>Strategic pricing insight:</strong> Your £55/month is not priced against what it costs you — it's priced against what NOT having it costs them. Show them the loss first. Then your price feels like nothing.
+  </div>
+
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-val" style="color:var(--red);">57%</div>
+      <div class="pain-label">of customers say they won't visit a business with unanswered negative reviews</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-val" style="color:var(--gold);">£45</div>
+      <div class="pain-label">average spend per table in an East London pub. One lost booking = £45+</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-val" style="color:var(--orange);">2–3</div>
+      <div class="pain-label">tables lost per week to an unanswered bad review = £90–£135/week gone</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-val" style="color:var(--red);">£4,680</div>
+      <div class="pain-label">lost per year — 2 tables/week × £45 × 52 weeks. Your £55/mo fixes it for £660/year</div>
+    </div>
+  </div>
+
+  <!-- HOW TO USE THIS IN PITCH -->
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>The question</th>
+          <th>What you say</th>
+          <th>The anchor</th>
+          <th class="r">Closes at</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="bold">"Is it worth it?"</td>
+          <td style="color:#bbb;font-size:13px;line-height:1.6;">"One table you'd have lost to that unanswered review = £45. We cost less than that per month."</td>
+          <td style="color:var(--gold);font-size:13px;">£45 table spend vs £55/mo</td>
+          <td class="r pos">Easy</td>
+        </tr>
+        <tr>
+          <td class="bold">"Why £350 upfront?"</td>
+          <td style="color:#bbb;font-size:13px;line-height:1.6;">"That covers 3 hours of technical setup, connecting your Google account, and training it to sound like you — not a template. That's a one-time cost."</td>
+          <td style="color:var(--gold);font-size:13px;">Agency charges £500 for setup. You don't.</td>
+          <td class="r pos">Reasonable</td>
+        </tr>
+        <tr>
+          <td class="bold">"Can I try it free?"</td>
+          <td style="color:#bbb;font-size:13px;line-height:1.6;">"We don't do free trials — but we do a 30-day money-back guarantee on the monthly fee. If it doesn't work, you get £55 back. The setup covers our time."</td>
+          <td style="color:var(--gold);font-size:13px;">Risk reversal without giving away value</td>
+          <td class="r warn-c">Usually works</td>
+        </tr>
+        <tr>
+          <td class="bold">"I can do it myself"</td>
+          <td style="color:#bbb;font-size:13px;line-height:1.6;">"You could. But it needs to be done in 24 hours of the review landing — during service, evenings, weekends. We do it instantly every time."</td>
+          <td style="color:var(--gold);font-size:13px;">Speed + consistency, not capability</td>
+          <td class="r warn-c">Stag's Head play</td>
+        </tr>
+        <tr>
+          <td class="bold">"I'll think about it"</td>
+          <td style="color:#bbb;font-size:13px;line-height:1.6;">"Totally fine — we only take 5 new pubs per month so we can set each one up properly. I've got 2 spots left this month. After that it's next month."</td>
+          <td style="color:var(--gold);font-size:13px;">Scarcity closes fence-sitters</td>
+          <td class="r pos">Closes fast</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<!-- SECTION 4: THE PRICING TIERS -->
+<div class="section">
+  <div class="section-label">Section 4 — Strategic Pricing Tiers</div>
+  <div class="section-title">Three tiers. One is the obvious choice.</div>
+
+  <div class="alert info" style="margin-bottom: 28px;">
+    <strong>The decoy effect (Hormozi / behavioural pricing):</strong> Always show 3 tiers. The bottom makes the middle look cheap. The top makes the middle look sensible. Nobody picks the bottom. Most pick the middle.
+  </div>
+
+  <div class="tier-grid">
+
+    <!-- STARTER -->
+    <div class="tier-card">
+      <div class="tier-name">Starter</div>
+      <div class="tier-price" style="color:var(--muted2);">£35</div>
+      <div class="tier-setup">per month — £0 setup (limited)</div>
+      <div class="tier-item no">No custom voice training</div>
+      <div class="tier-item no">Template replies only</div>
+      <div class="tier-item yes">Google reviews covered</div>
+      <div class="tier-item no">No Telegram alerts</div>
+      <div class="tier-item no">No onboarding call</div>
+      <div class="tier-item">Max 20 reviews/month</div>
+      <div class="tier-cta cta-outline">Enquire</div>
+    </div>
+
+    <!-- STANDARD — FEATURED -->
+    <div class="tier-card featured">
+      <div class="tier-badge">MOST POPULAR</div>
+      <div class="tier-name" style="color:var(--gold);">Reputation Manager</div>
+      <div class="tier-price" style="color:var(--gold);">£55</div>
+      <div class="tier-setup">per month — £350 setup (one-time)</div>
+      <div class="tier-item yes">AI trained in your voice</div>
+      <div class="tier-item yes">All Google reviews covered</div>
+      <div class="tier-item yes">Instant alerts via Telegram</div>
+      <div class="tier-item yes">Onboarding call included</div>
+      <div class="tier-item yes">30-day money-back guarantee</div>
+      <div class="tier-item yes">Unlimited reviews</div>
+      <div class="tier-cta cta-gold">Get started</div>
+    </div>
+
+    <!-- FULL AUTOPILOT -->
+    <div class="tier-card">
+      <div class="tier-name">Full Autopilot</div>
+      <div class="tier-price" style="color:var(--purple);">£95</div>
+      <div class="tier-setup">per month — £350 setup (one-time)</div>
+      <div class="tier-item yes">Everything in Reputation Manager</div>
+      <div class="tier-item yes">Email inbox management</div>
+      <div class="tier-item yes">Booking enquiry replies</div>
+      <div class="tier-item yes">WhatsApp monitoring (add-on)</div>
+      <div class="tier-item yes">Monthly report card</div>
+      <div class="tier-item yes">Priority support</div>
+      <div class="tier-cta cta-outline">Book a call</div>
+    </div>
+
+  </div>
+
+  <div class="alert warn">
+    <strong>Why this works:</strong> Starter exists to make £55 look like a no-brainer. Full Autopilot exists to make the person who wants "more" spend £95 instead of asking for custom. You steer everyone to £55 — that's your sweet spot. Upgrade to £95 naturally over time.
+  </div>
+</div>
+
+<hr>
+
+<!-- SECTION 5: STRATEGIC PRICING TACTICS -->
+<div class="section">
+  <div class="section-label">Section 5 — The 6 Pricing Plays</div>
+  <div class="section-title">How to apply each one to your 4 pubs</div>
+
+  <div class="strategy-grid">
+
+    <div class="strategy-card">
+      <div class="strategy-icon">⚓</div>
+      <div class="strategy-title">1. Anchoring</div>
+      <div class="strategy-body">Show a bigger number first so yours feels small. Lead with what an agency charges. Then reveal yours.</div>
+      <div class="strategy-example">"Most reputation management agencies charge £400–£800/month. We do it for £55 because we built our own AI — not a reseller."</div>
+    </div>
+
+    <div class="strategy-card">
+      <div class="strategy-icon">🔒</div>
+      <div class="strategy-title">2. Founder Rate Lock-in</div>
+      <div class="strategy-body">First 10 clients get a special rate — £45/month (locked forever, never increases). Creates urgency. Creates loyalty. Creates referrals.</div>
+      <div class="strategy-example">"You'd be one of our first 10 clients — so you get our Founder Rate: £45/month instead of £55, locked in for life even as we grow."</div>
+    </div>
+
+    <div class="strategy-card">
+      <div class="strategy-icon">📅</div>
+      <div class="strategy-title">3. Annual Commitment Discount</div>
+      <div class="strategy-body">Offer a 2-month discount for paying 12 months upfront. You get cash. They get saving. You reduce churn to near zero.</div>
+      <div class="strategy-example">"Pay for 10 months, get 12 — that's £550/year instead of £660. Save £110 and lock in today's rate."</div>
+    </div>
+
+    <div class="strategy-card">
+      <div class="strategy-icon">🎯</div>
+      <div class="strategy-title">4. Pain Pricing</div>
+      <div class="strategy-body">Calculate what it costs them NOT to have you. Show that number first. Then your price is tiny by comparison.</div>
+      <div class="strategy-example">"2 lost tables a week × £45 spend = £90/week gone. That's £4,680 a year. We fix it for £55 a month."</div>
+    </div>
+
+    <div class="strategy-card">
+      <div class="strategy-icon">⏰</div>
+      <div class="strategy-title">5. Scarcity + Urgency</div>
+      <div class="strategy-body">5 onboarding spots per month. Real (you can't set up 20 clients well in a month). Creates decision urgency without being fake.</div>
+      <div class="strategy-example">"We only onboard 5 pubs a month so setup quality stays high. I've got 2 spots left in April — after that it's May."</div>
+    </div>
+
+    <div class="strategy-card">
+      <div class="strategy-icon">🔁</div>
+      <div class="strategy-title">6. Risk Reversal</div>
+      <div class="strategy-body">30-day money-back on the monthly fee. Setup fee is the work already done — non-refundable. Removes objection risk while protecting your income.</div>
+      <div class="strategy-example">"If you're not happy after 30 days I'll refund the £55 — no questions. The setup fee covers the 3 hours I've already spent building it for you."</div>
+    </div>
+
+  </div>
+</div>
+
+<hr>
+
+<!-- SECTION 6: WHICH PLAY FOR WHICH PUB -->
+<div class="section">
+  <div class="section-label">Section 6 — Match the Play to the Pub</div>
+  <div class="section-title">Exactly which pricing tactic to use on each of your 4</div>
+
+  <div class="tbl-wrap" style="margin-bottom: 40px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Pub</th>
+          <th>Type</th>
+          <th>Primary play</th>
+          <th>Backup play</th>
+          <th>What to lead with</th>
+          <th class="r">Target price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td class="bold">Crown & Shuttle</td>
+          <td><span style="color:var(--red);font-size:12px;font-weight:700;">Ignorer</span></td>
+          <td style="color:var(--gold);font-size:13px;font-weight:600;">Pain pricing</td>
+          <td style="font-size:13px;color:#bbb;">Risk reversal</td>
+          <td style="font-size:13px;color:#bbb;line-height:1.6;">"You have an unanswered 1-star — here's what that's costing you per month"</td>
+          <td class="r warn-c">£350 + £55/mo</td>
+        </tr>
+        <tr>
+          <td class="bold">Old Blue Last</td>
+          <td><span style="color:var(--red);font-size:12px;font-weight:700;">Ignorer</span></td>
+          <td style="color:var(--gold);font-size:13px;font-weight:600;">Anchoring + Scarcity</td>
+          <td style="font-size:13px;color:#bbb;">Full Autopilot upsell</td>
+          <td style="font-size:13px;color:#bbb;line-height:1.6;">"Agencies charge £400+/mo for this. We do it for £55. And I've got 2 spots left in April."</td>
+          <td class="r warn-c">£350 + £55/mo → upsell £95</td>
+        </tr>
+        <tr>
+          <td class="bold">Red Lion Hoxton</td>
+          <td><span style="color:var(--red);font-size:12px;font-weight:700;">Ignorer</span></td>
+          <td style="color:var(--green);font-size:13px;font-weight:600;">Founder Rate</td>
+          <td style="font-size:13px;color:#bbb;">Pain pricing</td>
+          <td style="font-size:13px;color:#bbb;line-height:1.6;">"You're running the whole place — we'll be one of the first pubs so you get the Founder Rate: £45/mo locked forever"</td>
+          <td class="r pos">£350 + £45/mo (founder)</td>
+        </tr>
+        <tr class="hl2">
+          <td class="bold">Stag's Head</td>
+          <td><span style="color:var(--blue);font-size:12px;font-weight:700;">Manual Replier</span></td>
+          <td style="color:var(--blue);font-size:13px;font-weight:600;">7-day live demo first</td>
+          <td style="font-size:13px;color:#bbb;">Annual commitment deal</td>
+          <td style="font-size:13px;color:#bbb;line-height:1.6;">"You already do this — let me run it live for 7 days in your exact voice so you can see if it's better than what you write yourself"</td>
+          <td class="r" style="color:var(--blue);">Demo → £350 + £55/mo</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<!-- SECTION 7: FULL YEAR SCENARIO WITH STRATEGIC PRICING -->
+<div class="section">
+  <div class="section-label">Section 7 — What Strategic Pricing Does to the Numbers</div>
+  <div class="section-title">Standard rate vs Founder Rate vs Annual — side by side</div>
+
+  <div class="tbl-wrap" style="margin-bottom: 16px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Pricing model used</th>
+          <th class="r">Setup</th>
+          <th class="r">Monthly</th>
+          <th class="r">Year 1 revenue (1 client)</th>
+          <th class="r">Year 1 costs</th>
+          <th class="r">Year 1 profit</th>
+          <th class="r">Margin</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="bold">Standard</td>
+          <td class="r warn-c">£350</td><td class="r warn-c">£55</td>
+          <td class="r">£1,010</td><td class="r">£216</td>
+          <td class="r pos">£794</td><td class="r pos">79%</td>
+        </tr>
+        <tr>
+          <td class="bold">Founder Rate (Red Lion)</td>
+          <td class="r warn-c">£350</td><td class="r" style="color:var(--green)">£45</td>
+          <td class="r">£890</td><td class="r">£216</td>
+          <td class="r pos">£674</td><td class="r warn-c">76%</td>
+        </tr>
+        <tr>
+          <td class="bold">Annual deal (10mo pay, 12mo get)</td>
+          <td class="r warn-c">£350</td><td class="r warn-c">£550/yr</td>
+          <td class="r">£900</td><td class="r">£216</td>
+          <td class="r pos">£684</td><td class="r warn-c">76%</td>
+        </tr>
+        <tr>
+          <td class="bold">Demo first, then standard (Stag's)</td>
+          <td class="r warn-c">£350</td><td class="r warn-c">£55</td>
+          <td class="r">£1,010</td><td class="r neg">£236</td>
+          <td class="r pos">£774</td><td class="r pos">77%</td>
+        </tr>
+        <tr class="hl">
+          <td class="bold">Setup waived, 3mo commitment</td>
+          <td class="r" style="color:var(--muted)">£0</td><td class="r warn-c">£55</td>
+          <td class="r">£660</td><td class="r">£156</td>
+          <td class="r warn-c">£504</td><td class="r warn-c">76%</td>
+        </tr>
+        <tr>
+          <td class="bold">Free trial (what NOT to do)</td>
+          <td class="r neg">£0</td><td class="r warn-c">£55</td>
+          <td class="r">£660</td><td class="r neg">£276</td>
+          <td class="r warn-c">£384</td><td class="r neg">58%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size: 12px; color: var(--muted); margin-bottom: 40px;">* "Free trial" row includes 1 month with no revenue + setup time already spent = worst margin. Founder Rate and annual deal sacrifice very little (£120/year) and win loyal clients.</p>
+</div>
+
+<hr>
+
+<!-- FINAL -->
+<div class="section" style="padding-bottom: 80px;">
+  <div class="final-box">
+    <h2>Same 4 pubs.<br><span>Different plays.</span></h2>
+    <p>Crown & Shuttle, Old Blue Last — show them the pain. Red Lion — Founder Rate to win a testimonial. Stag's Head — demo first, they'll convert once they see their own voice come back. Never lead with price. Lead with the cost of NOT having it.</p>
+    <div>
+      <span class="pill pill-g">Pain pricing → Ignorers</span>
+      <span class="pill pill-y">Founder Rate → first 5 clients</span>
+      <span class="pill pill-g">Demo → Manual Repliers</span>
+      <span class="pill pill-y">Annual deal → retention play</span>
+      <span class="pill pill-r">No free trials</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

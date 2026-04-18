@@ -1,28 +1,25 @@
-// components/Navbar.tsx
+// components/Navbar.tsx — Raycast-inspired floating pill nav
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { SITE } from "@/lib/content";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import ThemeToggle from "./ThemeToggle";
+import { SITE } from "@/lib/content";
 
-const PRODUCTS = [
-  { label: "Inbox Autopilot", href: "/#how-it-works", description: "Email handled 24/7" },
-  { label: "Reputation Manager", href: "/#reputation-manager", description: "Reviews + complaints" },
-];
-
-const NAV_LINKS = [
-  { label: "How it works", href: "/#how-it-works" },
-  { label: "Pricing", href: "/#pricing" },
+const NAV_ITEMS = [
+  { label: "Reputation", href: "/products/reputation-manager" },
+  { label: "Inbox",      href: "/products/inbox-autopilot" },
+  { label: "Footfall",   href: "/products/footfall-engine" },
+  { label: "Demo",       href: "/demo" },
+  { label: "Pricing",    href: "/#pricing" },
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [productsOpen, setProductsOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -30,238 +27,182 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setProductsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  const closeAll = () => {
-    setProductsOpen(false);
-    setMobileOpen(false);
+  useEffect(() => {
+    setMobileOpen(false); // close on navigation
+  }, [pathname]);
+
+  const isActive = (href: string) => {
+    if (href.startsWith("/#")) return false;
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
   };
 
   return (
     <>
+      {/* ── Floating pill nav ───────────────────────────── */}
       <motion.header
-        initial={{ opacity: 0, y: -12 }}
+        initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1.0] }}
+        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
         style={{
           position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
+          top: "16px",
+          left: "50%",
+          transform: "translateX(-50%)",
           zIndex: 50,
-          borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
-          backgroundColor: scrolled || mobileOpen ? "var(--bg-navbar)" : "transparent",
-          backdropFilter: scrolled || mobileOpen ? "blur(12px)" : "none",
-          transition: "border-color 250ms ease, background-color 250ms ease",
+          width: "calc(100% - 32px)",
+          maxWidth: "1120px",
         }}
       >
-        <div
+        <nav
           style={{
-            maxWidth: "1200px",
-            margin: "0 auto",
-            padding: "0 24px",
-            height: "60px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            padding: "10px 14px 10px 18px",
+            borderRadius: "14px",
+            background: scrolled
+              ? "rgba(10, 12, 20, 0.85)"
+              : "rgba(10, 12, 20, 0.55)",
+            backdropFilter: "blur(20px) saturate(140%)",
+            WebkitBackdropFilter: "blur(20px) saturate(140%)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            boxShadow: scrolled
+              ? "0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)"
+              : "0 8px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03)",
+            transition: "background 250ms ease, box-shadow 250ms ease",
           }}
         >
           {/* Logo */}
           <Link
             href="/"
-            onClick={(e) => {
-              if (typeof window !== "undefined" && window.location.pathname === "/") {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }
-              closeAll();
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "9px",
+              textDecoration: "none",
+              flexShrink: 0,
             }}
-            style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}
           >
             <Image
               src="/logo.png"
               alt="Zero Clicks"
-              width={36}
-              height={36}
+              width={28}
+              height={28}
               unoptimized
-              style={{ borderRadius: "8px" }}
+              style={{ borderRadius: "7px" }}
             />
             <span style={{
               fontFamily: "var(--font-display)",
-              fontSize: "1.05rem",
-              color: "var(--text-primary)",
+              fontSize: "15px",
+              fontWeight: 600,
+              color: "#fff",
+              letterSpacing: "-0.01em",
               whiteSpace: "nowrap",
             }}>
               {SITE.name}
             </span>
           </Link>
 
-          {/* Desktop nav */}
-          <nav
-            className="desktop-nav"
-            style={{ display: "flex", alignItems: "center", gap: "32px" }}
+          {/* Desktop nav items */}
+          <div
+            className="desktop-nav-items"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "2px",
+              position: "absolute",
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
           >
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                style={{
-                  fontSize: "13px",
-                  color: "var(--text-secondary)",
-                  textDecoration: "none",
-                  letterSpacing: "0.01em",
-                  transition: "color 200ms ease",
-                }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-primary)")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-secondary)")}
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            {/* Products dropdown */}
-            <div ref={dropdownRef} style={{ position: "relative" }}>
-              <button
-                onClick={() => setProductsOpen((o) => !o)}
-                style={{
-                  fontSize: "13px",
-                  color: productsOpen ? "var(--text-primary)" : "var(--text-secondary)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  letterSpacing: "0.01em",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  padding: 0,
-                  transition: "color 200ms ease",
-                  fontFamily: "var(--font-body)",
-                }}
-              >
-                Products
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
-                  style={{ transform: productsOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 200ms ease" }}>
-                  <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-
-              <AnimatePresence>
-                {productsOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 6 }}
-                    transition={{ duration: 0.18 }}
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 12px)",
-                      right: 0,              // align to right edge — never overflows
-                      background: "var(--bg-card)",
-                      border: "1px solid var(--border-mid)",
-                      borderRadius: "10px",
-                      padding: "8px",
-                      minWidth: "220px",
-                      boxShadow: "0 16px 40px rgba(0,0,0,0.4)",
-                      zIndex: 100,
-                    }}
-                  >
-                    {PRODUCTS.map((product) => (
-                      <Link
-                        key={product.label}
-                        href={product.href}
-                        onClick={() => setProductsOpen(false)}
-                        style={{
-                          display: "block",
-                          padding: "10px 14px",
-                          borderRadius: "6px",
-                          textDecoration: "none",
-                          transition: "background 150ms ease",
-                        }}
-                        onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "var(--bg-hover)")}
-                        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "transparent")}
-                      >
-                        <p style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-primary)", margin: 0, fontFamily: "var(--font-body)" }}>
-                          {product.label}
-                        </p>
-                        <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "2px 0 0", fontFamily: "var(--font-body)" }}>
-                          {product.description}
-                        </p>
-                      </Link>
-                    ))}
-                    <div style={{ height: "1px", background: "var(--border)", margin: "6px 8px" }} />
-                    <Link
-                      href="/demo"
-                      onClick={() => setProductsOpen(false)}
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    position: "relative",
+                    padding: "7px 14px",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    color: active ? "#fff" : "rgba(255,255,255,0.55)",
+                    textDecoration: "none",
+                    letterSpacing: "-0.005em",
+                    transition: "color 180ms ease, background 180ms ease",
+                    fontFamily: "var(--font-body)",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!active) {
+                      (e.currentTarget as HTMLElement).style.color = "#fff";
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) {
+                      (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)";
+                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                    }
+                  }}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="navActive"
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding: "10px 14px",
-                        borderRadius: "6px",
-                        textDecoration: "none",
-                        background: "var(--accent-dim)",
-                        border: "1px solid rgba(59,130,246,0.15)",
-                        transition: "background 150ms ease",
+                        position: "absolute",
+                        inset: 0,
+                        background: "rgba(255,255,255,0.06)",
+                        borderRadius: "8px",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        zIndex: -1,
                       }}
-                      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "rgba(59,130,246,0.12)")}
-                      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "var(--accent-dim)")}
-                    >
-                      <span style={{ fontSize: "14px" }}>🎬</span>
-                      <div>
-                        <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--accent)", margin: 0, fontFamily: "var(--font-body)" }}>Live Demo</p>
-                        <p style={{ fontSize: "11px", color: "var(--text-secondary)", margin: "2px 0 0", fontFamily: "var(--font-body)" }}>See it working right now</p>
-                      </div>
-                    </Link>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
 
-            <ThemeToggle />
-
+          {/* Right side: primary CTA */}
+          <div className="desktop-cta" style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
             <Link
               href="/contact"
               style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 16px",
+                background: "#fff",
+                color: "#0a0c14",
                 fontSize: "13px",
-                color: "var(--text-primary)",
-                background: "var(--bg-card)",
-                border: "1px solid var(--border-mid)",
-                padding: "7px 16px",
-                borderRadius: "6px",
+                fontWeight: 600,
                 textDecoration: "none",
-                transition: "border-color 200ms ease, background 200ms ease",
+                borderRadius: "8px",
                 fontFamily: "var(--font-body)",
-                fontWeight: 500,
+                transition: "transform 150ms ease, box-shadow 150ms ease",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
               }}
               onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "var(--accent)";
-                el.style.background = "var(--accent-dim)";
+                (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(255,255,255,0.12)";
               }}
               onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "var(--border-mid)";
-                el.style.background = "var(--bg-card)";
+                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 2px rgba(0,0,0,0.15)";
               }}
             >
-              Book a free call
+              Book a call
             </Link>
-          </nav>
+          </div>
 
           {/* Mobile: hamburger */}
           <button
@@ -273,137 +214,116 @@ export default function Navbar() {
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: "4px",
-              color: "var(--text-primary)",
+              padding: "6px",
+              color: "#fff",
             }}
           >
             <AnimatePresence mode="wait" initial={false}>
               {mobileOpen ? (
-                <motion.svg key="close" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                  initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.15 }}>
+                <motion.svg key="close" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
                   <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </motion.svg>
               ) : (
-                <motion.svg key="menu" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                  initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.15 }}>
-                  <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <motion.svg key="menu" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </motion.svg>
               )}
             </AnimatePresence>
           </button>
-        </div>
+        </nav>
+      </motion.header>
 
-        {/* Mobile menu panel */}
-        <AnimatePresence>
-          {mobileOpen && (
+      {/* ── Mobile menu panel ──────────────────────────── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 45,
+              background: "rgba(3, 5, 12, 0.92)",
+              backdropFilter: "blur(24px)",
+              paddingTop: "80px",
+              padding: "80px 24px 40px",
+            }}
+          >
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              style={{
-                overflow: "hidden",
-                borderTop: "1px solid var(--border)",
-                background: "var(--bg-navbar-mobile)",
-              }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.05 }}
+              style={{ display: "flex", flexDirection: "column", gap: "4px", maxWidth: "480px", margin: "0 auto" }}
             >
-              <div style={{ padding: "16px 24px 24px", display: "flex", flexDirection: "column", gap: "4px" }}>
-                {NAV_LINKS.map((link) => (
+              {NAV_ITEMS.map((item, i) => (
+                <motion.div
+                  key={item.href}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 + i * 0.04 }}
+                >
                   <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={closeAll}
+                    href={item.href}
                     style={{
-                      fontSize: "15px",
-                      color: "var(--text-secondary)",
+                      display: "block",
+                      fontSize: "22px",
+                      fontWeight: 600,
+                      color: isActive(item.href) ? "#fff" : "rgba(255,255,255,0.5)",
                       textDecoration: "none",
-                      padding: "12px 0",
-                      borderBottom: "1px solid var(--border)",
-                      fontFamily: "var(--font-body)",
+                      padding: "14px 0",
+                      borderBottom: "1px solid rgba(255,255,255,0.06)",
+                      fontFamily: "var(--font-display)",
+                      letterSpacing: "-0.02em",
                     }}
                   >
-                    {link.label}
+                    {item.label}
                   </Link>
-                ))}
+                </motion.div>
+              ))}
 
-                {/* Products expanded inline on mobile */}
-                <div style={{ padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
-                  <p style={{ fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", fontFamily: "var(--font-mono)", margin: "0 0 10px" }}>
-                    Products
-                  </p>
-                  {PRODUCTS.map((product) => (
-                    <Link
-                      key={product.label}
-                      href={product.href}
-                      onClick={closeAll}
-                      style={{
-                        display: "block",
-                        padding: "8px 0",
-                        textDecoration: "none",
-                      }}
-                    >
-                      <span style={{ fontSize: "14px", color: "var(--text-primary)", fontFamily: "var(--font-body)", fontWeight: 500 }}>
-                        {product.label}
-                      </span>
-                      <span style={{ display: "block", fontSize: "11px", color: "var(--text-muted)", fontFamily: "var(--font-body)", marginTop: "2px" }}>
-                        {product.description}
-                      </span>
-                    </Link>
-                  ))}
-                  <Link
-                    href="/demo"
-                    onClick={closeAll}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      padding: "10px 12px",
-                      marginTop: "8px",
-                      borderRadius: "8px",
-                      background: "var(--accent-dim)",
-                      border: "1px solid rgba(59,130,246,0.15)",
-                      textDecoration: "none",
-                    }}
-                  >
-                    <span style={{ fontSize: "14px" }}>🎬</span>
-                    <div>
-                      <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--accent)", margin: 0, fontFamily: "var(--font-body)" }}>Live Demo</p>
-                      <p style={{ fontSize: "11px", color: "var(--text-secondary)", margin: "2px 0 0", fontFamily: "var(--font-body)" }}>See it working right now</p>
-                    </div>
-                  </Link>
-                </div>
-
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.35 }}
+              >
                 <Link
                   href="/contact"
-                  onClick={closeAll}
                   style={{
-                    display: "block",
-                    marginTop: "12px",
-                    padding: "14px",
-                    background: "var(--text-primary)",
-                    color: "#000",
-                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    marginTop: "32px",
+                    padding: "16px",
+                    background: "#fff",
+                    color: "#0a0c14",
+                    borderRadius: "12px",
                     textDecoration: "none",
-                    textAlign: "center",
-                    fontSize: "14px",
-                    fontWeight: 600,
+                    fontSize: "15px",
+                    fontWeight: 700,
                     fontFamily: "var(--font-body)",
                   }}
                 >
-                  Book a free call
+                  Book a free 15-min call
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
                 </Link>
-              </div>
+              </motion.div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.header>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Responsive styles */}
+      {/* Responsive */}
       <style>{`
-        @media (max-width: 680px) {
-          .desktop-nav { display: none !important; }
+        @media (max-width: 820px) {
+          .desktop-nav-items { display: none !important; }
+          .desktop-cta { display: none !important; }
           .mobile-menu-btn { display: flex !important; }
         }
       `}</style>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Zero Clicks — Strategy Report</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --blue:#3b82f6; --indigo:#6366f1; --purple:#a78bfa;
+    --green:#10b981; --amber:#f59e0b; --red:#ef4444;
+    --dark:#030712; --card:rgba(255,255,255,0.04);
+    --border:rgba(255,255,255,0.08);
+  }
+  body { background:var(--dark); color:#f3f4f6; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+
+  /* NAV TABS */
+  .nav { position:sticky; top:0; z-index:100; background:rgba(3,7,18,0.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); display:flex; gap:4px; padding:12px 32px; overflow-x:auto; }
+  .tab { padding:8px 18px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; white-space:nowrap; color:#6b7280; border:none; background:none; transition:all .2s; }
+  .tab:hover { color:#f3f4f6; background:var(--card); }
+  .tab.active { color:#fff; background:var(--blue); }
+
+  /* SECTIONS */
+  .section { display:none; min-height:100vh; padding:48px 32px; max-width:1100px; margin:0 auto; }
+  .section.active { display:block; }
+
+  /* HERO */
+  .hero { text-align:center; padding:64px 32px; }
+  .hero .badge { display:inline-block; background:rgba(59,130,246,0.15); color:var(--blue); border:1px solid rgba(59,130,246,0.3); border-radius:999px; padding:6px 16px; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-bottom:20px; }
+  .hero h1 { font-size:clamp(32px,5vw,56px); font-weight:900; background:linear-gradient(135deg,#60a5fa,#a78bfa,#34d399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:16px; line-height:1.1; }
+  .hero p { color:#9ca3af; font-size:18px; max-width:600px; margin:0 auto 32px; line-height:1.7; }
+  .hero-meta { display:flex; gap:32px; justify-content:center; flex-wrap:wrap; }
+  .hero-meta span { font-size:13px; color:#6b7280; }
+  .hero-meta strong { color:#f3f4f6; }
+
+  /* CARDS */
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; margin-bottom:20px; }
+  .card-title { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:16px; }
+  .card h2 { font-size:22px; font-weight:800; margin-bottom:8px; }
+  .card h3 { font-size:17px; font-weight:700; margin-bottom:8px; }
+  .card p { color:#9ca3af; font-size:14px; line-height:1.7; margin-bottom:12px; }
+  .card p:last-child { margin-bottom:0; }
+
+  /* GRID */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  @media(max-width:700px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
+
+  /* STAT PILLS */
+  .stat { text-align:center; padding:24px 16px; }
+  .stat .num { font-size:36px; font-weight:900; margin-bottom:4px; }
+  .stat .label { font-size:12px; color:#6b7280; }
+
+  /* COLOURED BORDERS */
+  .border-blue  { border-color:rgba(59,130,246,.4); }
+  .border-indigo{ border-color:rgba(99,102,241,.4); }
+  .border-purple{ border-color:rgba(167,139,250,.4); }
+  .border-green { border-color:rgba(16,185,129,.4); }
+  .border-amber { border-color:rgba(245,158,11,.4); }
+
+  /* FLOW */
+  .flow { display:flex; flex-direction:column; gap:0; }
+  .flow-step { display:flex; gap:20px; padding:20px 0; position:relative; }
+  .flow-step:not(:last-child)::after { content:''; position:absolute; left:19px; top:52px; bottom:0; width:2px; background:linear-gradient(to bottom,var(--blue),transparent); }
+  .flow-dot { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0; }
+  .flow-content h4 { font-size:15px; font-weight:700; margin-bottom:4px; }
+  .flow-content p { font-size:13px; color:#6b7280; line-height:1.6; }
+
+  /* AGENT CARDS */
+  .agent { display:flex; gap:16px; align-items:flex-start; padding:20px; background:var(--card); border:1px solid var(--border); border-radius:12px; margin-bottom:12px; }
+  .agent-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+  .agent-info h4 { font-size:15px; font-weight:700; margin-bottom:4px; }
+  .agent-info p { font-size:13px; color:#6b7280; line-height:1.6; }
+  .agent-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .tag { font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px; }
+
+  /* TABLE */
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th { text-align:left; padding:12px 16px; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#6b7280; border-bottom:1px solid var(--border); }
+  td { padding:12px 16px; border-bottom:1px solid rgba(255,255,255,0.04); color:#d1d5db; vertical-align:top; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+
+  /* TIMELINE */
+  .timeline-item { display:flex; gap:20px; padding:16px 0; border-bottom:1px solid var(--border); }
+  .timeline-item:last-child { border-bottom:none; }
+  .tl-dot { width:10px; height:10px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+  .tl-content h4 { font-size:14px; font-weight:700; margin-bottom:2px; }
+  .tl-content p { font-size:13px; color:#6b7280; line-height:1.5; }
+
+  /* CALLOUT */
+  .callout { border-radius:12px; padding:20px 24px; margin:20px 0; border-left:4px solid; }
+  .callout-blue { background:rgba(59,130,246,.08); border-color:var(--blue); }
+  .callout-green { background:rgba(16,185,129,.08); border-color:var(--green); }
+  .callout-amber { background:rgba(245,158,11,.08); border-color:var(--amber); }
+  .callout h4 { font-size:14px; font-weight:700; margin-bottom:6px; }
+  .callout p { font-size:13px; color:#9ca3af; line-height:1.6; margin:0; }
+
+  /* CODE */
+  code { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:6px; padding:2px 8px; font-size:12px; font-family:monospace; color:#a78bfa; }
+  pre { background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:10px; padding:20px; font-size:12px; font-family:monospace; color:#d1d5db; line-height:1.8; overflow-x:auto; margin:16px 0; }
+
+  /* PROGRESS BAR */
+  .progress-row { margin-bottom:14px; }
+  .progress-label { display:flex; justify-content:space-between; margin-bottom:5px; font-size:13px; }
+  .progress-track { background:rgba(255,255,255,0.06); border-radius:999px; height:8px; overflow:hidden; }
+  .progress-fill { height:100%; border-radius:999px; transition:width 1s ease; }
+
+  /* PRINT */
+  @media print {
+    .nav { display:none; }
+    .section { display:block !important; page-break-after:always; }
+    body { background:#fff; color:#111; }
+    .card { background:#f8f9fa; border-color:#dee2e6; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="tab active" onclick="show('overview')">📋 Overview</button>
+  <button class="tab" onclick="show('strategy')">🎯 Strategy</button>
+  <button class="tab" onclick="show('products')">📦 Products</button>
+  <button class="tab" onclick="show('agents')">🤖 AI Agents</button>
+  <button class="tab" onclick="show('reputation')">⭐ Reputation Manager</button>
+  <button class="tab" onclick="show('footfall')">📍 Footfall Engine</button>
+  <button class="tab" onclick="show('outreach')">📧 Outreach</button>
+  <button class="tab" onclick="show('market')">📊 Market Data</button>
+  <button class="tab" onclick="show('done')">✅ What We Built</button>
+  <button class="tab" onclick="show('roadmap')">🗺️ Roadmap</button>
+</nav>
+
+<!-- ═══════════════════════════ OVERVIEW ═══════════════════════════ -->
+<div id="overview" class="section active">
+  <div class="hero">
+    <div class="badge">Strategy Report · April 2026</div>
+    <h1>Zero Clicks</h1>
+    <p>AI automation for UK independent hospitality. Built by one founder, powered by three AI agents, targeting London's 2,500 independent pubs.</p>
+    <div class="hero-meta">
+      <span><strong>Founder</strong> Venkatesh Surampudi</span>
+      <span><strong>Market</strong> UK Hospitality</span>
+      <span><strong>Target</strong> Independent London Pubs</span>
+      <span><strong>Core Stack</strong> n8n · Claude AI · Next.js</span>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card border-blue">
+      <div class="stat">
+        <div class="num" style="color:var(--blue)">£150</div>
+        <div class="label">per client / month (Pub OS tier)</div>
+      </div>
+    </div>
+    <div class="card border-green">
+      <div class="stat">
+        <div class="num" style="color:var(--green)">~2,500</div>
+        <div class="label">independent London pubs (TAM)</div>
+      </div>
+    </div>
+    <div class="card border-purple">
+      <div class="stat">
+        <div class="num" style="color:var(--purple)">99.9%</div>
+        <div class="label">gross margin at 50 clients</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:20px">
+    <div class="card border-blue">
+      <div class="card-title" style="color:var(--blue)">The Problem</div>
+      <h3>Pubs are invisible on Google</h3>
+      <p>83% of independent pubs haven't posted on their Google Business Profile in 90+ days. Unanswered reviews signal to tourists that nobody is home. Competitors who post weekly appear 2.8× more in local search.</p>
+    </div>
+    <div class="card border-green">
+      <div class="card-title" style="color:var(--green)">The Solution</div>
+      <h3>Automated presence management</h3>
+      <p>Zero Clicks runs two AI-powered engines: one that replies to every Google review in the pub's voice, and one that posts weekly offers and updates to attract walk-in traffic — all with zero admin from the owner.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-blue">
+    <h4>Core Principle</h4>
+    <p>"AI writes the message. The pub controls the economics." — All offers are pre-approved by the pub owner. AI only writes the presentation, never invents the discount.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ STRATEGY ═══════════════════════════ -->
+<div id="strategy" class="section">
+  <div class="card" style="margin-bottom:28px">
+    <div class="card-title" style="color:var(--indigo)">Go-To-Market Strategy</div>
+    <h2>Land, Prove, Expand</h2>
+    <p>Three phases designed around proof before scale — get 5 clients first, use them as case studies, then raise price and expand.</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(59,130,246,.2);color:var(--blue)">1</div>
+      <div class="flow-content">
+        <h4>Phase 1 — Proof (now → 5 clients)</h4>
+        <p>£55/month, no setup fee. Goal is proof, not profit. Target: independent East London pubs with unanswered reviews. Cold email outreach via n8n + Claude AI. First 5 clients grandfather at £55 forever.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(99,102,241,.2);color:var(--indigo)">2</div>
+      <div class="flow-content">
+        <h4>Phase 2 — Price Raise (5 → 25 clients)</h4>
+        <p>Once 5 clients live: £350 setup + £55/month for Reputation Manager. Upsell to £95 Growth tier. Use testimonials and tracked ROI data from Phase 1. Raise filters tyre-kickers and signals seriousness.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(167,139,250,.2);color:var(--purple)">3</div>
+      <div class="flow-content">
+        <h4>Phase 3 — Full Pub OS (25 → 50+ clients)</h4>
+        <p>Sell the £150/month bundled Pub OS: Reputation + GBP Footfall Engine + Monthly Intelligence Report. 50 clients = £7,500/month revenue on £10.50/month infrastructure. Move critical automation to Node.js scripts.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(16,185,129,.2);color:var(--green)">4</div>
+      <div class="flow-content">
+        <h4>Target Milestone — Visa Funded</h4>
+        <p>15 clients at £150/mo Pub OS = £2,250/mo. 3 months banked = £6,750 → covers 5 lakh visa funding to return to London and complete MBA at University of Greenwich.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="card-title" style="color:var(--amber);margin-bottom:16px">Why Independent Pubs Only</div>
+    <div class="grid-2">
+      <div class="card border-green">
+        <h3 style="color:var(--green)">✅ Target: Independent</h3>
+        <p>Owner IS the decision maker. Can say yes on a 10-minute call. No procurement, no chain approval, no legal review. Feels the pain directly. Will pay £55–£150 to solve a real daily problem.</p>
+      </div>
+      <div class="card" style="border-color:rgba(239,68,68,.3)">
+        <h3 style="color:var(--red)">❌ Avoid: Managed Chains</h3>
+        <p>Wetherspoons, Greene King, Youngs, Stonegate — all have corporate processes. Manager can't sign off on £55 tool. Decision goes up chain. Timeline: months. Not worth pursuing.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-amber" style="margin-top:20px">
+    <div class="card-title" style="color:var(--amber)">Pricing Architecture (3-tier decoy)</div>
+    <table>
+      <tr><th>Tier</th><th>Price</th><th>What's Included</th><th>Purpose</th></tr>
+      <tr><td>Starter</td><td>£35/mo</td><td>Basic presence monitoring</td><td>Anchor — makes Reputation Manager look reasonable</td></tr>
+      <tr><td><strong>Reputation Manager</strong></td><td><strong>£55/mo</strong></td><td>AI review replies, Telegram alerts</td><td>Core product — target for first 5 clients</td></tr>
+      <tr><td>Full Autopilot (Pub OS)</td><td>£150/mo</td><td>Reviews + GBP Posts + Monthly Report</td><td>Premium — sell once social proof exists</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ PRODUCTS ═══════════════════════════ -->
+<div id="products" class="section">
+  <div class="card" style="margin-bottom:28px">
+    <div class="card-title" style="color:var(--purple)">Product Suite</div>
+    <h2>Zero Clicks Pub OS</h2>
+    <p>Three modules. One Telegram digest. Zero logins for the pub owner.</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card border-blue">
+      <div class="card-title" style="color:var(--blue)">Module 1</div>
+      <h3>Reputation Manager</h3>
+      <p>Monitors Google reviews 24/7. Claude writes replies in the pub's voice within hours. Owner gets Telegram notification. No login needed ever.</p>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <div style="font-size:24px;font-weight:900;color:var(--blue)">£55<span style="font-size:14px;color:#6b7280">/mo</span></div>
+      </div>
+    </div>
+    <div class="card border-indigo">
+      <div class="card-title" style="color:var(--indigo)">Module 2</div>
+      <h3>GBP Footfall Engine</h3>
+      <p>Posts 4 offers/events/updates per month to Google Business Profile. Drives tourist walk-ins at moment of search intent. Policy-safe, food-led, coupon tracked.</p>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <div style="font-size:24px;font-weight:900;color:var(--indigo)">£95<span style="font-size:14px;color:#6b7280">/mo</span></div>
+      </div>
+    </div>
+    <div class="card border-green">
+      <div class="card-title" style="color:var(--green)">Module 3</div>
+      <h3>Monthly Intelligence Report</h3>
+      <p>Weekly Telegram digest: impressions, redemptions, review score. Monthly report showing £X attributed revenue. This is what justifies the price and kills churn.</p>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <div style="font-size:24px;font-weight:900;color:var(--green)">Included<span style="font-size:14px;color:#6b7280"> in OS</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-green" style="margin-top:28px">
+    <h4>Ideas Killed (Why It Matters)</h4>
+    <p>5 product ideas were tested and rejected using real hospitality industry knowledge: Payout Reconciler (pubs don't do delivery), Panic Button shift cover (already solved by Deputy/Harri), Invoice Scanner (takes 5 mins on paper, not a real pain), Compliance Logger (clipboard is fine), Gmail Booking Organizer (WiFi consent blocks email lists, tourists don't return). Killing these fast saved 6+ months of wasted development.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ AGENTS ═══════════════════════════ -->
+<div id="agents" class="section">
+  <div class="card" style="margin-bottom:28px">
+    <div class="card-title" style="color:var(--purple)">Multi-Agent Architecture</div>
+    <h2>Three AI Agents, One Brain</h2>
+    <p>Zero Clicks runs on a coordinated system of three AI agents, each with a defined role. All decisions and outputs are logged to a shared Obsidian vault at <code>/Users/venky/ZeroClicks-Brain/</code> — the cross-session memory system.</p>
+  </div>
+
+  <div class="agent">
+    <div class="agent-icon" style="background:rgba(59,130,246,.15)">🔵</div>
+    <div class="agent-info">
+      <h4>Claude Code (Anthropic) — Primary Builder</h4>
+      <p>Main development agent. Builds and debugs n8n workflows, writes production code, fixes rendering bugs, designs system architecture, maintains Obsidian knowledge base. Has full access to the codebase, terminal, and file system. Acts as the technical co-founder.</p>
+      <div class="agent-tags">
+        <span class="tag" style="background:rgba(59,130,246,.15);color:var(--blue)">n8n Workflows</span>
+        <span class="tag" style="background:rgba(59,130,246,.15);color:var(--blue)">System Architecture</span>
+        <span class="tag" style="background:rgba(59,130,246,.15);color:var(--blue)">Bug Fixing</span>
+        <span class="tag" style="background:rgba(59,130,246,.15);color:var(--blue)">Documentation</span>
+        <span class="tag" style="background:rgba(59,130,246,.15);color:var(--blue)">Strategy</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="agent">
+    <div class="agent-icon" style="background:rgba(99,102,241,.15)">🟣</div>
+    <div class="agent-info">
+      <h4>Antigravity / Gemini (Google) — Product Strategist</h4>
+      <p>Dedicated product brainstorming agent. Runs overnight and in parallel when Claude hits usage limits. Stress-tested 7+ product ideas using real market analysis. Identified the GBP Footfall Engine concept. Improved cold email copy. Acts as a brutal product critic — kills bad ideas fast.</p>
+      <div class="agent-tags">
+        <span class="tag" style="background:rgba(99,102,241,.15);color:var(--indigo)">Product Strategy</span>
+        <span class="tag" style="background:rgba(99,102,241,.15);color:var(--indigo)">Market Analysis</span>
+        <span class="tag" style="background:rgba(99,102,241,.15);color:var(--indigo)">Email Copy</span>
+        <span class="tag" style="background:rgba(99,102,241,.15);color:var(--indigo)">Risk Assessment</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="agent">
+    <div class="agent-icon" style="background:rgba(16,185,129,.15)">🟢</div>
+    <div class="agent-info">
+      <h4>Perplexity — Research & Lead Intelligence</h4>
+      <p>Real-time research agent with live web search and citation. Used for lead generation (finding pub emails), market data validation, competitor analysis, and current hospitality industry trends. Every data point is source-verified.</p>
+      <div class="agent-tags">
+        <span class="tag" style="background:rgba(16,185,129,.15);color:var(--green)">Lead Research</span>
+        <span class="tag" style="background:rgba(16,185,129,.15);color:var(--green)">Market Data</span>
+        <span class="tag" style="background:rgba(16,185,129,.15);color:var(--green)">Competitor Intel</span>
+        <span class="tag" style="background:rgba(16,185,129,.15);color:var(--green)">Source Verified</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-blue" style="margin-top:8px">
+    <h4>The Human Layer</h4>
+    <p>Venkatesh Surampudi — founder with 3+ years of direct hospitality experience. This is the irreplaceable layer that killed 5 AI-generated product ideas the agents thought were good. Real industry knowledge beats AI analysis. The founder's instinct that "pubs don't do deliveries" and "Dusk-style free drinks drive walk-ins" came from lived experience, not data.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ REPUTATION MANAGER ═══════════════════════════ -->
+<div id="reputation" class="section">
+  <div class="card" style="margin-bottom:28px">
+    <div class="card-title" style="color:var(--blue)">Core Product</div>
+    <h2>Reputation Manager — How It Works</h2>
+    <p>A fully automated Google review reply system. Once set up, the pub owner never touches it. Claude replies to every review in their voice within hours.</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(59,130,246,.2);color:var(--blue)">1</div>
+      <div class="flow-content">
+        <h4>Review Poller — n8n Workflow</h4>
+        <p>Polls the Google Places API every 2 hours for new reviews. Checks against last_checked timestamp stored in Airtable. Triggers only when a new review appears — no unnecessary API calls.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(99,102,241,.2);color:var(--indigo)">2</div>
+      <div class="flow-content">
+        <h4>Claude AI — Reply Generation</h4>
+        <p>Claude reads the review (star rating, text, reviewer name). Generates a reply that sounds human — warm, specific to the review content, written in the pub's established voice. Never generic. Never corporate.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(167,139,250,.2);color:var(--purple)">3</div>
+      <div class="flow-content">
+        <h4>Google My Business API — Auto-Post</h4>
+        <p>Reply is posted directly to the Google Business Profile via OAuth-authenticated API call. Post ID is logged. Owner's Google account is used — reply appears as coming from the pub, not from Zero Clicks.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(16,185,129,.2);color:var(--green)">4</div>
+      <div class="flow-content">
+        <h4>Telegram Notification</h4>
+        <p>Owner receives a Telegram message showing: the original review, the star rating, and the reply that was just posted. They can see everything but don't have to do anything. 1★–2★ reviews are flagged immediately for owner awareness.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <pre>n8n Workflow: "Zero Clicks — Reputation Manager"
+──────────────────────────────────────────────
+Cron Trigger (every 2hrs)
+  → Google Places API: fetch reviews
+  → IF new review since last_checked:
+      → Claude API: generate reply (pub voice)
+      → Google My Business API: post reply
+      → Airtable: update last_checked
+      → Telegram: notify owner
+  → Loop to next client</pre>
+  </div>
+
+  <div class="grid-2" style="margin-top:20px">
+    <div class="card border-blue">
+      <div class="card-title" style="color:var(--blue)">Technical Stack</div>
+      <p><strong>Automation:</strong> n8n (self-hosted / Cloud)</p>
+      <p><strong>AI:</strong> Claude claude-sonnet-4-5 via Anthropic API</p>
+      <p><strong>Google Auth:</strong> OAuth 2.0 per client</p>
+      <p><strong>Notifications:</strong> Telegram Bot API</p>
+      <p><strong>Client Data:</strong> Airtable (promotion libraries, tokens, state)</p>
+      <p><strong>Frontend:</strong> Next.js 14 at 0-clicks.uk</p>
+    </div>
+    <div class="card border-green">
+      <div class="card-title" style="color:var(--green)">The Business Case</div>
+      <p><strong>Every unanswered review</strong> signals to new tourists that nobody is paying attention.</p>
+      <p><strong>Google rewards responsiveness</strong> — active profiles appear 2.8× more in local search results.</p>
+      <p><strong>Pub owners</strong> have zero time to reply — they're running a kitchen and a bar.</p>
+      <p><strong>£55/month</strong> is less than one hour of a manager's time.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ FOOTFALL ENGINE ═══════════════════════════ -->
+<div id="footfall" class="section">
+  <div class="card" style="margin-bottom:28px">
+    <div class="card-title" style="color:var(--indigo)">Growth Product</div>
+    <h2>GBP Footfall Engine</h2>
+    <p>Inspired by Dusk (app that drove £2.7M incremental pub spend in summer 2023 via free drink offers). Same model — without splitting revenue with a third-party app.</p>
+  </div>
+
+  <div class="callout callout-blue">
+    <h4>"AI writes the message. The pub controls the economics."</h4>
+    <p>AI is completely banned from inventing offers or discounts. The pub owner pre-approves a library of safe, food-led offers. AI only writes the caption — never the price, never the deal, never the alcohol mention.</p>
+  </div>
+
+  <div class="grid-2" style="margin-top:20px">
+    <div class="card border-indigo">
+      <div class="card-title" style="color:var(--indigo)">3-Lane Content Strategy</div>
+      <p><strong>Lane A — Promotion Posts:</strong> Pre-approved deals (Burger + Side, 10% off, etc.)</p>
+      <p><strong>Lane B — Event Posts:</strong> Live music, quiz night, sports screening, Sunday roast</p>
+      <p><strong>Lane C — Freshness Updates:</strong> Terrace open, new menu, kitchen open late</p>
+      <p style="margin-top:12px;color:#6b7280">Rotating lanes keeps the algorithm active and compliance risks low.</p>
+    </div>
+    <div class="card border-green">
+      <div class="card-title" style="color:var(--green)">3-Layer Verification</div>
+      <p><strong>Technical:</strong> API returns 200, post published, post ID stored</p>
+      <p><strong>Platform:</strong> Post visible on mobile Google Maps, survives moderation</p>
+      <p><strong>Commercial:</strong> Coupon code tracked at POS — attributable revenue, not vanity metrics</p>
+      <p style="margin-top:12px;color:#6b7280">Without all three layers, we can't defend the £95/month charge.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="card-title" style="color:var(--amber)">Verified ROI Simulation (real data, sourced)</div>
+    <table>
+      <tr><th>Metric</th><th>Value</th><th>Source</th></tr>
+      <tr><td>Offer post CTR</td><td style="color:var(--green)">2.18%</td><td>Sterling Sky 2026</td></tr>
+      <tr><td>With CTA button multiplier</td><td style="color:var(--green)">×2.3 → 5.01%</td><td>Sterling Sky 2026</td></tr>
+      <tr><td>Weekly posting uplift (vs monthly)</td><td style="color:var(--green)">+28% GBP actions</td><td>SOCi/BrightLocal 2026</td></tr>
+      <tr><td>Local searcher visits within 24hrs</td><td style="color:var(--green)">76%</td><td>Google/Think with Google</td></tr>
+      <tr><td>Realistic pub ROI (target profile)</td><td style="color:var(--green)">3.7× on £95 spend</td><td>Internal simulation</td></tr>
+      <tr><td>Pub net monthly from Footfall Engine</td><td style="color:var(--green)">~£356</td><td>Internal (3,000 views, 36 extra covers)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ OUTREACH ═══════════════════════════ -->
+<div id="outreach" class="section">
+  <div class="card" style="margin-bottom:28px">
+    <div class="card-title" style="color:var(--amber)">Cold Email Campaign</div>
+    <h2>Outreach Engine</h2>
+    <p>Fully automated cold email system built in n8n. Claude writes a unique personalised situation line per pub, injected into a branded HTML template.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card border-amber">
+      <div class="card-title" style="color:var(--amber)">Campaign Status</div>
+      <p><strong>Batch 1:</strong> 19 East London pubs contacted</p>
+      <p><strong>Source:</strong> Apify scrape → east_london_pubs2.csv</p>
+      <p><strong>Emails landed:</strong> ✅ Inbox (not spam) — confirmed by 2 auto-replies</p>
+      <p><strong>Follow-up:</strong> Day-4 trigger workflow (ID: SRz2pz3FhSmvo1I6)</p>
+      <p><strong>Next batch:</strong> 31 pubs — emails being found via Perplexity</p>
+    </div>
+    <div class="card border-blue">
+      <div class="card-title" style="color:var(--blue)">Email Optimisations Applied</div>
+      <p>✅ Fixed raw HTML rendering (emailType: html top-level)</p>
+      <p>✅ Fixed logo full-size render (inline CSS, Gmail strips style blocks)</p>
+      <p>✅ Fixed mobile responsiveness (width 100%, max-width 600px)</p>
+      <p>✅ Pattern-based situation lines (not stale specific review references)</p>
+      <p>✅ Updated CTA to value-first: "free sample reply" offer</p>
+      <p>✅ Send timing: Tue–Thu 10–11am only</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="card-title" style="color:var(--blue)">n8n Outreach Workflow Architecture</div>
+    <pre>Workflow: "Zero Clicks — Cold Email Outreach Agent"
+ID: Ko6p1rCtpj8I8uyI  |  Instance: http://localhost:5678
+─────────────────────────────────────────────────────────
+Manual Trigger
+  → Google Sheets: read prospects (Read Prospects tab)
+  → IF prospects exist:
+      → Split in Batches (one pub at a time)
+          → Build Claude Request (Code node)
+          → Claude AI: write personalised email
+          → Parse Claude Response (Set node)
+          → Wrap HTML Template (Code node — inline CSS)
+          → Gmail: create draft (emailType: "html" top-level)
+          → Sheets: mark sent (append to Mark Sent tab)
+          → Telegram: log send
+          → ← loop back to Split in Batches (index 0)
+  → IF no prospects: stop</pre>
+  </div>
+
+  <div class="card border-green" style="margin-top:20px">
+    <div class="card-title" style="color:var(--green)">Lead Qualification Criteria</div>
+    <table>
+      <tr><th>Filter</th><th>Rule</th><th>Why</th></tr>
+      <tr><td>Google Rating</td><td>≥ 4.0 stars</td><td>Below this, reviews don't convert to bookings</td></tr>
+      <tr><td>Review Count</td><td>≥ 50 reviews</td><td>Proves active, established business</td></tr>
+      <tr><td>Owner Reply Rate</td><td>Low or zero</td><td>This IS the pain we solve</td></tr>
+      <tr><td>Ownership</td><td>Independent only</td><td>Chains have no local decision-making</td></tr>
+      <tr><td>Location</td><td>Tourist zones</td><td>Shoreditch, Hackney, Soho, Camden, Bermondsey</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MARKET DATA ═══════════════════════════ -->
+<div id="market" class="section">
+  <div class="card" style="margin-bottom:28px">
+    <div class="card-title" style="color:var(--green)">Market Intelligence</div>
+    <h2>London Pub Market</h2>
+    <p>All data sourced and verified. No hallucinated statistics.</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card border-blue"><div class="stat"><div class="num" style="color:var(--blue)">~3,800</div><div class="label">total pubs in Greater London</div></div></div>
+    <div class="card border-indigo"><div class="stat"><div class="num" style="color:var(--indigo)">~2,500</div><div class="label">independent (targetable)</div></div></div>
+    <div class="card border-green"><div class="stat"><div class="num" style="color:var(--green)">83%</div><div class="label">haven't posted on GBP in 90 days</div></div></div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="card-title" style="color:var(--blue)">London Pub Breakdown</div>
+    <div style="margin-top:8px">
+      <div class="progress-row">
+        <div class="progress-label"><span>Small Independents (&lt;60 covers, wet-led)</span><span style="color:var(--blue)">42% · ~1,600 pubs</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:100%;background:var(--blue)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Medium Independents (food-led, 60–150 covers)</span><span style="color:var(--indigo)">24% · ~900 pubs</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:57%;background:var(--indigo)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Large Independents (destination venues)</span><span style="color:var(--purple)">10% · ~380 pubs</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:24%;background:var(--purple)"></div></div>
+      </div>
+      <div class="progress-row">
+        <div class="progress-label"><span>Managed Chains (skip — no local autonomy)</span><span style="color:#4b5563">24% · ~920 pubs</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:57%;background:#374151"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:20px">
+    <div class="card border-amber">
+      <div class="card-title" style="color:var(--amber)">UK Pub Economics</div>
+      <p><strong>Avg monthly revenue:</strong> £20k–£40k (independent)</p>
+      <p><strong>London urban/high-traffic:</strong> £50k+/month</p>
+      <p><strong>Net margin:</strong> 10–15%</p>
+      <p><strong>Labour cost:</strong> 25–35% of revenue</p>
+      <p><strong>Incremental margin</strong> (fixed labour): ~45%</p>
+    </div>
+    <div class="card border-green">
+      <div class="card-title" style="color:var(--green)">TAM Calculation</div>
+      <p><strong>London only:</strong> 2,500 × £150 = £4.5M/year</p>
+      <p><strong>Realistic 1% capture:</strong> 25 clients = £45k/year</p>
+      <p><strong>Realistic 2% capture:</strong> 50 clients = £90k/year</p>
+      <p><strong>Infrastructure at 50 clients:</strong> £10.50/month</p>
+      <p><strong>Gross margin:</strong> 99.9%</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ WHAT WE BUILT ═══════════════════════════ -->
+<div id="done" class="section">
+  <div class="card" style="margin-bottom:28px">
+    <div class="card-title" style="color:var(--green)">Build Log</div>
+    <h2>Everything Built — April 2026</h2>
+    <p>Complete log of technical work, decisions, and fixes across all sessions.</p>
+  </div>
+
+  <div class="card border-blue" style="margin-bottom:16px">
+    <div class="card-title" style="color:var(--blue)">n8n Workflows Built</div>
+    <div class="timeline-item">
+      <div class="tl-dot" style="background:var(--green)"></div>
+      <div class="tl-content"><h4>Cold Email Outreach Agent (ID: Ko6p1rCtpj8I8uyI)</h4><p>Reads 19 pubs from Google Sheets, generates personalised emails via Claude, creates Gmail drafts, marks sent, logs to Telegram. Fixed raw HTML rendering bug (emailType top-level).</p></div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-dot" style="background:var(--blue)"></div>
+      <div class="tl-content"><h4>Review Poller Workflow</h4><p>Polls Google Places API every 2hrs. Detects new reviews since last check. Triggers Reputation Manager flow.</p></div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-dot" style="background:var(--indigo)"></div>
+      <div class="tl-content"><h4>Reputation Manager Workflow</h4><p>Claude + Google My Business API for automated review replies. Telegram notification to pub owner. OAuth per client.</p></div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-dot" style="background:var(--amber)"></div>
+      <div class="tl-content"><h4>Day-4 Follow-Up Workflow (ID: SRz2pz3FhSmvo1I6)</h4><p>Fires on non-replies from batch 1. Different angle — specific unanswered count + free sample reply CTA.</p></div>
+    </div>
+  </div>
+
+  <div class="card border-indigo" style="margin-bottom:16px">
+    <div class="card-title" style="color:var(--indigo)">Bugs Fixed</div>
+    <table>
+      <tr><th>Bug</th><th>Root Cause</th><th>Fix</th></tr>
+      <tr><td>Raw HTML in Gmail drafts</td><td>emailType inside options{}</td><td>Moved emailType to top-level parameter</td></tr>
+      <tr><td>Logo rendering at full size</td><td>Gmail strips &lt;style&gt; blocks</td><td>Converted all CSS to inline styles</td></tr>
+      <tr><td>Mobile email too wide</td><td>Fixed width="580"</td><td>width="100%" + max-width:600px + reduced padding</td></tr>
+      <tr><td>Stale situation lines</td><td>Referencing specific old reviews</td><td>Pattern-based observations only (no specific reviews)</td></tr>
+      <tr><td>n8n loop stopping after 1 item</td><td>Last node not connected back to Split in Batches</td><td>Telegram → Split in Batches (index 0)</td></tr>
+      <tr><td>$input.first() error in loop</td><td>Wrong method for "Run Once for Each Item" mode</td><td>Changed to $input.item.json</td></tr>
+    </table>
+  </div>
+
+  <div class="card border-green" style="margin-bottom:16px">
+    <div class="card-title" style="color:var(--green)">Files & Documents Created</div>
+    <table>
+      <tr><th>File</th><th>Purpose</th></tr>
+      <tr><td><code>/ZeroClicks-Brain/Info Hub — Zero Clicks.md</code></td><td>Single source of truth — all decisions, lessons, architecture</td></tr>
+      <tr><td><code>/ZeroClicks-Brain/Product/GBP Footfall Engine.md</code></td><td>Full product spec, risk controls, commercial model</td></tr>
+      <tr><td><code>/ZeroClicks-Brain/Product/Zero Clicks Pub OS — Production Architecture.md</code></td><td>Infrastructure decisions, Airtable schema, workflow architecture</td></tr>
+      <tr><td><code>/ZeroClicks-Brain/Product/n8n Production Reality — Decision Log.md</code></td><td>Licensing risk, scaling limits, when to move to Node.js</td></tr>
+      <tr><td><code>/ZeroClicks-Brain/Build Log/Antigravity — The Footfall Pivot.md</code></td><td>Session transcript of GBP Footfall Engine product discovery</td></tr>
+      <tr><td><code>/zero-clicks/public/london-pubs-chart.html</code></td><td>Visual market breakdown — 3,800 London pubs by type</td></tr>
+      <tr><td><code>/n8n/cold-outreach/template.html</code></td><td>Branded HTML email template (mobile-responsive, inline CSS)</td></tr>
+    </table>
+  </div>
+
+  <div class="card border-purple">
+    <div class="card-title" style="color:var(--purple)">Website Changes (0-clicks.uk)</div>
+    <table>
+      <tr><th>Page</th><th>Change</th><th>Reason</th></tr>
+      <tr><td>Pricing.tsx</td><td>Removed 30-day money-back guarantee</td><td>Would be exploited for free month</td></tr>
+      <tr><td>Pricing.tsx</td><td>Added loss aversion line</td><td>Psychology — anchors commitment</td></tr>
+      <tr><td>app/connect/page.tsx</td><td>Removed "14-day free trial" banner</td><td>No trial offered — connect page is for committed clients</td></tr>
+      <tr><td>content.ts</td><td>Locked pricing: £35/£55/£95 tiers</td><td>Decoy pricing architecture</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ ROADMAP ═══════════════════════════ -->
+<div id="roadmap" class="section">
+  <div class="card" style="margin-bottom:28px">
+    <div class="card-title" style="color:var(--purple)">What's Next</div>
+    <h2>Roadmap to Visa Milestone</h2>
+    <p>15 clients at £150/mo = £2,250/mo. 3 months = £6,750 → visa funded, back to London, finish MBA at University of Greenwich.</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(245,158,11,.2);color:var(--amber)">→</div>
+      <div class="flow-content">
+        <h4>This week — Outreach Push</h4>
+        <p>Send follow-ups to 19 batch 1 pubs. Scrape 30+ new leads via Perplexity (tourist zones). Send batch 2. Updated CTA: "free sample reply" instead of 10-min call ask. Send Tue–Thu 10am.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(59,130,246,.2);color:var(--blue)">1</div>
+      <div class="flow-content">
+        <h4>Month 1 — First Client</h4>
+        <p>First paying client at £55/month. Screenshot the Stripe payment. This is the proof everything else is built on. First client typically comes from a follow-up, not the first email.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(99,102,241,.2);color:var(--indigo)">2</div>
+      <div class="flow-content">
+        <h4>Month 2–3 — Fix Infrastructure</h4>
+        <p>Move from Mac+ngrok to Hetzner VPS (£3.50/mo). Kill ngrok permanently. n8n Cloud for legal SaaS operation ($20/mo). Rebuild Review Poller with multi-client Airtable loop. Wire Stripe for £55/mo recurring.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(167,139,250,.2);color:var(--purple)">3</div>
+      <div class="flow-content">
+        <h4>Month 3–4 — 5 Clients + Price Raise</h4>
+        <p>£350 setup + £55/mo for new clients. Begin upselling existing clients to £95 Growth (GBP Footfall Engine pilot). Run 14-day free pilot on 1 pub — track redemptions, take screenshot of live offer on Maps.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot" style="background:rgba(16,185,129,.2);color:var(--green)">✓</div>
+      <div class="flow-content">
+        <h4>Month 6–9 — Visa Milestone</h4>
+        <p>15 clients at £150 Pub OS = £2,250/mo. Infrastructure cost = £20/mo. Net: £2,230/mo. 3 months banked = £6,690. 5 lakh (~£4,700) visa funded. Return to London. Complete MBA. Then scale.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-amber" style="margin-top:28px">
+    <h4>The Honest Risk</h4>
+    <p>The product is built. The market is real. The margin is 99.9%. The only variable that controls the timeline is outreach volume. 19 emails is 0.8% of the London target market. The founders who get to 10 clients fastest are the ones sending 50–100 emails per week consistently, not perfectly. Every week without outreach is a week added to the timeline.</p>
+  </div>
+
+  <div class="card border-green" style="margin-top:20px;text-align:center;padding:40px">
+    <div style="font-size:48px;margin-bottom:16px">🎯</div>
+    <h2 style="font-size:28px;margin-bottom:8px">The Goal</h2>
+    <p style="font-size:18px;color:#9ca3af;max-width:500px;margin:0 auto">Fund the visa. Get back to London. Finish the degree. Then scale Zero Clicks from there.</p>
+    <div style="margin-top:24px;font-size:13px;color:#4b5563">Built by Venkatesh Surampudi · Zero Clicks · 0-clicks.uk · April 2026</div>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

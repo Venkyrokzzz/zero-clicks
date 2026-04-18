@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero Clicks — Final Pricing</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Lexend+Mega:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06060a;
+    --surface: #0d0d12;
+    --card: #111118;
+    --border: #1a1a24;
+    --text: #eeeef0;
+    --muted: #5a5a6e;
+    --green: #00e676;
+    --green-dim: rgba(0,230,118,0.08);
+    --green-border: rgba(0,230,118,0.2);
+    --gold: #ffd600;
+    --red: #ff3b3b;
+    --blue: #2979ff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lexend', sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 100px 24px 60px;
+    text-align: center;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,230,118,0.04) 0%, transparent 70%);
+    top: 30%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
+    font-size: 12px; font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 100px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .hero h1 {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: clamp(36px, 7vw, 72px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+    animation: fadeIn 0.5s 0.1s ease both;
+  }
+
+  .hero h1 span { color: var(--green); }
+
+  .hero p {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto;
+    animation: fadeIn 0.5s 0.2s ease both;
+  }
+
+  /* MAIN CARD */
+  .pricing-wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  .main-card {
+    background: var(--card);
+    border: 1px solid var(--green-border);
+    border-radius: 24px;
+    padding: 56px 48px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .main-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--green), rgba(0,230,118,0.2));
+  }
+
+  .main-card::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,230,118,0.03) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    pointer-events: none;
+  }
+
+  .offer-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
+    font-size: 11px; font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .offer-tag .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .price-main {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: clamp(56px, 10vw, 80px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .price-period {
+    font-size: 18px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .price-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 36px;
+  }
+
+  .price-sub strong { color: var(--green); font-weight: 600; }
+
+  /* FEATURES GRID */
+  .features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+
+  @media (max-width: 600px) { .features { grid-template-columns: 1fr; } }
+
+  .feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .feature-icon {
+    font-size: 18px;
+    min-width: 24px;
+    text-align: center;
+    margin-top: 1px;
+  }
+
+  .feature-text {
+    font-size: 15px;
+    color: #ccc;
+    line-height: 1.5;
+  }
+
+  .feature-text strong { color: var(--text); }
+
+  /* GUARANTEE */
+  .guarantee {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 36px;
+  }
+
+  .guarantee-icon {
+    font-size: 28px;
+    min-width: 36px;
+    text-align: center;
+  }
+
+  .guarantee-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+
+  .guarantee-body {
+    font-size: 15px;
+    color: #aaa;
+    line-height: 1.7;
+  }
+
+  /* CTA */
+  .cta-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green);
+    color: #000;
+    font-family: 'Lexend', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    padding: 18px 36px;
+    border-radius: 12px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .cta-btn:hover { transform: scale(1.03); box-shadow: 0 8px 32px rgba(0,230,118,0.25); }
+
+  .cta-note {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* COMPARISON */
+  .comparison {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  .comp-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .comp-table th {
+    padding: 16px 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .comp-table th:last-child { color: var(--green); }
+
+  .comp-table td {
+    padding: 14px 20px;
+    font-size: 14px;
+    color: #aaa;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .comp-table tr:last-child td { border-bottom: none; }
+
+  .comp-table td:last-child {
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .comp-table td:first-child {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .comp-price {
+    font-family: 'Lexend', sans-serif;
+    font-weight: 700;
+  }
+
+  .comp-us {
+    background: rgba(0,230,118,0.03);
+  }
+
+  /* PHASES */
+  .phases {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  .phases-title {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .phases-title span { color: var(--gold); }
+
+  .phase-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  @media (max-width: 700px) { .phase-cards { grid-template-columns: 1fr; } }
+
+  .phase-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    position: relative;
+  }
+
+  .phase-card.active { border-color: var(--green-border); }
+  .phase-card.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--green);
+  }
+
+  .phase-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .phase-card.active .phase-num { color: var(--green); }
+  .phase-card:not(.active) .phase-num { color: var(--muted); }
+
+  .phase-price {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+
+  .phase-when {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .phase-details {
+    font-size: 14px;
+    color: #aaa;
+    line-height: 1.7;
+  }
+
+  .phase-details strong { color: var(--text); }
+
+  /* BOTTOM */
+  .bottom {
+    text-align: center;
+    padding: 60px 24px 80px;
+    border-top: 1px solid var(--border);
+  }
+
+  .bottom h2 {
+    font-family: 'Lexend Mega', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  .bottom h2 span { color: var(--green); }
+
+  .bottom p {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 400px;
+    margin: 0 auto 32px;
+  }
+
+  /* HORMOZI BADGE */
+  .hormozi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,214,0,0.06);
+    border: 1px solid rgba(255,214,0,0.15);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-top: 32px;
+  }
+
+  .hormozi-badge-text {
+    font-size: 12px;
+    color: var(--gold);
+    line-height: 1.5;
+  }
+
+  .hormozi-badge-text strong { font-weight: 700; }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Final Pricing — April 2026</div>
+  <h1>One product.<br>One price.<br><span>No hiding.</span></h1>
+  <p>Backed by research. Built on Hormozi. Designed for pub owners who don't have time to think about pricing tiers.</p>
+</div>
+
+<!-- MAIN PRICING CARD -->
+<div class="pricing-wrap">
+  <div class="main-card">
+    <div class="offer-tag">
+      <span class="dot"></span>
+      Reputation Manager
+    </div>
+
+    <div class="price-row">
+      <span class="price-main">£55</span>
+      <span class="price-period">/month</span>
+    </div>
+    <div class="price-sub">
+      Setup done for you in 48 hours. Cancel anytime.<br>
+      <strong>30-day money-back guarantee — if it doesn't save you time, full refund.</strong>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-text"><strong>AI replies the second a review lands</strong> — 24/7, even at 3am</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎤</div>
+        <div class="feature-text"><strong>In your voice, with your feel</strong> — fully customisable to how you'd actually reply</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📱</div>
+        <div class="feature-text"><strong>Telegram alert — approve in one tap</strong> — nothing posts without your say-so</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-text"><strong>Setup done for you</strong> — we handle everything, you just connect your Google</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <div class="feature-text"><strong>Monthly reputation report</strong> — see how your reviews are trending</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🇬🇧</div>
+        <div class="feature-text"><strong>UK-based support</strong> — real person, not a chatbot in another timezone</div>
+      </div>
+    </div>
+
+    <div class="guarantee">
+      <div class="guarantee-icon">🛡️</div>
+      <div>
+        <div class="guarantee-title">The Zero Clicks Guarantee</div>
+        <div class="guarantee-body">
+          If Reputation Manager doesn't save you at least 15 minutes a day in your first 30 days — we refund every penny. No questions. No forms. Just an honest refund. We only win if you win.
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a href="https://0-clicks.uk/call" class="cta-btn">
+        Get started — £55/month →
+      </a>
+      <span class="cta-note">No free trial. No card upfront. Just book a call,<br>see it work on your pub, and decide.</span>
+    </div>
+
+    <div class="hormozi-badge">
+      <span style="font-size: 18px;">📖</span>
+      <div class="hormozi-badge-text">
+        <strong>Hormozi-aligned:</strong> No free trial. Strong guarantee. Price on outcome, not features. One offer, no confusion.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPETITOR COMPARISON -->
+<div class="comparison reveal">
+  <div class="comp-title">How we compare</div>
+  <table class="comp-table">
+    <tr>
+      <th>Platform</th>
+      <th>Price</th>
+      <th>Contract</th>
+      <th>Zero Clicks</th>
+    </tr>
+    <tr>
+      <td>Birdeye</td>
+      <td class="comp-price">£270–450/mo</td>
+      <td>Annual required</td>
+      <td>5–8x cheaper</td>
+    </tr>
+    <tr>
+      <td>Podium</td>
+      <td class="comp-price">£320–480/mo</td>
+      <td>Annual required</td>
+      <td>6–9x cheaper</td>
+    </tr>
+    <tr>
+      <td>Reputation.com</td>
+      <td class="comp-price">£110+/mo</td>
+      <td>Annual required</td>
+      <td>2x cheaper</td>
+    </tr>
+    <tr>
+      <td>Grade.us</td>
+      <td class="comp-price">£90/mo</td>
+      <td>Monthly</td>
+      <td>40% cheaper</td>
+    </tr>
+    <tr class="comp-us">
+      <td><strong>Zero Clicks</strong></td>
+      <td class="comp-price" style="color: var(--green);">£55/mo</td>
+      <td style="color: var(--green);">Cancel anytime</td>
+      <td>🇬🇧 UK built</td>
+    </tr>
+  </table>
+</div>
+
+<!-- PRICING PHASES -->
+<div class="phases reveal">
+  <div class="phases-title">The pricing <span>roadmap</span></div>
+
+  <div class="phase-cards">
+    <div class="phase-card active">
+      <div class="phase-num">Phase 1 — Now</div>
+      <div class="phase-price">£55/mo</div>
+      <div class="phase-when">0–10 clients</div>
+      <div class="phase-details">
+        <strong>One product. One price.</strong><br>
+        No tiers. No annual. No free trial.<br>
+        30-day guarantee. Setup included.<br>
+        Prove the product works.
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-num">Phase 2 — After 5 clients</div>
+      <div class="phase-price">+ Annual</div>
+      <div class="phase-when">5–15 clients</div>
+      <div class="phase-details">
+        Add annual option: <strong>£528/year</strong> (save 2 months = £44/mo).<br>
+        Only offered to existing monthly clients after 30 days.
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-num">Phase 3 — Scale</div>
+      <div class="phase-price">£79/mo</div>
+      <div class="phase-when">15+ clients</div>
+      <div class="phase-details">
+        Raise price for new clients.<br>
+        <strong>Existing clients keep £55.</strong><br>
+        Add Full Autopilot tier at £120/mo.<br>
+        Founding members locked in forever.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM -->
+<div class="bottom reveal">
+  <h2>One price.<br><span>Zero confusion.</span></h2>
+  <p>Create the product in Stripe. £55/month recurring. Ship it.</p>
+  <a href="https://dashboard.stripe.com" class="cta-btn" style="background: var(--gold); color: #000;">
+    Open Stripe →
+  </a>
+</div>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

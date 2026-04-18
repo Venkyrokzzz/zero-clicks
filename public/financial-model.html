@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero Clicks — Financial Model</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Lexend+Mega:wght@700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06060a;
+    --card: #0e0e14;
+    --border: #1a1a24;
+    --text: #eeeef0;
+    --muted: #52526a;
+    --green: #00e676;
+    --red: #ff3b3b;
+    --gold: #ffd600;
+    --blue: #448aff;
+    --purple: #c158dc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Lexend', sans-serif; font-size: 16px; line-height: 1.7; }
+  .wrap { max-width: 1020px; margin: 0 auto; padding: 0 24px; }
+
+  .hero { padding: 80px 24px 60px; text-align: center; }
+  .hero h1 { font-family: 'Lexend Mega', sans-serif; font-size: clamp(32px, 6vw, 60px); font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 16px; }
+  .hero h1 span { color: var(--gold); }
+  .hero p { color: var(--muted); font-size: 17px; }
+
+  .section { padding: 60px 24px 0; max-width: 1020px; margin: 0 auto; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+  .section-title { font-family: 'Lexend Mega', sans-serif; font-size: clamp(22px, 4vw, 34px); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 32px; line-height: 1.2; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 60px 0 0; }
+
+  /* COST GRID */
+  .cost-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  @media (max-width: 720px) { .cost-grid { grid-template-columns: 1fr; } }
+
+  .cost-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+  .cost-card-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 18px; }
+  .cost-card.fixed .cost-card-title { color: var(--blue); }
+  .cost-card.variable .cost-card-title { color: var(--purple); }
+  .cost-card.setup .cost-card-title { color: var(--gold); }
+
+  .cost-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-row-label { color: #aaa; }
+  .cost-row-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 12px; }
+
+  .cost-total { display: flex; justify-content: space-between; padding: 12px 0 0; margin-top: 8px; border-top: 1px solid var(--border); }
+  .cost-total-label { font-weight: 700; font-size: 14px; }
+  .cost-total-val { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700; }
+  .cost-card.fixed .cost-total-val { color: var(--blue); }
+  .cost-card.variable .cost-total-val { color: var(--purple); }
+  .cost-card.setup .cost-total-val { color: var(--gold); }
+
+  /* FORMULA BOX */
+  .formula-box { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; margin-bottom: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 620px) { .formula-box { grid-template-columns: 1fr; } }
+  .formula-item-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .formula-item-val { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; }
+
+  /* TABLES */
+  .scenario-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; background: var(--card); font-size: 13px; min-width: 680px; }
+  thead th { padding: 12px 14px; text-align: right; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.015); }
+  thead th:first-child { text-align: left; }
+  tbody td { padding: 12px 14px; text-align: right; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #bbb; }
+  tbody td:first-child { text-align: left; font-family: 'Lexend', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); }
+  tbody tr:last-child td { border-bottom: none; }
+  .pos { color: var(--green) !important; font-weight: 700; }
+  .neg { color: var(--red) !important; font-weight: 700; }
+  .warn { color: var(--gold) !important; font-weight: 600; }
+  .dim { color: var(--muted) !important; }
+  .highlight-row { background: rgba(0,230,118,0.03); }
+  .highlight-row td { border-top: 1px solid rgba(0,230,118,0.15) !important; }
+  .note-row td { background: rgba(255,214,0,0.03); border-top: 1px solid rgba(255,214,0,0.12) !important; }
+
+  /* CLIENT TRACKER */
+  .client-tracker { display: grid; gap: 14px; }
+  .client-row-block { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .client-row-header { display: grid; grid-template-columns: 160px 1fr 1fr 1fr 1fr 1fr; padding: 10px 16px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); gap: 8px; }
+  .client-row { display: grid; grid-template-columns: 160px 1fr 1fr 1fr 1fr 1fr; padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 12px; gap: 8px; align-items: center; }
+  .client-row:last-child { border-bottom: none; }
+  .client-row-label { font-family: 'Lexend', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); }
+  .client-row span:not(.client-row-label) { font-family: 'JetBrains Mono', monospace; text-align: right; color: #bbb; }
+  .client-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; }
+  .tag-new { background: rgba(0,230,118,0.1); color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+  .tag-ongoing { background: rgba(68,138,255,0.1); color: var(--blue); border: 1px solid rgba(68,138,255,0.2); }
+  .tag-total { background: rgba(255,214,0,0.08); color: var(--gold); border: 1px solid rgba(255,214,0,0.15); }
+
+  /* SCALE GRID */
+  .scale-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .scale-grid { grid-template-columns: 1fr; } }
+  .scale-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .scale-card-num { font-family: 'Lexend Mega', sans-serif; font-size: 40px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+  .scale-card-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .scale-card-row { display: flex; justify-content: space-between; font-size: 13px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .scale-card-row:last-child { border-bottom: none; }
+  .scale-card-row span:last-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+
+  /* VERDICT CARDS */
+  .verdicts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 620px) { .verdicts { grid-template-columns: 1fr; } }
+  .verdict { background: var(--card); border-radius: 14px; padding: 22px; border-left: 3px solid; }
+  .verdict.win { border-color: var(--green); }
+  .verdict.lose { border-color: var(--red); }
+  .verdict.caution { border-color: var(--gold); }
+  .verdict-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .verdict.win .verdict-tag { color: var(--green); }
+  .verdict.lose .verdict-tag { color: var(--red); }
+  .verdict.caution .verdict-tag { color: var(--gold); }
+  .verdict-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .verdict-body { font-size: 13px; color: #888; line-height: 1.7; }
+
+  /* BIG NUMBERS */
+  .big-numbers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 700px) { .big-numbers { grid-template-columns: repeat(2, 1fr); } }
+  .big-num-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 18px; text-align: center; }
+  .big-num-val { font-family: 'Lexend Mega', sans-serif; font-size: 34px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+  .big-num-label { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+  /* FINAL */
+  .final-box { background: var(--card); border: 1px solid rgba(0,230,118,0.2); border-radius: 20px; padding: 40px; text-align: center; }
+  .final-box h2 { font-family: 'Lexend Mega', sans-serif; font-size: clamp(26px, 4vw, 40px); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .final-box h2 span { color: var(--green); }
+  .final-box p { color: var(--muted); font-size: 15px; max-width: 520px; margin: 0 auto 24px; }
+  .verdict-pill { display: inline-block; padding: 9px 20px; border-radius: 100px; font-size: 13px; font-weight: 700; margin: 5px; }
+  .pill-green { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3); color: var(--green); }
+  .pill-gold { background: rgba(255,214,0,0.1); border: 1px solid rgba(255,214,0,0.3); color: var(--gold); }
+  .pill-red { background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.3); color: var(--red); }
+
+  /* ALERT BOX */
+  .alert { border-radius: 12px; padding: 18px 22px; font-size: 14px; line-height: 1.7; margin-bottom: 24px; }
+  .alert.warn { background: rgba(255,214,0,0.05); border: 1px solid rgba(255,214,0,0.2); color: #ccc; }
+  .alert.warn strong { color: var(--gold); }
+  .alert.info { background: rgba(68,138,255,0.05); border: 1px solid rgba(68,138,255,0.2); color: #ccc; }
+  .alert.info strong { color: var(--blue); }
+  .alert.green { background: rgba(0,230,118,0.05); border: 1px solid rgba(0,230,118,0.2); color: #ccc; }
+  .alert.green strong { color: var(--green); }
+
+  /* SCALE NOTE */
+  .scale-note { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; margin-top: 24px; font-size: 14px; color: #999; }
+  .scale-note strong { color: var(--text); }
+
+  /* TRACKER WRAPPER */
+  @media (max-width: 700px) {
+    .client-row-header, .client-row { grid-template-columns: 120px 1fr 1fr 1fr 1fr 1fr; font-size: 11px; padding: 10px 12px; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Every penny.<br><span>Tracked.</span></h1>
+  <p>Real costs. Real Claude API. Hostinger hosting. First 5 clients individually — then what happens when it scales.</p>
+</div>
+
+<hr>
+
+<!-- SECTION 1: ACTUAL COSTS -->
+<div class="section">
+  <div class="section-label">Section 1 — Your Actual Costs</div>
+  <div class="section-title">What it really costs you each month</div>
+
+  <div class="alert info" style="margin-bottom: 28px;">
+    <strong>Updated from previous model.</strong> Claude API = £20/month total. Hostinger VPS = ~£5/month (500–600 INR). These are your two biggest real costs. Everything else is nearly free.
+  </div>
+
+  <div class="cost-grid">
+    <!-- FIXED -->
+    <div class="cost-card fixed">
+      <div class="cost-card-title">Fixed Monthly (you pay regardless)</div>
+      <div class="cost-row"><span class="cost-row-label">Hostinger VPS (~600 INR)</span><span class="cost-row-val" style="color:var(--blue)">£5</span></div>
+      <div class="cost-row"><span class="cost-row-label">Claude (Anthropic) API</span><span class="cost-row-val" style="color:var(--blue)">£20</span></div>
+      <div class="cost-row"><span class="cost-row-label">Domain (0-clicks.uk)</span><span class="cost-row-val">£1</span></div>
+      <div class="cost-row"><span class="cost-row-label">Vercel (Next.js hosting)</span><span class="cost-row-val">£0</span></div>
+      <div class="cost-row"><span class="cost-row-label">Telegram bot</span><span class="cost-row-val">£0</span></div>
+      <div class="cost-row"><span class="cost-row-label">n8n (on Hostinger)</span><span class="cost-row-val">£0</span></div>
+      <div class="cost-total">
+        <span class="cost-total-label">Total Fixed</span>
+        <span class="cost-total-val">£26/mo</span>
+      </div>
+    </div>
+
+    <!-- VARIABLE -->
+    <div class="cost-card variable">
+      <div class="cost-card-title">Per-Client Monthly Variable</div>
+      <div class="cost-row"><span class="cost-row-label">Your support time (~30 min)</span><span class="cost-row-val" style="color:var(--purple)">£10</span></div>
+      <div class="cost-row"><span class="cost-row-label">Buffer (errors, edge cases)</span><span class="cost-row-val">£2</span></div>
+      <div class="cost-row"><span class="cost-row-label">Claude API per client*</span><span class="cost-row-val">£0</span></div>
+      <div class="cost-row"><span class="cost-row-label">n8n executions</span><span class="cost-row-val">£0</span></div>
+      <div class="cost-row" style="border-bottom:none;padding-bottom:0;"></div>
+      <div class="cost-row" style="border-bottom:none;padding-bottom:0;"></div>
+      <div class="cost-total">
+        <span class="cost-total-label">Variable per client</span>
+        <span class="cost-total-val">£12/mo</span>
+      </div>
+    </div>
+
+    <!-- SETUP -->
+    <div class="cost-card setup">
+      <div class="cost-card-title">One-Time Setup (your time)</div>
+      <div class="cost-row"><span class="cost-row-label">Google Business + OAuth</span><span class="cost-row-val">1 hr</span></div>
+      <div class="cost-row"><span class="cost-row-label">n8n workflow config</span><span class="cost-row-val">1 hr</span></div>
+      <div class="cost-row"><span class="cost-row-label">Test + QA + Telegram</span><span class="cost-row-val">30 min</span></div>
+      <div class="cost-row"><span class="cost-row-label">Onboarding call + handover</span><span class="cost-row-val">30 min</span></div>
+      <div class="cost-row" style="border-bottom:none;"></div>
+      <div class="cost-row" style="border-bottom:none;"></div>
+      <div class="cost-total">
+        <span class="cost-total-label">3 hrs × £20/hr</span>
+        <span class="cost-total-val">£60 once</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert warn" style="margin-top: 16px;">
+    <strong>* Claude API note:</strong> £20/month covers all clients up to ~5–8. It's billed per token — not per client. At 50 reviews/month × 8 clients = 400 replies. Still well within £20. When you scale past 15 clients, budget Claude at £30–35/month.
+  </div>
+
+  <!-- THE FORMULA -->
+  <div style="margin-top: 32px; margin-bottom: 0;">
+    <div class="section-label" style="padding: 0; margin-bottom: 12px;">The formula</div>
+    <div class="formula-box">
+      <div>
+        <div class="formula-item-label">Monthly Profit (N clients)</div>
+        <div class="formula-item-val" style="color: var(--green);">£55N − £26 − £12N = <span style="color:var(--gold)">£43N − £26</span></div>
+      </div>
+      <div>
+        <div class="formula-item-label">Day-1 Profit per client (setup)</div>
+        <div class="formula-item-val" style="color: var(--green);">£350 − £60 setup time = <span style="color:var(--gold)">£290 in pocket</span></div>
+      </div>
+      <div>
+        <div class="formula-item-label">Break-even point</div>
+        <div class="formula-item-val" style="color: var(--blue);">1 client covers fixed costs in Month 1 ✅</div>
+      </div>
+      <div>
+        <div class="formula-item-label">Ongoing margin per client</div>
+        <div class="formula-item-val" style="color: var(--purple);">£43 kept from every £55 = <span style="color:var(--gold)">78%</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- SECTION 2: FIRST 5 CLIENTS — INDIVIDUAL TRACKER -->
+<div class="section">
+  <div class="section-label">Section 2 — First 5 Clients</div>
+  <div class="section-title">What comes in & what goes out — per client, per month</div>
+
+  <div class="alert green" style="margin-bottom: 28px;">
+    <strong>How to read this:</strong> Each row is one month. You acquire 1 new client per month. Fixed costs (£26) are split across whoever is active. You see the net effect on your bank balance each month.
+  </div>
+
+  <!-- MONTH 1 — CLIENT 1 JOINS -->
+  <div style="margin-bottom: 14px;">
+    <div style="font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">Month 1 — Client 1 joins</div>
+    <div class="client-row-block">
+      <div class="client-row-header">
+        <span>Item</span><span style="text-align:right">In (£)</span><span style="text-align:right">Out (£)</span><span style="text-align:right">Why</span><span style="text-align:right">Running Total</span><span style="text-align:right">Net</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Setup fee — C1 <span class="client-tag tag-new">NEW</span></span>
+        <span class="pos">+£350</span><span>—</span><span class="dim">One-time setup</span><span class="pos">+£350</span><span class="pos">+£350</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">MRR Month 1 — C1</span>
+        <span class="pos">+£55</span><span>—</span><span class="dim">First monthly sub</span><span class="pos">+£405</span><span class="pos">+£405</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Setup time — C1</span>
+        <span>—</span><span class="neg">−£60</span><span class="dim">3 hrs your time</span><span class="pos">+£345</span><span class="pos">+£345</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Fixed costs</span>
+        <span>—</span><span class="neg">−£26</span><span class="dim">Hostinger + Claude API + domain</span><span class="pos">+£319</span><span class="pos">+£319</span>
+      </div>
+      <div class="client-row highlight-row">
+        <span class="client-row-label">Variable — C1</span>
+        <span>—</span><span class="neg">−£12</span><span class="dim">Support + buffer</span><span>—</span><span class="pos">+£307</span>
+      </div>
+      <div class="client-row note-row">
+        <span class="client-row-label" style="color:var(--gold)">Month 1 Total <span class="client-tag tag-total">TOTAL</span></span>
+        <span class="pos" style="font-size:14px;font-weight:800">+£405</span><span class="neg" style="font-size:14px;font-weight:800">−£98</span><span class="dim">—</span><span>—</span><span class="pos" style="font-size:16px;font-weight:800;color:var(--green)">+£307</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTH 2 — CLIENT 2 JOINS -->
+  <div style="margin-bottom: 14px;">
+    <div style="font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">Month 2 — Client 2 joins (Client 1 ongoing)</div>
+    <div class="client-row-block">
+      <div class="client-row-header">
+        <span>Item</span><span style="text-align:right">In (£)</span><span style="text-align:right">Out (£)</span><span style="text-align:right">Why</span><span style="text-align:right">Running Total</span><span style="text-align:right">Net</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">MRR — C1 <span class="client-tag tag-ongoing">ONGOING</span></span>
+        <span class="pos">+£55</span><span>—</span><span class="dim">Month 2 subscription</span><span class="pos">+£55</span><span class="pos">+£55</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Setup fee — C2 <span class="client-tag tag-new">NEW</span></span>
+        <span class="pos">+£350</span><span>—</span><span class="dim">One-time setup</span><span class="pos">+£405</span><span class="pos">+£405</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">MRR Month 1 — C2</span>
+        <span class="pos">+£55</span><span>—</span><span class="dim">First sub</span><span class="pos">+£460</span><span class="pos">+£460</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Setup time — C2</span>
+        <span>—</span><span class="neg">−£60</span><span class="dim">3 hrs your time</span><span class="pos">+£400</span><span class="pos">+£400</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Fixed costs</span>
+        <span>—</span><span class="neg">−£26</span><span class="dim">Hostinger + Claude API + domain</span><span class="pos">+£374</span><span class="pos">+£374</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Variable — C1 + C2</span>
+        <span>—</span><span class="neg">−£24</span><span class="dim">£12 × 2 clients</span><span>—</span><span class="pos">+£350</span>
+      </div>
+      <div class="client-row note-row">
+        <span class="client-row-label" style="color:var(--gold)">Month 2 Total <span class="client-tag tag-total">TOTAL</span></span>
+        <span class="pos" style="font-size:14px;font-weight:800">+£460</span><span class="neg" style="font-size:14px;font-weight:800">−£110</span><span class="dim">—</span><span>—</span><span class="pos" style="font-size:16px;font-weight:800;color:var(--green)">+£350</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTH 3 — CLIENT 3 JOINS -->
+  <div style="margin-bottom: 14px;">
+    <div style="font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">Month 3 — Client 3 joins (C1 + C2 ongoing)</div>
+    <div class="client-row-block">
+      <div class="client-row-header">
+        <span>Item</span><span style="text-align:right">In (£)</span><span style="text-align:right">Out (£)</span><span style="text-align:right">Why</span><span style="text-align:right">Running Total</span><span style="text-align:right">Net</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">MRR — C1 + C2 <span class="client-tag tag-ongoing">ONGOING</span></span>
+        <span class="pos">+£110</span><span>—</span><span class="dim">2 × £55 subs</span><span class="pos">+£110</span><span class="pos">+£110</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Setup fee — C3 <span class="client-tag tag-new">NEW</span></span>
+        <span class="pos">+£350</span><span>—</span><span class="dim">One-time setup</span><span class="pos">+£460</span><span class="pos">+£460</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">MRR Month 1 — C3</span>
+        <span class="pos">+£55</span><span>—</span><span class="dim">First sub</span><span class="pos">+£515</span><span class="pos">+£515</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Setup time — C3</span>
+        <span>—</span><span class="neg">−£60</span><span class="dim">3 hrs your time</span><span class="pos">+£455</span><span class="pos">+£455</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Fixed costs</span>
+        <span>—</span><span class="neg">−£26</span><span class="dim">Hostinger + Claude API + domain</span><span class="pos">+£429</span><span class="pos">+£429</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Variable — C1 + C2 + C3</span>
+        <span>—</span><span class="neg">−£36</span><span class="dim">£12 × 3 clients</span><span>—</span><span class="pos">+£393</span>
+      </div>
+      <div class="client-row note-row">
+        <span class="client-row-label" style="color:var(--gold)">Month 3 Total <span class="client-tag tag-total">TOTAL</span></span>
+        <span class="pos" style="font-size:14px;font-weight:800">+£515</span><span class="neg" style="font-size:14px;font-weight:800">−£122</span><span class="dim">—</span><span>—</span><span class="pos" style="font-size:16px;font-weight:800;color:var(--green)">+£393</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTH 4 — CLIENT 4 JOINS -->
+  <div style="margin-bottom: 14px;">
+    <div style="font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">Month 4 — Client 4 joins (C1 + C2 + C3 ongoing)</div>
+    <div class="client-row-block">
+      <div class="client-row-header">
+        <span>Item</span><span style="text-align:right">In (£)</span><span style="text-align:right">Out (£)</span><span style="text-align:right">Why</span><span style="text-align:right">Running Total</span><span style="text-align:right">Net</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">MRR — C1+C2+C3 <span class="client-tag tag-ongoing">ONGOING</span></span>
+        <span class="pos">+£165</span><span>—</span><span class="dim">3 × £55 subs</span><span class="pos">+£165</span><span class="pos">+£165</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Setup fee — C4 <span class="client-tag tag-new">NEW</span></span>
+        <span class="pos">+£350</span><span>—</span><span class="dim">One-time setup</span><span class="pos">+£515</span><span class="pos">+£515</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">MRR Month 1 — C4</span>
+        <span class="pos">+£55</span><span>—</span><span class="dim">First sub</span><span class="pos">+£570</span><span class="pos">+£570</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Setup time — C4</span>
+        <span>—</span><span class="neg">−£60</span><span class="dim">3 hrs your time</span><span class="pos">+£510</span><span class="pos">+£510</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Fixed costs</span>
+        <span>—</span><span class="neg">−£26</span><span class="dim">Hostinger + Claude API + domain</span><span class="pos">+£484</span><span class="pos">+£484</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Variable — 4 clients</span>
+        <span>—</span><span class="neg">−£48</span><span class="dim">£12 × 4 clients</span><span>—</span><span class="pos">+£436</span>
+      </div>
+      <div class="client-row note-row">
+        <span class="client-row-label" style="color:var(--gold)">Month 4 Total <span class="client-tag tag-total">TOTAL</span></span>
+        <span class="pos" style="font-size:14px;font-weight:800">+£570</span><span class="neg" style="font-size:14px;font-weight:800">−£134</span><span class="dim">—</span><span>—</span><span class="pos" style="font-size:16px;font-weight:800;color:var(--green)">+£436</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MONTH 5 — CLIENT 5 JOINS -->
+  <div style="margin-bottom: 14px;">
+    <div style="font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">Month 5 — Client 5 joins (C1+C2+C3+C4 ongoing)</div>
+    <div class="client-row-block">
+      <div class="client-row-header">
+        <span>Item</span><span style="text-align:right">In (£)</span><span style="text-align:right">Out (£)</span><span style="text-align:right">Why</span><span style="text-align:right">Running Total</span><span style="text-align:right">Net</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">MRR — C1+C2+C3+C4 <span class="client-tag tag-ongoing">ONGOING</span></span>
+        <span class="pos">+£220</span><span>—</span><span class="dim">4 × £55 subs</span><span class="pos">+£220</span><span class="pos">+£220</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Setup fee — C5 <span class="client-tag tag-new">NEW</span></span>
+        <span class="pos">+£350</span><span>—</span><span class="dim">One-time setup</span><span class="pos">+£570</span><span class="pos">+£570</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">MRR Month 1 — C5</span>
+        <span class="pos">+£55</span><span>—</span><span class="dim">First sub</span><span class="pos">+£625</span><span class="pos">+£625</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Setup time — C5</span>
+        <span>—</span><span class="neg">−£60</span><span class="dim">3 hrs your time</span><span class="pos">+£565</span><span class="pos">+£565</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Fixed costs</span>
+        <span>—</span><span class="neg">−£26</span><span class="dim">Hostinger + Claude API + domain</span><span class="pos">+£539</span><span class="pos">+£539</span>
+      </div>
+      <div class="client-row">
+        <span class="client-row-label">Variable — 5 clients</span>
+        <span>—</span><span class="neg">−£60</span><span class="dim">£12 × 5 clients</span><span>—</span><span class="pos">+£479</span>
+      </div>
+      <div class="client-row note-row">
+        <span class="client-row-label" style="color:var(--gold)">Month 5 Total <span class="client-tag tag-total">TOTAL</span></span>
+        <span class="pos" style="font-size:14px;font-weight:800">+£625</span><span class="neg" style="font-size:14px;font-weight:800">−£146</span><span class="dim">—</span><span>—</span><span class="pos" style="font-size:16px;font-weight:800;color:var(--green)">+£479</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUMULATIVE SUMMARY -->
+  <div style="margin-top: 8px; margin-bottom: 8px;">
+    <div style="font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">Cumulative bank balance after each month</div>
+    <div class="scenario-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>End of Month</th>
+            <th>Clients Active</th>
+            <th>Month Profit</th>
+            <th>Cumulative Total</th>
+            <th>Monthly Fixed Absorbed?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Month 1</td><td>1</td><td class="pos">+£307</td><td class="pos">£307</td><td class="pos">Yes ✅</td></tr>
+          <tr><td>Month 2</td><td>2</td><td class="pos">+£350</td><td class="pos">£657</td><td class="pos">Yes ✅</td></tr>
+          <tr><td>Month 3</td><td>3</td><td class="pos">+£393</td><td class="pos">£1,050</td><td class="pos">Yes ✅</td></tr>
+          <tr><td>Month 4</td><td>4</td><td class="pos">+£436</td><td class="pos">£1,486</td><td class="pos">Yes ✅</td></tr>
+          <tr class="highlight-row"><td>Month 5</td><td>5</td><td class="pos">+£479</td><td class="pos">£1,965</td><td class="pos">Yes ✅</td></tr>
+          <tr><td>Month 6 (no new client)</td><td>5</td><td class="warn">+£189</td><td class="pos">£2,154</td><td class="pos">Yes ✅</td></tr>
+          <tr><td>Month 12 (no new client)</td><td>5</td><td class="warn">+£189</td><td class="pos">£3,288</td><td class="pos">Yes ✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 10px;">* Month 6–12 assumes no new clients, all 5 stay. You earn £189/month pure recurring. £3,288 by end of year on just 5 clients.</p>
+  </div>
+</div>
+
+<hr>
+
+<!-- SECTION 3: WHAT HAPPENS WHEN IT SCALES -->
+<div class="section">
+  <div class="section-label">Section 3 — When It Multiplies</div>
+  <div class="section-title">What happens past 5 clients</div>
+
+  <div class="alert warn" style="margin-bottom: 28px;">
+    <strong>Key shift:</strong> Once fixed costs (£26/mo) are absorbed by existing clients, every new client is almost pure profit. Claude API scales slowly — won't blow out until 15+ clients. Support time is your real constraint.
+  </div>
+
+  <div class="scale-grid" style="margin-bottom: 32px;">
+    <div class="scale-card">
+      <div class="scale-card-num" style="color:var(--blue)">5</div>
+      <div class="scale-card-sub">clients — steady state</div>
+      <div class="scale-card-row"><span>Monthly revenue</span><span class="warn">£275</span></div>
+      <div class="scale-card-row"><span>Fixed costs</span><span class="neg">−£26</span></div>
+      <div class="scale-card-row"><span>Variable (5 × £12)</span><span class="neg">−£60</span></div>
+      <div class="scale-card-row"><span>Monthly profit</span><span class="pos">£189</span></div>
+      <div class="scale-card-row"><span>Margin</span><span class="warn">69%</span></div>
+      <div class="scale-card-row"><span>Annual recurring</span><span class="pos">£2,268</span></div>
+    </div>
+
+    <div class="scale-card" style="border-color: rgba(0,230,118,0.2);">
+      <div class="scale-card-num" style="color:var(--green)">10</div>
+      <div class="scale-card-sub">clients — solid business</div>
+      <div class="scale-card-row"><span>Monthly revenue</span><span class="warn">£550</span></div>
+      <div class="scale-card-row"><span>Fixed costs</span><span class="neg">−£26</span></div>
+      <div class="scale-card-row"><span>Variable (10 × £12)</span><span class="neg">−£120</span></div>
+      <div class="scale-card-row"><span>Monthly profit</span><span class="pos">£404</span></div>
+      <div class="scale-card-row"><span>Margin</span><span class="pos">73%</span></div>
+      <div class="scale-card-row"><span>Annual recurring</span><span class="pos">£4,848</span></div>
+    </div>
+
+    <div class="scale-card" style="border-color: rgba(255,214,0,0.2);">
+      <div class="scale-card-num" style="color:var(--gold)">20</div>
+      <div class="scale-card-sub">clients — real income</div>
+      <div class="scale-card-row"><span>Monthly revenue</span><span class="warn">£1,100</span></div>
+      <div class="scale-card-row"><span>Fixed costs*</span><span class="neg">−£36</span></div>
+      <div class="scale-card-row"><span>Variable (20 × £12)</span><span class="neg">−£240</span></div>
+      <div class="scale-card-row"><span>Monthly profit</span><span class="pos">£824</span></div>
+      <div class="scale-card-row"><span>Margin</span><span class="pos">75%</span></div>
+      <div class="scale-card-row"><span>Annual recurring</span><span class="pos">£9,888</span></div>
+    </div>
+  </div>
+
+  <!-- SCALE DETAIL TABLE -->
+  <div class="scenario-wrap" style="margin-bottom: 16px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Clients</th>
+          <th>MRR</th>
+          <th>Fixed</th>
+          <th>Variable</th>
+          <th>Claude API est.</th>
+          <th>Monthly Profit</th>
+          <th>Margin %</th>
+          <th>Annual Run Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1 client</td><td>£55</td><td>£26</td><td>£12</td><td class="dim">£20 (incl.)</td><td class="warn">£17</td><td class="warn">31%</td><td class="warn">£204</td></tr>
+        <tr><td>2 clients</td><td>£110</td><td>£26</td><td>£24</td><td class="dim">£20 (incl.)</td><td class="warn">£60</td><td class="warn">55%</td><td class="warn">£720</td></tr>
+        <tr><td>3 clients</td><td>£165</td><td>£26</td><td>£36</td><td class="dim">£20 (incl.)</td><td class="pos">£103</td><td class="pos">62%</td><td class="pos">£1,236</td></tr>
+        <tr><td>4 clients</td><td>£220</td><td>£26</td><td>£48</td><td class="dim">£20 (incl.)</td><td class="pos">£146</td><td class="pos">66%</td><td class="pos">£1,752</td></tr>
+        <tr><td>5 clients</td><td>£275</td><td>£26</td><td>£60</td><td class="dim">£20 (incl.)</td><td class="pos">£189</td><td class="pos">69%</td><td class="pos">£2,268</td></tr>
+        <tr><td>7 clients</td><td>£385</td><td>£26</td><td>£84</td><td class="dim">£20 (incl.)</td><td class="pos">£275</td><td class="pos">71%</td><td class="pos">£3,300</td></tr>
+        <tr><td>10 clients</td><td>£550</td><td>£26</td><td>£120</td><td class="dim">£20 (incl.)</td><td class="pos">£404</td><td class="pos">73%</td><td class="pos">£4,848</td></tr>
+        <tr><td>15 clients</td><td>£825</td><td>£26</td><td>£180</td><td class="dim">£30 (rises)</td><td class="pos">£589</td><td class="pos">71%</td><td class="pos">£7,068</td></tr>
+        <tr class="highlight-row"><td>20 clients</td><td>£1,100</td><td>£36</td><td>£240</td><td class="dim">£36 (rises)</td><td class="pos">£824</td><td class="pos">75%</td><td class="pos">£9,888</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size: 12px; color: var(--muted); margin-bottom: 40px;">* At 1–2 clients, fixed costs eat most of the margin. From client 3 onwards, fixed costs are absorbed and profit jumps. Claude API starts rising at 15+ clients — budget +£10/month per 10 extra clients.</p>
+
+  <!-- WHERE SUPPORT TIME BREAKS IT -->
+  <div class="alert warn">
+    <strong>The real constraint at scale isn't cost — it's your time.</strong> At 20 clients × 30 min/month = 10 hours/month support. That's manageable. If it creeps to 1hr/client = 20 hours. You'll need a system (Telegram auto-updates, FAQ doc, or hire VA) before you hit 15 clients.
+  </div>
+</div>
+
+<hr>
+
+<!-- SECTION 4: VERDICT CARDS -->
+<div class="section">
+  <div class="section-label">Section 4 — Where You Win & Lose</div>
+  <div class="section-title">Every case, brutally honest</div>
+
+  <div class="verdicts" style="margin-bottom: 48px;">
+    <div class="verdict win">
+      <div class="verdict-tag">✅ Win</div>
+      <div class="verdict-title">Client 1 pays £350 + stays 3 months</div>
+      <div class="verdict-body">Total in: £515. Total out: £98 (setup) + £38 (2mo ongoing) = £136. Profit: £379. Win even on early churn.</div>
+    </div>
+    <div class="verdict win">
+      <div class="verdict-tag">✅ Win</div>
+      <div class="verdict-title">5 clients steady — no new ones</div>
+      <div class="verdict-body">£189/month pure recurring. £2,268/year doing nothing except support. Fixed costs fully absorbed from client 3.</div>
+    </div>
+    <div class="verdict win">
+      <div class="verdict-tag">✅ Win</div>
+      <div class="verdict-title">Client invokes 30-day guarantee</div>
+      <div class="verdict-body">You refund £55 MRR. You keep £350 setup. Net day-1 profit: £290. The setup fee is your insurance policy.</div>
+    </div>
+    <div class="verdict win">
+      <div class="verdict-tag">✅ Win</div>
+      <div class="verdict-title">2 clients, 1 churns month 2</div>
+      <div class="verdict-body">Month 1: +£307. Month 2: +£350 (C2 setup covers it). Month 3 onwards: £103/mo on just 1 steady client.</div>
+    </div>
+    <div class="verdict lose">
+      <div class="verdict-tag">❌ Lose</div>
+      <div class="verdict-title">Client demands full refund incl. setup</div>
+      <div class="verdict-body">You refund £405. You spent £60 time + £26 fixed + £12 variable = £98. Net loss: £98 − £0 = you lose £98. One bad client max. Non-refundable T&Cs = this never happens.</div>
+    </div>
+    <div class="verdict lose">
+      <div class="verdict-tag">❌ Lose</div>
+      <div class="verdict-title">0 clients — 3 months in</div>
+      <div class="verdict-body">You pay £26/mo fixed for 3 months = £78 total loss. That's it. Your downside is capped at £78 if you get zero traction in 3 months. Not a money risk. A motivation risk.</div>
+    </div>
+    <div class="verdict caution">
+      <div class="verdict-tag">⚠️ Watch Out</div>
+      <div class="verdict-title">1–2 clients only — low margin</div>
+      <div class="verdict-body">With just 1 client ongoing you keep £17/month. Fixed costs dominate. At 1–2 clients you're covering costs not building income. Push through to 3+ clients as fast as possible.</div>
+    </div>
+    <div class="verdict caution">
+      <div class="verdict-tag">⚠️ Watch Out</div>
+      <div class="verdict-title">Support time creep past 30 min</div>
+      <div class="verdict-body">If a difficult client needs 2hrs/month = £40 cost not £10. Margin on that client drops from £43 to £13. Set boundaries: Telegram only, response within 24hrs, no WhatsApp DMs.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- SECTION 5: KEY NUMBERS -->
+<div class="section">
+  <div class="section-label">Section 5 — The Numbers That Matter</div>
+  <div class="section-title">Summary</div>
+
+  <div class="big-numbers" style="margin-bottom: 48px;">
+    <div class="big-num-card">
+      <div class="big-num-val" style="color: var(--green);">£290</div>
+      <div class="big-num-label">Profit in pocket the day each client signs up</div>
+    </div>
+    <div class="big-num-card">
+      <div class="big-num-val" style="color: var(--blue);">3</div>
+      <div class="big-num-label">Clients needed before fixed costs stop mattering</div>
+    </div>
+    <div class="big-num-card">
+      <div class="big-num-val" style="color: var(--gold);">£43</div>
+      <div class="big-num-label">Kept from every £55 payment (ongoing)</div>
+    </div>
+    <div class="big-num-card">
+      <div class="big-num-val" style="color: var(--purple);">£78</div>
+      <div class="big-num-label">Maximum you can lose in 3 months of zero clients</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- FINAL VERDICT -->
+<div class="section" style="padding-bottom: 80px;">
+  <div class="final-box">
+    <h2>The model <span>works.</span></h2>
+    <p>Minimal fixed costs. Predictable variable costs. £290 profit per client on day one. Only risk is getting zero clients — and that's free to fix.</p>
+
+    <div>
+      <span class="verdict-pill pill-green">£290 profit per client day 1</span>
+      <span class="verdict-pill pill-gold">3 clients = fixed costs absorbed</span>
+      <span class="verdict-pill pill-green">£404/month at 10 clients</span>
+      <span class="verdict-pill pill-gold">Max downside = £78</span>
+      <span class="verdict-pill pill-red">Only risk = getting no clients</span>
+    </div>
+
+    <div style="margin-top: 32px; padding: 22px; background: rgba(255,214,0,0.05); border: 1px solid rgba(255,214,0,0.15); border-radius: 14px; text-align: left;">
+      <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px;">One thing to lock into T&Cs</div>
+      <div style="font-size: 14px; color: #aaa; line-height: 1.8;">
+        <strong style="color: var(--text);">Setup fee (£350) is non-refundable.</strong> It covers 3 hours of technical setup completed on your behalf. The monthly fee (£55) carries a 30-day money-back guarantee — cancel anytime before day 30 and pay nothing more.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'translateY(0)'; } });
+  }, { threshold: 0.05 });
+
+  document.querySelectorAll('.client-row-block, .scale-card, .verdict, .big-num-card, .cost-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>

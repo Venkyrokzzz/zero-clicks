@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>London Pubs — Market Breakdown</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #030712;
+      color: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .container { max-width: 900px; width: 100%; }
+
+    .header { text-align: center; margin-bottom: 48px; }
+    .header .label {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #3b82f6; margin-bottom: 10px;
+    }
+    .header h1 {
+      font-size: 36px; font-weight: 800;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .header p { color: #6b7280; font-size: 14px; }
+
+    /* Stats row */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 20px; text-align: center;
+    }
+    .stat-card .num { font-size: 28px; font-weight: 800; color: #60a5fa; }
+    .stat-card .desc { font-size: 12px; color: #6b7280; margin-top: 4px; }
+
+    /* Main layout */
+    .main { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+
+    .card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 28px;
+    }
+    .card-title { font-size: 13px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 24px; }
+
+    /* Donut chart */
+    .donut-wrap { position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 24px; }
+    .donut-center {
+      position: absolute; text-align: center;
+      pointer-events: none;
+    }
+    .donut-center .big { font-size: 28px; font-weight: 800; color: #f3f4f6; }
+    .donut-center .small { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+    .donut-legend { display: flex; flex-direction: column; gap: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { color: #d1d5db; flex: 1; }
+    .legend-val { color: #9ca3af; font-size: 12px; }
+    .legend-pct { font-weight: 700; font-size: 13px; }
+
+    /* Bar chart */
+    .bars { display: flex; flex-direction: column; gap: 18px; }
+    .bar-row {}
+    .bar-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .bar-name { font-size: 13px; color: #d1d5db; }
+    .bar-count { font-size: 13px; font-weight: 700; }
+    .bar-track { background: rgba(255,255,255,0.05); border-radius: 999px; height: 10px; overflow: hidden; }
+    .bar-fill {
+      height: 100%; border-radius: 999px;
+      animation: growBar 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
+      transform-origin: left;
+    }
+    @keyframes growBar {
+      from { width: 0 !important; }
+    }
+    .bar-note { font-size: 11px; color: #4b5563; margin-top: 4px; }
+
+    /* Bottom insight strip */
+    .insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .insight {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 16px;
+    }
+    .insight .icon { font-size: 20px; margin-bottom: 8px; }
+    .insight .insight-title { font-size: 12px; font-weight: 600; color: #60a5fa; margin-bottom: 4px; }
+    .insight p { font-size: 12px; color: #6b7280; line-height: 1.5; }
+
+    .source { text-align: center; margin-top: 32px; font-size: 11px; color: #374151; }
+
+    /* Colours */
+    .c-blue   { color: #3b82f6; }
+    .c-indigo { color: #818cf8; }
+    .c-purple { color: #a78bfa; }
+    .c-gray   { color: #6b7280; }
+    .bg-blue   { background: #3b82f6; }
+    .bg-indigo { background: #818cf8; }
+    .bg-purple { background: #a78bfa; }
+    .bg-gray   { background: #4b5563; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="label">Market Intelligence · London 2025</div>
+    <h1>London Pub Landscape</h1>
+    <p>~3,800 pubs across Greater London · Breakdown by operator type &amp; size</p>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="num">~3,800</div>
+      <div class="desc">Total pubs in Greater London</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">66%</div>
+      <div class="desc">Of visits go to independents</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">~2,500</div>
+      <div class="desc">Independent-run pubs (your market)</div>
+    </div>
+  </div>
+
+  <!-- Main two-column -->
+  <div class="main">
+
+    <!-- Donut -->
+    <div class="card">
+      <div class="card-title">Operator type split</div>
+      <div class="donut-wrap">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <!-- Background ring -->
+          <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="30"/>
+
+          <!-- Segments: total circumference = 2π×75 ≈ 471.2 -->
+          <!-- Small indie: 42% = 197.9 | offset 0 -->
+          <circle cx="100" cy="100" r="75" fill="none"
+            stroke="#3b82f6" stroke-width="30"
+            stroke-dasharray="197.9 273.3"
+            stroke-dashoffset="117.8"
+            transform="rotate(-90 100 100)"/>
+
+          <!-- Medium indie: 24% = 113.1 | offset -197.9 -->
+          <circle cx="100" cy="100" r="75" fill="none"
+            stroke="#818cf8" stroke-width="30"
+            stroke-dasharray="113.1 358.1"
+            stroke-dashoffset="-80.1"
+            transform="rotate(-90 100 100)"/>
+
+          <!-- Large indie: 10% = 47.1 | offset after medium -->
+          <circle cx="100" cy="100" r="75" fill="none"
+            stroke="#a78bfa" stroke-width="30"
+            stroke-dasharray="47.1 424.1"
+            stroke-dashoffset="-193.2"
+            transform="rotate(-90 100 100)"/>
+
+          <!-- Chains: 24% = 113.1 | fills the rest -->
+          <circle cx="100" cy="100" r="75" fill="none"
+            stroke="#374151" stroke-width="30"
+            stroke-dasharray="113.1 358.1"
+            stroke-dashoffset="-240.3"
+            transform="rotate(-90 100 100)"/>
+        </svg>
+        <div class="donut-center">
+          <div class="big">3,800</div>
+          <div class="small">London pubs</div>
+        </div>
+      </div>
+
+      <div class="donut-legend">
+        <div class="legend-item">
+          <div class="legend-dot bg-blue"></div>
+          <div class="legend-label">Small independents</div>
+          <div class="legend-val">~1,600</div>
+          <div class="legend-pct c-blue">42%</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot bg-indigo"></div>
+          <div class="legend-label">Medium independents</div>
+          <div class="legend-val">~900</div>
+          <div class="legend-pct c-indigo">24%</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot bg-purple"></div>
+          <div class="legend-label">Large independents</div>
+          <div class="legend-val">~380</div>
+          <div class="legend-pct c-purple">10%</div>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot bg-gray"></div>
+          <div class="legend-label">Managed chains</div>
+          <div class="legend-val">~920</div>
+          <div class="legend-pct c-gray">24%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar chart -->
+    <div class="card">
+      <div class="card-title">Size breakdown — what each means</div>
+      <div class="bars">
+
+        <div class="bar-row">
+          <div class="bar-meta">
+            <div class="bar-name">🍺 Small Independent</div>
+            <div class="bar-count c-blue">~1,600 pubs</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill bg-blue" style="width:100%"></div></div>
+          <div class="bar-note">Solo/family run · &lt;60 covers · wet-led or basic food · your easiest sell</div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-meta">
+            <div class="bar-name">🍔 Medium Independent</div>
+            <div class="bar-count c-indigo">~900 pubs</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill bg-indigo" style="width:56%"></div></div>
+          <div class="bar-note">Food-led or gastropub · 60–150 covers · 1–5 sites · owner still decides</div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-meta">
+            <div class="bar-name">🏛️ Large Independent</div>
+            <div class="bar-count c-purple">~380 pubs</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill bg-purple" style="width:24%"></div></div>
+          <div class="bar-note">Destination venues · events · 150+ covers · longer sales cycle</div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-meta">
+            <div class="bar-name">🏢 Managed Chain</div>
+            <div class="bar-count c-gray">~920 pubs</div>
+          </div>
+          <div class="bar-track"><div class="bar-fill bg-gray" style="width:58%"></div></div>
+          <div class="bar-note">Stonegate · Wetherspoons · Greene King · skip — no local autonomy</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Insight strip -->
+  <div class="insights">
+    <div class="insight">
+      <div class="icon">🎯</div>
+      <div class="insight-title">Your TAM</div>
+      <p>~2,500 independent London pubs. At £95/mo that's £2.85M/yr addressable just in London.</p>
+    </div>
+    <div class="insight">
+      <div class="icon">📍</div>
+      <div class="insight-title">Best zones</div>
+      <p>Shoreditch, Hackney, Bethnal Green, Soho, Camden — tourist-heavy = impulse walk-ins = Footfall Engine works best.</p>
+    </div>
+    <div class="insight">
+      <div class="icon">⚡</div>
+      <div class="insight-title">Low-hanging fruit</div>
+      <p>~83% of all pubs haven't posted on GBP in 90+ days. Most dormant profiles are small independents.</p>
+    </div>
+  </div>
+
+  <div class="source">Sources: ONS London Pub Data 2025 · Lumina Intelligence UK Pub Market 2025 · House of Commons Library Pub Statistics · British Beer &amp; Pub Association</div>
+
+</div>
+</body>
+</html>
