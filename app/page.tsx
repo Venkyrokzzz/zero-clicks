@@ -186,15 +186,7 @@ export default function Home() {
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)')}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--bg-card)')}
             >
-              See the demo
-              <kbd style={{
-                background: 'var(--bg-hover)',
-                color: 'var(--text-muted)',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                fontSize: '12px',
-                fontFamily: 'var(--font-mono)',
-              }}>⌘K</kbd>
+              See the demo →
             </Link>
           </motion.div>
         </div>
@@ -211,7 +203,7 @@ export default function Home() {
         <Testimonials />
 
         <section id="pricing"><Pricing /></section>
-        <ReputationShowcase />
+        <section id="reputation-manager"><ReputationShowcase /></section>
         <section id="how-it-works"><HowItWorks /></section>
 
         <FAQ />

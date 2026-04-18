@@ -14,8 +14,8 @@ const PRODUCTS = [
 ];
 
 const NAV_LINKS = [
-  { label: "Services", href: "/#reputation-manager" },
   { label: "How it works", href: "/#how-it-works" },
+  { label: "Pricing", href: "/#pricing" },
 ];
 
 export default function Navbar() {
