@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { track } from "@/lib/analytics";
 
 type State = "idle" | "sending" | "sent" | "error";
 
@@ -45,6 +46,7 @@ export default function FloatingChat() {
       const json = await res.json();
       if (res.ok && json.success) {
         setState("sent");
+        track("form_submit", { form: "chat_widget" });
       } else {
         setState("error");
       }

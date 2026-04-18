@@ -24,7 +24,7 @@ export const HERO = {
   subtext:
     "Zero Clicks automates the daily grind for UK pubs, restaurants and hotels — reviews replied to, inbox handled, nothing dropped. You stay front of house.",
   ctaPrimary: {
-    label: "Book a free 15-min call",
+    label: "Book a free 30-min call",
     href: "/contact",
   },
   ctaSecondary: {

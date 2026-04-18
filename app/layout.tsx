@@ -1,12 +1,11 @@
 // app/layout.tsx
-// Root layout — fonts loaded via next/font (never via CDN link).
-// Analytics: drop scripts in the commented block below.
-
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "../styles/globals.css";
 import NavbarWrapper from "../components/NavbarWrapper";
 import { ThemeProvider } from "../components/ThemeProvider";
+import JsonLd from "../components/JsonLd";
 
 const interBody = Inter({
   subsets: ["latin"],
@@ -22,68 +21,59 @@ const interDisplay = Inter({
   display: "swap",
 });
 
+const BASE = "https://www.0-clicks.uk";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(BASE),
   title: {
-    default: "Zero Clicks — AI Automation for UK Businesses",
+    default: "Zero Clicks — AI Automation for UK Pubs & Restaurants",
     template: "%s | Zero Clicks",
   },
   description:
-    "Zero Clicks builds custom n8n + Claude AI automation workflows for UK hospitality businesses and SMEs. Automate your inbox, bookings, and ops in days.",
-  keywords: ["AI automation", "n8n", "workflow automation", "UK hospitality", "pub automation", "email automation", "Claude AI", "business automation"],
+    "Zero Clicks automates the daily grind for UK pubs, restaurants and hotels — reviews replied to in under 4 minutes, inbox handled, nothing dropped. Live in 48 hours.",
+  keywords: [
+    "AI automation UK hospitality",
+    "pub review automation",
+    "restaurant email automation",
+    "Google review replies UK",
+    "n8n automation agency UK",
+    "hospitality AI tools",
+    "pub management software",
+  ],
+  alternates: { canonical: BASE },
   openGraph: {
-    title: "Zero Clicks — AI Automation for UK Businesses",
-    description: "Custom n8n + Claude AI workflows for UK hospitality and SMEs. Inbox automated, ops running 24/7.",
-    url: "https://zeroclicks.dev",
+    title: "Zero Clicks — AI Automation for UK Pubs & Restaurants",
+    description: "Reviews replied to in under 4 minutes. Inbox handled. Google presence kept fresh — all automated. UK hospitality only. Live in 48 hrs.",
+    url: BASE,
     siteName: "Zero Clicks",
     locale: "en_GB",
     type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Zero Clicks — AI Automation for UK Hospitality" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zero Clicks",
-    description: "We automate the boring stuff so you can focus on what matters.",
+    title: "Zero Clicks — AI Automation for UK Pubs & Restaurants",
+    description: "Reviews replied to in under 4 minutes. Inbox handled. Nothing dropped. UK hospitality only.",
+    images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-  },
+  icons: { icon: "/logo.png", apple: "/logo.png" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${interBody.variable} ${interDisplay.variable}`}>
+    <html lang="en-GB" suppressHydrationWarning className={`${interBody.variable} ${interDisplay.variable}`}>
       <head>
-        {/* Anti-flash script — sets data-theme BEFORE first paint, prevents white/dark flash */}
-        <script dangerouslySetInnerHTML={{ __html: `
-          (function() {
-            try {
-              var stored = localStorage.getItem('zc-theme');
-              // Dark is always default — only switch to light if user explicitly chose it
-              var theme = stored === 'light' ? 'light' : 'dark';
-              document.documentElement.setAttribute('data-theme', theme);
-            } catch(e) {
-              document.documentElement.setAttribute('data-theme', 'dark');
-            }
-          })();
-        `}} />
-        {/*
-         * ── Analytics placeholder ─────────────────────────────────────
-         * Uncomment to enable:
-         *
-         * Google Analytics (GA4):
-         * <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX" />
-         *
-         * Plausible:
-         * <script defer data-domain="zeroclicks.co.uk" src="https://plausible.io/js/script.js" />
-         * ──────────────────────────────────────────────────────────────
-         */}
+        {/* Anti-flash: always dark unless user explicitly chose light */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var s=localStorage.getItem('zc-theme');document.documentElement.setAttribute('data-theme',s==='light'?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();` }} />
+        <JsonLd />
       </head>
       <body style={{ margin: 0 }}>
         <ThemeProvider>
           <NavbarWrapper />
           {children}
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );

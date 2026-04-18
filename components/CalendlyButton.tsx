@@ -1,4 +1,5 @@
 "use client";
+import { track } from "@/lib/analytics";
 
 export default function CalendlyButton() {
   return (
@@ -6,6 +7,7 @@ export default function CalendlyButton() {
       href="https://calendly.com/zeroclicks-hq/30min"
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => track("calendly_open", { location: "contact_page" })}
       style={{
         marginTop: "8px",
         display: "block",
@@ -31,7 +33,7 @@ export default function CalendlyButton() {
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
       }}
     >
-      Book a free 15-min call →
+      Book a free 30-min call →
     </a>
   );
 }

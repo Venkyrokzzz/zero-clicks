@@ -4,7 +4,8 @@ import Footer from "@/components/Footer";
 import ProductPageShell from "@/components/ProductPageShell";
 
 export const metadata: Metadata = {
-  title: "Inbox Autopilot — Zero Clicks",
+  title: "Inbox Autopilot — AI Email Automation for UK Pubs & Restaurants",
+  alternates: { canonical: "https://www.0-clicks.uk/products/inbox-autopilot" },
   description:
     "AI reads, sorts and drafts every email so you check your inbox twice a day instead of all day.",
 };

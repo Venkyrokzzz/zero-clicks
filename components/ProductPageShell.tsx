@@ -158,7 +158,7 @@ export default function ProductPageShell({
             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.transform = "translateY(-1px)")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.transform = "translateY(0)")}
           >
-            Book a free 15-min call
+            Book a free 30-min call
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>

@@ -4,7 +4,8 @@ import Footer from "@/components/Footer";
 import ProductPageShell from "@/components/ProductPageShell";
 
 export const metadata: Metadata = {
-  title: "Footfall Engine — Zero Clicks",
+  title: "Footfall Engine — Google Business Profile Automation for UK Venues",
+  alternates: { canonical: "https://www.0-clicks.uk/products/footfall-engine" },
   description:
     "Automated Google Business Profile posting that brings local searchers through your door.",
 };

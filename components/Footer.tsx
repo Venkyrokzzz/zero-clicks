@@ -40,6 +40,7 @@ export default function Footer() {
           {[
             { label: "LinkedIn", href: SITE.linkedin },
             { label: "Email", href: `mailto:${SITE.email}` },
+            { label: "Privacy", href: "/privacy" },
           ].map(link => (
             <Link
               key={link.label}

@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Block internal/utility pages from indexing
+Disallow: /connect/
+Disallow: /dashboard/
+Disallow: /neural-flow/
+Disallow: /pitch/
+Disallow: /api/
+
+Sitemap: https://www.0-clicks.uk/sitemap.xml

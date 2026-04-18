@@ -85,7 +85,7 @@ export default function ContactPage() {
                 fontSize: "clamp(1.4rem, 2.5vw, 1.9rem)", color: "var(--text-primary)",
                 margin: "0 0 12px", lineHeight: 1.2,
               }}>
-                15 minutes. No slides. Just clarity.
+                30 minutes. No slides. Just clarity.
               </h2>
               <p style={{
                 fontSize: "0.875rem", color: "var(--text-secondary)", lineHeight: 1.75,

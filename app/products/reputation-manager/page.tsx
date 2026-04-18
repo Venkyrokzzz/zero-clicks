@@ -5,7 +5,8 @@ import ProductPageShell from "@/components/ProductPageShell";
 import ReputationShowcase from "@/components/ReputationShowcase";
 
 export const metadata: Metadata = {
-  title: "Reputation Manager — Zero Clicks",
+  title: "Reputation Manager — Automated Google Review Replies for UK Pubs",
+  alternates: { canonical: "https://www.0-clicks.uk/products/reputation-manager" },
   description:
     "Every Google review replied to, automatically. AI watches your listing 24/7 and drafts personalised responses in your own voice. You approve in one tap.",
 };
