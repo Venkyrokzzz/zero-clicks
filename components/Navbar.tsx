@@ -71,11 +71,11 @@ export default function Navbar() {
             justifyContent: "space-between",
             padding: "12px 16px 12px 20px",
             borderRadius: "16px",
-            background: "linear-gradient(135deg, rgba(10,16,40,0.92) 0%, rgba(6,10,28,0.95) 100%)",
-            backdropFilter: "blur(40px) saturate(200%)",
-            WebkitBackdropFilter: "blur(40px) saturate(200%)",
-            border: "1px solid rgba(6,182,212,0.25)",
-            boxShadow: "0 0 0 1px rgba(255,255,255,0.03), 0 4px 24px rgba(0,0,0,0.5), 0 0 40px rgba(6,182,212,0.06), inset 0 1px 0 rgba(6,182,212,0.1)",
+            background: "rgba(8,12,28,0.55)",
+            backdropFilter: "blur(24px) saturate(160%)",
+            WebkitBackdropFilter: "blur(24px) saturate(160%)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 4px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07)",
             transition: "background 300ms ease, box-shadow 300ms ease",
             pointerEvents: "all",
             position: "relative",
@@ -85,7 +85,7 @@ export default function Navbar() {
           <div aria-hidden style={{
             position: "absolute",
             top: 0, left: "10%", right: "10%", height: "1px",
-            background: "linear-gradient(90deg, transparent, rgba(6,182,212,0.5) 30%, rgba(140,100,255,0.4) 70%, transparent)",
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 40%, rgba(255,255,255,0.08) 60%, transparent)",
             borderRadius: "1px",
           }} />
 
