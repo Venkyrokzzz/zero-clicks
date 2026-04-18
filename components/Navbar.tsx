@@ -105,10 +105,10 @@ export default function Navbar() {
             />
             <span style={{
               fontFamily: "var(--font-display)",
-              fontSize: "15px",
-              fontWeight: 600,
+              fontSize: "16px",
+              fontWeight: 700,
               color: "#fff",
-              letterSpacing: "-0.01em",
+              letterSpacing: "0.01em",
               whiteSpace: "nowrap",
             }}>
               {SITE.name}
@@ -121,7 +121,7 @@ export default function Navbar() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "2px",
+              gap: "4px",
               flex: 1,
               justifyContent: "center",
             }}
@@ -134,26 +134,25 @@ export default function Navbar() {
                   href={item.href}
                   style={{
                     position: "relative",
-                    padding: "7px 14px",
-                    borderRadius: "8px",
-                    fontSize: "13px",
+                    padding: "8px 18px",
+                    borderRadius: "9px",
+                    fontSize: "15px",
                     fontWeight: 500,
-                    color: active ? "#fff" : "rgba(255,255,255,0.55)",
+                    color: active ? "#fff" : "rgba(255,255,255,0.5)",
                     textDecoration: "none",
-                    letterSpacing: "-0.005em",
-                    transition: "color 180ms ease, background 180ms ease",
+                    letterSpacing: "0.01em",
+                    transition: "color 180ms ease",
                     fontFamily: "var(--font-body)",
+                    whiteSpace: "nowrap",
                   }}
                   onMouseEnter={(e) => {
                     if (!active) {
                       (e.currentTarget as HTMLElement).style.color = "#fff";
-                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!active) {
-                      (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.55)";
-                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                      (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)";
                     }
                   }}
                 >
@@ -185,13 +184,14 @@ export default function Navbar() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                padding: "8px 16px",
+                padding: "9px 20px",
                 background: "#fff",
                 color: "#0a0c14",
-                fontSize: "13px",
-                fontWeight: 600,
+                fontSize: "14px",
+                fontWeight: 700,
                 textDecoration: "none",
-                borderRadius: "8px",
+                borderRadius: "9px",
+                letterSpacing: "0.01em",
                 fontFamily: "var(--font-body)",
                 transition: "transform 150ms ease, box-shadow 150ms ease",
                 boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
