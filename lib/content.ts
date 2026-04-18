@@ -19,31 +19,31 @@ export const SITE = {
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
 export const HERO = {
-  headlineTop: "Stop doing it manually.",
-  headlineBottom: "Let the machines handle it.",
+  headlineTop: "Every Google review replied to.",
+  headlineBottom: "Before you finish your shift.",
   subtext:
-    "Zero Clicks builds AI automation for UK pubs and restaurants — so your reviews get replied to, your inbox runs itself, and no booking goes unanswered.",
+    "Zero Clicks watches your Google listing 24/7 and writes personalised replies in your own voice. You approve in one tap — or let it run fully automatic.",
   ctaPrimary: {
-    label: "Book a free 15-min call",
+    label: "Get a free sample reply",
     href: "/contact",
   },
   ctaSecondary: {
-    label: "See how it works",
-    href: "#services",
+    label: "See it in action",
+    href: "/demo",
   },
 } as const;
 
 // ── Proof bar ─────────────────────────────────────────────────────────────────
 // Items repeat automatically in the marquee — no need to duplicate.
 export const PROOF_BAR_ITEMS: string[] = [
-  "Built for UK hospitality businesses",
-  "Built on n8n — open source, no lock-in",
-  "Deployed in days, not months",
-  "Automations run 24/7",
-  "Custom-built for your stack",
+  "26 of 30 London pubs have unanswered reviews",
+  "1-star improvement = up to 9% more revenue",
+  "Average reply time: under 4 minutes",
+  "Works for pubs, restaurants and hotels",
+  "Replies in your voice — not a template",
+  "1-2 star reviews flagged to you instantly",
+  "Live in 48 hours",
   "UK-based, always available",
-  "OAuth2 secured — no stored passwords",
-  "Claude AI — Haiku for speed, Sonnet for quality",
 ];
 
 // ── Services ──────────────────────────────────────────────────────────────────

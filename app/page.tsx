@@ -62,67 +62,62 @@ export default function Home() {
         >
           {/* Badge */}
           <motion.div
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '6px 14px',
+              padding: '5px 14px',
               borderRadius: '9999px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              background: 'rgba(255, 255, 255, 0.04)',
-              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(16,185,129,0.25)',
+              background: 'rgba(16,185,129,0.06)',
             }}
           >
             <motion.div
-              animate={{ scale: [1, 1.4, 1], opacity: [1, 0.6, 1] }}
+              animate={{ opacity: [1, 0.4, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
-              style={{
-                width: '7px',
-                height: '7px',
-                borderRadius: '50%',
-                background: '#ef4444',
-                boxShadow: '0 0 8px #ef4444',
-                flexShrink: 0,
-              }}
+              style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', flexShrink: 0 }}
             />
-            <span style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#a1a1aa', fontWeight: 500 }}>
-              N8N · Claude AI · Built for UK Hospitality
+            <span style={{ fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#10b981', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
+              AI-powered review replies for UK hospitality
             </span>
           </motion.div>
 
           {/* Headline */}
           <motion.h1
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
             style={{
-              fontSize: 'clamp(2.5rem, 8vw, 5rem)',
-              fontWeight: 700,
-              marginTop: '32px',
-              marginBottom: '16px',
+              fontSize: 'clamp(2.6rem, 7.5vw, 4.8rem)',
+              fontWeight: 800,
+              marginTop: '28px',
+              marginBottom: '0',
               letterSpacing: '-0.04em',
               lineHeight: 1.05,
             }}
           >
-            <span style={{ display: 'block', marginBottom: '8px' }} className="hero-heading">
-              You run the business.
+            <span style={{ display: 'block' }} className="hero-heading">
+              {HERO.headlineTop}
             </span>
-            <span className="hero-heading" style={{ display: 'block' }}>
-              AI runs everything else.
+            <span className="hero-heading" style={{ display: 'block', opacity: 0.5 }}>
+              {HERO.headlineBottom}
             </span>
           </motion.h1>
 
           {/* Subtext */}
           <motion.p
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.35 }}
             style={{
-              fontSize: 'clamp(1rem, 2vw, 1.15rem)',
+              fontSize: 'clamp(1rem, 1.8vw, 1.1rem)',
               color: 'var(--text-secondary)',
-              lineHeight: 1.6,
-              maxWidth: '680px',
-              margin: '0 auto 40px',
+              lineHeight: 1.65,
+              maxWidth: '560px',
+              margin: '20px auto 36px',
               fontFamily: 'var(--font-body)',
               fontWeight: 400,
             }}
@@ -142,51 +137,71 @@ export default function Home() {
               marginBottom: '64px',
             }}
           >
-            {/* Primary CTA — white pill */}
+            {/* Primary CTA */}
             <Link
               href="/contact"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '10px',
+                gap: '8px',
                 padding: '14px 28px',
-                background: 'var(--text-primary)',
-                color: 'var(--bg)',
+                background: '#2c4fd6',
+                color: '#fff',
                 fontSize: '14px',
-                fontWeight: 600,
+                fontWeight: 700,
                 textDecoration: 'none',
-                borderRadius: '9999px',
-                transition: 'opacity 200ms ease',
+                borderRadius: '8px',
+                boxShadow: '0 0 32px rgba(44,79,214,0.35)',
+                transition: 'transform 150ms ease, box-shadow 150ms ease',
+                fontFamily: 'var(--font-body)',
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0.9')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = 'translateY(-1px)';
+                el.style.boxShadow = '0 0 40px rgba(44,79,214,0.5)';
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = 'translateY(0)';
+                el.style.boxShadow = '0 0 32px rgba(44,79,214,0.35)';
+              }}
             >
-              Book a free 15-min call
-              <span style={{ opacity: 0.4, fontSize: '13px' }}>✕</span>
+              Get a free sample reply
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
             </Link>
 
-            {/* Secondary CTA — dark glass */}
+            {/* Secondary CTA */}
             <Link
               href="/demo"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '10px',
-                padding: '14px 24px',
-                background: 'var(--bg-card)',
-                color: 'var(--text-primary)',
+                gap: '8px',
+                padding: '14px 22px',
+                background: 'transparent',
+                color: 'rgba(255,255,255,0.6)',
                 fontSize: '14px',
                 fontWeight: 500,
                 textDecoration: 'none',
                 borderRadius: '8px',
-                border: '1px solid var(--border-mid)',
-                backdropFilter: 'blur(8px)',
-                transition: 'background 200ms ease',
+                border: '1px solid rgba(255,255,255,0.1)',
+                transition: 'color 150ms ease, border-color 150ms ease',
+                fontFamily: 'var(--font-body)',
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--bg-card)')}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.color = 'rgba(255,255,255,0.9)';
+                el.style.borderColor = 'rgba(255,255,255,0.2)';
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.color = 'rgba(255,255,255,0.6)';
+                el.style.borderColor = 'rgba(255,255,255,0.1)';
+              }}
             >
-              See the demo →
+              See it in action →
             </Link>
           </motion.div>
         </div>
