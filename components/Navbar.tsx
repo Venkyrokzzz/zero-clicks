@@ -94,10 +94,9 @@ export default function Navbar() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "9px",
+              gap: "10px",
               textDecoration: "none",
-              flex: "0 0 auto",
-              minWidth: "140px",
+              flex: 1,
             }}
           >
             <Image
@@ -110,7 +109,7 @@ export default function Navbar() {
             />
             <span style={{
               fontFamily: "var(--font-display)",
-              fontSize: "16px",
+              fontSize: "17px",
               fontWeight: 700,
               color: "#fff",
               letterSpacing: "0.01em",
@@ -139,9 +138,9 @@ export default function Navbar() {
                   href={item.href}
                   style={{
                     position: "relative",
-                    padding: "8px 18px",
-                    borderRadius: "9px",
-                    fontSize: "15px",
+                    padding: "9px 20px",
+                    borderRadius: "10px",
+                    fontSize: "16px",
                     fontWeight: 500,
                     color: active ? "#e2e8f0" : "rgba(255,255,255,0.45)",
                     textDecoration: "none",
@@ -185,18 +184,18 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Right side: primary CTA — right anchor, matches logo min-width */}
-          <div className="desktop-cta" style={{ display: "flex", alignItems: "center", gap: "8px", flex: "0 0 auto", minWidth: "140px", justifyContent: "flex-end" }}>
+          {/* Right side: primary CTA — right anchor */}
+          <div className="desktop-cta" style={{ display: "flex", alignItems: "center", flex: 1, justifyContent: "flex-end" }}>
             <Link
               href="/contact"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                padding: "9px 20px",
+                padding: "10px 22px",
                 background: "linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(59,130,246,0.15) 100%)",
                 color: "#e2e8f0",
-                fontSize: "14px",
+                fontSize: "15px",
                 fontWeight: 600,
                 textDecoration: "none",
                 borderRadius: "9px",
