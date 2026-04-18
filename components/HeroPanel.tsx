@@ -119,7 +119,7 @@ export default function HeroPanel() {
           </div>
         </div>
 
-        <div style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className="hero-panel-body" style={{ padding: "24px 28px", display: "flex", flexDirection: "column", gap: "16px" }}>
 
           {/* ── Incoming review ── */}
           <AnimatePresence mode="wait">
@@ -286,6 +286,11 @@ export default function HeroPanel() {
 
         </div>
       </div>
+      <style>{`
+        @media (max-width: 480px) {
+          .hero-panel-body { padding: 16px 16px !important; }
+        }
+      `}</style>
     </motion.div>
   );
 }

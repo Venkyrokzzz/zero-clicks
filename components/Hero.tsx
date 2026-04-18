@@ -15,6 +15,7 @@ const ease = [0.25, 0.1, 0.25, 1.0] as const;
 export default function Hero() {
   return (
     <section
+      className="hero-section"
       style={{
         minHeight: "100vh",
         display: "flex",
@@ -174,6 +175,13 @@ export default function Hero() {
         </motion.div>
 
       </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .hero-section { padding: 120px 20px 60px !important; }
+          .hero-heading { font-size: clamp(2.2rem, 10vw, 3.5rem) !important; }
+        }
+      `}</style>
     </section>
   );
 }
