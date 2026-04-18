@@ -52,30 +52,35 @@ export default function Navbar() {
         style={{
           position: "fixed",
           top: "16px",
-          left: "50%",
-          transform: "translateX(-50%)",
+          left: 0,
+          right: 0,
           zIndex: 50,
-          width: "calc(100% - 32px)",
-          maxWidth: "1120px",
+          display: "flex",
+          justifyContent: "center",
+          padding: "0 16px",
+          pointerEvents: "none",
         }}
       >
         <nav
           style={{
+            width: "100%",
+            maxWidth: "1120px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             padding: "10px 14px 10px 18px",
             borderRadius: "14px",
             background: scrolled
-              ? "rgba(10, 12, 20, 0.85)"
-              : "rgba(10, 12, 20, 0.55)",
+              ? "rgba(10, 12, 20, 0.92)"
+              : "rgba(10, 12, 20, 0.65)",
             backdropFilter: "blur(20px) saturate(140%)",
             WebkitBackdropFilter: "blur(20px) saturate(140%)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            border: "1px solid rgba(255,255,255,0.08)",
             boxShadow: scrolled
               ? "0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)"
               : "0 8px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03)",
             transition: "background 250ms ease, box-shadow 250ms ease",
+            pointerEvents: "all",
           }}
         >
           {/* Logo — left anchor */}
