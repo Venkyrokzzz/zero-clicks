@@ -59,8 +59,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           (function() {
             try {
               var stored = localStorage.getItem('zc-theme');
-              var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-              var theme = (stored === 'light' || stored === 'dark') ? stored : (prefersDark ? 'dark' : 'light');
+              // Dark is always default — only switch to light if user explicitly chose it
+              var theme = stored === 'light' ? 'light' : 'dark';
               document.documentElement.setAttribute('data-theme', theme);
             } catch(e) {
               document.documentElement.setAttribute('data-theme', 'dark');

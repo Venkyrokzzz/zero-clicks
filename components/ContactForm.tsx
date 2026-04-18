@@ -73,10 +73,14 @@ export default function ContactForm() {
     setFormState("submitting");
     setErrorMsg("");
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: "53cf9ade-73a5-4e1c-a684-d7bab8607d35",
+          ...data,
+          subject: `New enquiry from ${data.name} — Zero Clicks`,
+        }),
       });
       const json = await res.json();
       if (!res.ok || !json.success) { setErrorMsg("Something went wrong. Email me directly at zeroclicks.hq@gmail.com"); setFormState("error"); return; }

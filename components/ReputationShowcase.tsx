@@ -149,7 +149,7 @@ export default function ReputationShowcase() {
   const inView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
-    <section id="reputation-manager" style={{ borderTop: '1px solid var(--border)', padding: '80px 48px', background: 'transparent' }}>
+    <section id="reputation-manager" className="rep-section" style={{ borderTop: '1px solid var(--border)', padding: '80px 48px', background: 'transparent' }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }} ref={ref}>
 
         {/* Header */}
@@ -157,6 +157,7 @@ export default function ReputationShowcase() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
+          className="rep-header"
           style={{ marginBottom: '64px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}
         >
           <div>
@@ -172,15 +173,24 @@ export default function ReputationShowcase() {
               We reply in under 30 seconds — in your voice.
             </p>
           </div>
-          <div style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '13px', paddingBottom: '6px' }}>// 02 Product Flow</div>
+          <div className="rep-code-label" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '13px', paddingBottom: '6px' }}>// 02 Product Flow</div>
         </motion.div>
 
         {/* Step Cards — 2x2 AntiGravity grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+        <div className="rep-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
           {steps.map((step, i) => (
             <StepCard key={step.number} step={step} icon={stepIcons[i]} delay={i * 0.12} inView={inView} cardIndex={i} />
           ))}
         </div>
+
+        <style>{`
+          @media (max-width: 640px) {
+            .rep-section { padding: 60px 20px !important; }
+            .rep-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 40px !important; }
+            .rep-code-label { display: none; }
+            .rep-grid { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
 
         {/* Bottom proof bar */}
         <motion.div
