@@ -19,12 +19,12 @@ export const SITE = {
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
 export const HERO = {
-  headlineTop: "Every Google review replied to.",
-  headlineBottom: "Before you finish your shift.",
+  headlineTop: "You run the business.",
+  headlineBottom: "AI runs everything else.",
   subtext:
-    "Zero Clicks watches your Google listing 24/7 and writes personalised replies in your own voice. You approve in one tap — or let it run fully automatic.",
+    "Zero Clicks automates the daily grind for UK pubs, restaurants and hotels — reviews replied to, inbox handled, nothing dropped. You stay front of house.",
   ctaPrimary: {
-    label: "Get a free sample reply",
+    label: "Book a free 15-min call",
     href: "/contact",
   },
   ctaSecondary: {

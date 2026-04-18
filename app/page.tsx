@@ -81,7 +81,7 @@ export default function Home() {
               style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', flexShrink: 0 }}
             />
             <span style={{ fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#10b981', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
-              AI-powered review replies for UK hospitality
+              AI automation for UK hospitality
             </span>
           </motion.div>
 
@@ -166,7 +166,7 @@ export default function Home() {
                 el.style.boxShadow = '0 0 32px rgba(44,79,214,0.35)';
               }}
             >
-              Get a free sample reply
+              Book a free 15-min call
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
