@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SITE } from "@/lib/content";
+import ThemeToggle from "./ThemeToggle";
 
 const NAV_ITEMS = [
   { label: "Reputation", href: "/products/reputation-manager" },
@@ -184,8 +185,9 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Right side: primary CTA — right anchor */}
-          <div className="desktop-cta" style={{ display: "flex", alignItems: "center", flex: 1, justifyContent: "flex-end" }}>
+          {/* Right side: theme toggle + CTA */}
+          <div className="desktop-cta" style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, justifyContent: "flex-end" }}>
+            <ThemeToggle />
             <Link
               href="/contact"
               style={{
