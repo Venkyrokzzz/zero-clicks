@@ -68,19 +68,24 @@ export default function Navbar() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "10px 14px 10px 18px",
-            borderRadius: "14px",
+            padding: "11px 16px 11px 20px",
+            borderRadius: "16px",
             background: scrolled
-              ? "rgba(10, 12, 20, 0.92)"
-              : "rgba(10, 12, 20, 0.65)",
-            backdropFilter: "blur(20px) saturate(140%)",
-            WebkitBackdropFilter: "blur(20px) saturate(140%)",
-            border: "1px solid rgba(255,255,255,0.08)",
+              ? "rgba(6, 8, 18, 0.88)"
+              : "rgba(6, 8, 18, 0.55)",
+            backdropFilter: "blur(48px) saturate(180%)",
+            WebkitBackdropFilter: "blur(48px) saturate(180%)",
+            // gradient border — teal top edge fades to transparent
+            border: "1px solid transparent",
+            backgroundClip: "padding-box",
+            outline: "1px solid rgba(255,255,255,0.07)",
+            outlineOffset: "-1px",
             boxShadow: scrolled
-              ? "0 16px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)"
-              : "0 8px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03)",
-            transition: "background 250ms ease, box-shadow 250ms ease",
+              ? "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(6,182,212,0.08), inset 0 1px 0 rgba(255,255,255,0.06)"
+              : "0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(6,182,212,0.06), inset 0 1px 0 rgba(255,255,255,0.05)",
+            transition: "background 300ms ease, box-shadow 300ms ease",
             pointerEvents: "all",
+            position: "relative",
           }}
         >
           {/* Logo — left anchor */}
@@ -138,21 +143,24 @@ export default function Navbar() {
                     borderRadius: "9px",
                     fontSize: "15px",
                     fontWeight: 500,
-                    color: active ? "#fff" : "rgba(255,255,255,0.5)",
+                    color: active ? "#e2e8f0" : "rgba(255,255,255,0.45)",
                     textDecoration: "none",
-                    letterSpacing: "0.01em",
-                    transition: "color 180ms ease",
+                    letterSpacing: "0.02em",
+                    transition: "color 200ms ease, background 200ms ease",
                     fontFamily: "var(--font-body)",
                     whiteSpace: "nowrap",
+                    background: active ? "rgba(6,182,212,0.08)" : "transparent",
                   }}
                   onMouseEnter={(e) => {
                     if (!active) {
-                      (e.currentTarget as HTMLElement).style.color = "#fff";
+                      (e.currentTarget as HTMLElement).style.color = "#e2e8f0";
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!active) {
-                      (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)";
+                      (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)";
+                      (e.currentTarget as HTMLElement).style.background = "transparent";
                     }
                   }}
                 >
@@ -162,12 +170,13 @@ export default function Navbar() {
                       style={{
                         position: "absolute",
                         inset: 0,
-                        background: "rgba(255,255,255,0.06)",
-                        borderRadius: "8px",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        background: "rgba(6,182,212,0.08)",
+                        borderRadius: "9px",
+                        border: "1px solid rgba(6,182,212,0.18)",
+                        boxShadow: "inset 0 1px 0 rgba(6,182,212,0.1)",
                         zIndex: -1,
                       }}
-                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 34 }}
                     />
                   )}
                   {item.label}
@@ -185,24 +194,30 @@ export default function Navbar() {
                 alignItems: "center",
                 gap: "6px",
                 padding: "9px 20px",
-                background: "#fff",
-                color: "#0a0c14",
+                background: "linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(59,130,246,0.15) 100%)",
+                color: "#e2e8f0",
                 fontSize: "14px",
-                fontWeight: 700,
+                fontWeight: 600,
                 textDecoration: "none",
                 borderRadius: "9px",
-                letterSpacing: "0.01em",
+                letterSpacing: "0.02em",
                 fontFamily: "var(--font-body)",
-                transition: "transform 150ms ease, box-shadow 150ms ease",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
+                border: "1px solid rgba(6,182,212,0.3)",
+                boxShadow: "0 0 20px rgba(6,182,212,0.08), inset 0 1px 0 rgba(255,255,255,0.08)",
+                backdropFilter: "blur(8px)",
+                transition: "transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(255,255,255,0.12)";
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = "translateY(-1px)";
+                el.style.boxShadow = "0 0 28px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.1)";
+                el.style.borderColor = "rgba(6,182,212,0.5)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 2px rgba(0,0,0,0.15)";
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = "translateY(0)";
+                el.style.boxShadow = "0 0 20px rgba(6,182,212,0.08), inset 0 1px 0 rgba(255,255,255,0.08)";
+                el.style.borderColor = "rgba(6,182,212,0.3)";
               }}
             >
               Book a call
