@@ -78,7 +78,7 @@ export default function Navbar() {
             transition: "background 250ms ease, box-shadow 250ms ease",
           }}
         >
-          {/* Logo */}
+          {/* Logo — left anchor */}
           <Link
             href="/"
             style={{
@@ -86,7 +86,8 @@ export default function Navbar() {
               alignItems: "center",
               gap: "9px",
               textDecoration: "none",
-              flexShrink: 0,
+              flex: "0 0 auto",
+              minWidth: "140px",
             }}
           >
             <Image
@@ -109,16 +110,15 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop nav items */}
+          {/* Desktop nav items — true centre via flex:1 columns */}
           <div
             className="desktop-nav-items"
             style={{
               display: "flex",
               alignItems: "center",
               gap: "2px",
-              position: "absolute",
-              left: "50%",
-              transform: "translateX(-50%)",
+              flex: 1,
+              justifyContent: "center",
             }}
           >
             {NAV_ITEMS.map((item) => {
@@ -172,8 +172,8 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Right side: primary CTA */}
-          <div className="desktop-cta" style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+          {/* Right side: primary CTA — right anchor, matches logo min-width */}
+          <div className="desktop-cta" style={{ display: "flex", alignItems: "center", gap: "8px", flex: "0 0 auto", minWidth: "140px", justifyContent: "flex-end" }}>
             <Link
               href="/contact"
               style={{
