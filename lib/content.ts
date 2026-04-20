@@ -6,7 +6,7 @@
 
 export const SITE = {
   name: "Zero Clicks",
-  tagline: "Less screen. More pub.",
+  tagline: "Less screen. More floor.",
   email: "zeroclicks.hq@gmail.com",
   github: "https://github.com/venkatesh-surampudi",
   linkedin: "https://linkedin.com/in/venkatesh-surampudi-b51323379",
@@ -19,7 +19,7 @@ export const SITE = {
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
 export const HERO = {
-  headlineTop: "Behind the bar,",
+  headlineTop: "Front of house,",
   headlineBottom: "not behind a screen.",
   subtext:
     "One less thing to open your laptop for — every single day. Zero Clicks handles your Google reviews and inbox so UK pub owners stay on the floor, not on the computer.",
