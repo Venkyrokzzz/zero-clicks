@@ -6,7 +6,7 @@
 
 export const SITE = {
   name: "Zero Clicks",
-  tagline: "We automate the boring stuff so you can focus on what matters.",
+  tagline: "Less screen. More pub.",
   email: "zeroclicks.hq@gmail.com",
   github: "https://github.com/venkatesh-surampudi",
   linkedin: "https://linkedin.com/in/venkatesh-surampudi-b51323379",
@@ -19,10 +19,10 @@ export const SITE = {
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
 export const HERO = {
-  headlineTop: "You run the business.",
-  headlineBottom: "AI runs everything else.",
+  headlineTop: "Behind the bar,",
+  headlineBottom: "not behind a screen.",
   subtext:
-    "Zero Clicks automates the daily grind for UK pubs, restaurants and hotels — reviews replied to, inbox handled, nothing dropped. You stay front of house.",
+    "One less thing to open your laptop for — every single day. Zero Clicks handles your Google reviews and inbox so UK pub owners stay on the floor, not on the computer.",
   ctaPrimary: {
     label: "Book a free 15-min call",
     href: "/contact",
