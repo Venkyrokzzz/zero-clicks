@@ -167,7 +167,7 @@ export const PACKAGES: Package[] = [
   {
     name: "Starter",
     tagline: "Dip your toe in. No commitment.",
-    price: "£35",
+    price: "£55",
     timeline: "per month — no setup fee",
     description: "Template AI replies to your Google reviews. Good if you want to see automated replies before going all-in.",
     features: [
@@ -182,25 +182,25 @@ export const PACKAGES: Package[] = [
   {
     name: "Reputation Manager",
     tagline: "Every review replied to. In your voice.",
-    price: "£55",
+    price: "£75",
     timeline: "per month · £350 one-time setup",
     description: "AI monitors your Google reviews 24/7 and replies instantly in your exact voice — not a template. Every guest feels heard.",
     features: [
       "AI trained in your voice — not a template",
       "All Google reviews covered, unlimited",
-      "Instant Telegram alert — approve in one tap",
+      "Instant WhatsApp alert — approve in one tap",
       "Onboarding call included",
       "Runs 24/7 with zero manual work from you",
     ],
     scarcity: "5 onboarding spots left this month",
     badge: "MOST POPULAR",
     highlight: true,
-    cta: "Get started — £350 + £55/mo",
+    cta: "Get started — £350 + £75/mo",
   },
   {
     name: "Full Autopilot",
     tagline: "Reviews and inbox handled. Nothing slips.",
-    price: "£95",
+    price: "£120",
     timeline: "per month · £350 one-time setup",
     description: "Reputation Manager and Inbox Autopilot together — every review replied to, every email triaged, every urgent item on your phone.",
     features: [
@@ -212,8 +212,8 @@ export const PACKAGES: Package[] = [
       "Priority support included",
     ],
     valueStack: [
-      { item: "Reputation Manager", value: "£55/mo" },
-      { item: "Inbox Autopilot", value: "£55/mo" },
+      { item: "Reputation Manager", value: "£75/mo" },
+      { item: "Inbox Autopilot", value: "£75/mo" },
       { item: "Priority support", value: "£30/mo" },
     ],
     highlight: false,
