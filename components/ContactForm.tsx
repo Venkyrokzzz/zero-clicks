@@ -1,7 +1,7 @@
 // components/ContactForm.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CONTACT_PAGE, SITE } from "@/lib/content";
 import Link from "next/link";
@@ -38,21 +38,24 @@ const labelStyle: React.CSSProperties = {
   marginBottom: "8px",
 };
 
-export default function ContactForm() {
+const ALLOWED_SERVICES = ["Inbox Autopilot", "Reputation Manager", "Lead Capture", "Full Ops Autopilot"];
+
+// Isolated component so useSearchParams doesn't block the whole form
+function ServiceParamHandler({ setData }: { setData: React.Dispatch<React.SetStateAction<FormData>> }) {
   const searchParams = useSearchParams();
   const serviceParam = searchParams.get("service");
-
-  const [formState, setFormState] = useState<FormState>("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [data, setData] = useState<FormData>({ name: "", email: "", company: "", budget: "", message: "" });
-
-  const ALLOWED_SERVICES = ["Inbox Autopilot", "Reputation Manager", "Lead Capture", "Full Ops Autopilot"];
-
   useEffect(() => {
     if (serviceParam && ALLOWED_SERVICES.includes(serviceParam)) {
       setData(prev => ({ ...prev, message: `I'm interested in your ${serviceParam} service.` }));
     }
-  }, [serviceParam]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [serviceParam, setData]);
+  return null;
+}
+
+export default function ContactForm() {
+  const [formState, setFormState] = useState<FormState>("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [data, setData] = useState<FormData>({ name: "", email: "", company: "", budget: "", message: "" });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -133,6 +136,9 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      <Suspense fallback={null}>
+        <ServiceParamHandler setData={setData} />
+      </Suspense>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
           <label htmlFor="name" style={labelStyle}>Name <span style={{ color: "var(--accent)" }}>*</span></label>

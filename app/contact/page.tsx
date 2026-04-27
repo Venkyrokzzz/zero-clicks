@@ -4,7 +4,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContactForm from "@/components/ContactForm";
 import { CONTACT_PAGE } from "@/lib/content";
-import { Suspense } from "react";
 import CalendlyButton from "@/components/CalendlyButton";
 
 export const metadata: Metadata = {
@@ -159,9 +158,7 @@ export default function ContactPage() {
                   padding: "32px",
                 }}
               >
-                <Suspense fallback={<div style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)", fontSize: "14px" }}>Loading form...</div>}>
-                  <ContactForm />
-                </Suspense>
+                <ContactForm />
               </div>
             </div>
 
