@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Zero Clicks — LinkedIn Banner</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1584px;
+    height: 396px;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0d0d14;
+  }
+
+  .banner {
+    width: 1584px;
+    height: 396px;
+    background: linear-gradient(135deg, #0d0d14 0%, #12121f 50%, #0d0d14 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* Subtle grid */
+  .grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(212,168,83,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,168,83,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Glow blobs */
+  .glow-left {
+    position: absolute;
+    left: -100px;
+    top: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(212,168,83,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .glow-right {
+    position: absolute;
+    right: -50px;
+    bottom: -100px;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(91,155,213,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  /* Left section — branding */
+  .left {
+    position: relative;
+    z-index: 2;
+    padding: 0 64px;
+    flex: 0 0 auto;
+    width: 480px;
+    border-right: 1px solid rgba(212,168,83,0.12);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-box {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #d4a853, #b8872a);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: #0d0d14;
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+  }
+
+  .tagline {
+    font-size: 14px;
+    color: #888;
+    line-height: 1.5;
+    max-width: 320px;
+  }
+
+  .tagline strong {
+    color: #d4a853;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(107,223,107,0.08);
+    border: 1px solid rgba(107,223,107,0.2);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: #6bdf6b;
+    width: fit-content;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    background: #6bdf6b;
+    border-radius: 50%;
+  }
+
+  /* Stats section */
+  .stats {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    padding: 0 48px;
+    height: 100%;
+    align-items: center;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    height: 60%;
+  }
+
+  .stat:last-child {
+    border-right: none;
+  }
+
+  .stat-number {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-number.gold { color: #d4a853; }
+  .stat-number.green { color: #6bdf6b; }
+  .stat-number.blue { color: #5b9bd5; }
+  .stat-number.white { color: #ffffff; }
+
+  .stat-label {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    line-height: 1.4;
+  }
+
+  .stat-sub {
+    font-size: 11px;
+    color: #444;
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  /* Bottom bar */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #d4a853, #d4a853, transparent);
+    opacity: 0.4;
+  }
+
+  /* URL */
+  .url {
+    position: absolute;
+    bottom: 20px;
+    right: 48px;
+    font-size: 12px;
+    color: #444;
+    z-index: 2;
+    letter-spacing: 0.5px;
+  }
+
+  .url span {
+    color: #d4a853;
+  }
+</style>
+</head>
+<body>
+  <div class="banner">
+    <div class="grid"></div>
+    <div class="glow-left"></div>
+    <div class="glow-right"></div>
+
+    <!-- Left: Branding -->
+    <div class="left">
+      <div class="logo-row">
+        <div class="logo-box">ZC</div>
+        <span class="brand-name">Zero Clicks</span>
+      </div>
+      <p class="tagline">
+        AI that replies to your <strong>Google reviews</strong> automatically — in your voice, within seconds.
+      </p>
+      <div class="badge">
+        <div class="dot"></div>
+        Built for UK Hospitality
+      </div>
+    </div>
+
+    <!-- Right: Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-number gold">8s</div>
+        <div class="stat-label">Avg Reply<br>Time</div>
+        <div class="stat-sub">vs 3.2 days industry avg</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number green">100%</div>
+        <div class="stat-label">Response<br>Rate</div>
+        <div class="stat-sub">every review answered</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number blue">0</div>
+        <div class="stat-label">Hours Spent<br>by Owner</div>
+        <div class="stat-sub">fully automated</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number white">£0</div>
+        <div class="stat-label">Setup Cost<br>Trial</div>
+        <div class="stat-sub">free for 60 days</div>
+      </div>
+    </div>
+
+    <div class="bottom-bar"></div>
+    <div class="url">0-clicks.uk &nbsp;|&nbsp; <span>zeroclicks.hq@gmail.com</span></div>
+  </div>
+</body>
+</html>

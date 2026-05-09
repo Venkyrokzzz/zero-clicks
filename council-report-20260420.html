@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Council Report — Reputation Manager GTM · Zero Clicks</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f8f9fb;
+    color: #1a1d23;
+    line-height: 1.6;
+    padding: 40px 20px 80px;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    background: #fff;
+    border: 1px solid #e2e5ea;
+    border-radius: 14px;
+    padding: 32px 36px;
+    margin-bottom: 24px;
+  }
+
+  .header-meta {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8b94a3;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f1117;
+    margin-bottom: 12px;
+    line-height: 1.35;
+  }
+
+  .header .question-block {
+    font-size: 14px;
+    color: #4b5563;
+    background: #f4f6fa;
+    border-left: 3px solid #6366f1;
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    line-height: 1.7;
+  }
+
+  /* Verdict card */
+  .verdict-card {
+    background: #fff;
+    border: 1px solid #e2e5ea;
+    border-radius: 14px;
+    padding: 32px 36px;
+    margin-bottom: 24px;
+  }
+
+  .verdict-card h2 {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8b94a3;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .verdict-section {
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+
+  .verdict-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .verdict-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f1117;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .verdict-section h3 .icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .icon-agree   { background: #d1fae5; color: #065f46; }
+  .icon-clash   { background: #fee2e2; color: #991b1b; }
+  .icon-blind   { background: #fef3c7; color: #92400e; }
+  .icon-rec     { background: #ede9fe; color: #4c1d95; }
+  .icon-action  { background: #dbeafe; color: #1e40af; }
+
+  .verdict-section p {
+    font-size: 14.5px;
+    color: #374151;
+    line-height: 1.75;
+  }
+
+  /* One-thing CTA */
+  .one-thing {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    border-radius: 14px;
+    padding: 28px 36px;
+    color: #fff;
+    margin-bottom: 24px;
+  }
+
+  .one-thing .label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    opacity: 0.75;
+    margin-bottom: 10px;
+  }
+
+  .one-thing p {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.65;
+  }
+
+  /* Alignment grid */
+  .alignment-grid {
+    background: #fff;
+    border: 1px solid #e2e5ea;
+    border-radius: 14px;
+    padding: 28px 36px;
+    margin-bottom: 24px;
+  }
+
+  .alignment-grid h2 {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8b94a3;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .advisors {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .advisors { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .advisor-chip {
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+    border: 1px solid transparent;
+  }
+
+  .advisor-chip .name {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .advisor-chip .stance {
+    font-size: 11px;
+    line-height: 1.4;
+    opacity: 0.8;
+  }
+
+  .chip-contrarian  { background: #fff1f2; border-color: #fecdd3; }
+  .chip-contrarian .name { color: #be123c; }
+  .chip-principles  { background: #eff6ff; border-color: #bfdbfe; }
+  .chip-principles .name { color: #1d4ed8; }
+  .chip-expansionist{ background: #f0fdf4; border-color: #bbf7d0; }
+  .chip-expansionist .name { color: #15803d; }
+  .chip-outsider    { background: #fefce8; border-color: #fde68a; }
+  .chip-outsider .name { color: #b45309; }
+  .chip-executor    { background: #f5f3ff; border-color: #ddd6fe; }
+  .chip-executor .name { color: #6d28d9; }
+
+  /* Collapsible sections */
+  details {
+    background: #fff;
+    border: 1px solid #e2e5ea;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  summary {
+    padding: 16px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #374151;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+
+  summary::after {
+    content: "›";
+    margin-left: auto;
+    font-size: 18px;
+    color: #9ca3af;
+    transition: transform 200ms ease;
+    transform: rotate(90deg);
+  }
+
+  details[open] summary::after {
+    transform: rotate(270deg);
+  }
+
+  .detail-body {
+    padding: 0 22px 20px;
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.75;
+    border-top: 1px solid #f0f2f5;
+    padding-top: 16px;
+  }
+
+  .detail-body p { margin-bottom: 12px; }
+  .detail-body p:last-child { margin-bottom: 0; }
+
+  .sections-header {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8b94a3;
+    font-weight: 700;
+    margin-bottom: 14px;
+    margin-top: 28px;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    margin-top: 48px;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-meta">LLM Council · Zero Clicks · 20 April 2026</div>
+    <h1>Should Reputation Manager be Zero Clicks' primary revenue driver for the next 3 months?</h1>
+    <div class="question-block">
+      Venky is 25, in India, needs revenue to return to London in 3 months. Zero clients, zero revenue. Reputation Manager is live — AI that auto-drafts Google review replies in a pub's voice. 26/30 London pubs had unanswered reviews. Pricing: free 14-day trial → £55/month. Greene King ops background. Cold outreach started (4 emails). What's the fastest path to first revenue?
+    </div>
+  </div>
+
+  <!-- One Thing First (most prominent) -->
+  <div class="one-thing">
+    <div class="label">The One Thing To Do First</div>
+    <p>Today, find 5 London pubs with unanswered Google reviews. Write the replies they should have sent. Email those drafts to the owners — no ask for access, no setup, just: "Here's what I'd have written for you. I can do this every week." Send that email today. That single action proves the product, removes the trust barrier, and gives the owner a reason to say yes without handing credentials to a stranger.</p>
+  </div>
+
+  <!-- Chairman Verdict -->
+  <div class="verdict-card">
+    <h2>Chairman's Verdict</h2>
+
+    <div class="verdict-section">
+      <h3><span class="icon icon-agree">✓</span> Where the Council Agrees</h3>
+      <p>Every advisor agrees on three things: the product works, the pain is real, and the Greene King network is the most valuable asset Venky isn't using. Nobody argued against Reputation Manager as the product — nobody disputed the 26/30 signal. And every advisor who touched the Greene King point said the same thing: one warm contact beats months of cold outreach. There's also quiet agreement that four cold emails is not a strategy. Volume and urgency are missing.</p>
+    </div>
+
+    <div class="verdict-section">
+      <h3><span class="icon icon-clash">↔</span> Where the Council Clashes</h3>
+      <p>The Executor and First Principles Thinker disagree sharply on channel. The Executor says send 50 messages this week — digital, fast, now. The First Principles Thinker says put down the laptop, walk into a pub at 3pm on a Tuesday. One optimises for volume, the other for conversion quality. These are not compatible in the short term.</p>
+      <p style="margin-top:10px;">The Contrarian and Expansionist disagree on framing. The Contrarian sees a hard 90-day maths problem — 18 clients needed, extremely unlikely via cold outreach alone. The Expansionist sees a long-game distribution play — land one Greene King contact, use it as social proof. Both are right. They're answering different timeframes.</p>
+    </div>
+
+    <div class="verdict-section">
+      <h3><span class="icon icon-blind">!</span> Blind Spots the Council Caught</h3>
+      <p>The peer reviews were unusually consistent: every reviewer identified the same thing the advisors missed — the Google Business Profile access problem. This is the actual gate between "interested pub owner" and "paying customer." A stranger in India cold-contacting a London pub owner and asking for admin access to their Google listing triggers every reasonable trust alarm a small business owner has. Google's own security may flag it. No advisor addressed how Venky earns that handover.</p>
+      <p style="margin-top:10px;">One reviewer proposed the solution: a "we draft, you post" model. Venky emails draft replies to the pub owner, who posts manually — no credentials exchanged. Lower trust barrier, still delivers the product's core value, still justifies £55/month, and builds the relationship before asking for access. This was the most overlooked and most actionable insight in the entire council.</p>
+    </div>
+
+    <div class="verdict-section">
+      <h3><span class="icon icon-rec">→</span> The Recommendation</h3>
+      <p>Go all-in on Reputation Manager, but change the entry point. Do not lead with "give me access to your Google Business Profile." Lead with a done-for-you sample. Find 3–5 London pubs with unanswered reviews, write professional draft replies for their specific real reviews, and send those drafts cold — no ask for access upfront. The offer is: "I'll do this for you every week. Here's what it looks like. Free for 14 days, £55 after that, and you post them yourself until you trust me."</p>
+      <p style="margin-top:10px;">On the Greene King network: use it in week one or don't complain about cold outreach conversion. The message is not "can you be my client" — it's "I'm building something and I'd love 20 minutes to see if I've got the product right." That framing works because it's true and low-stakes.</p>
+      <p style="margin-top:10px;">On location: be transparent if asked. Frame it as temporary: "I'm back in London in [month] — if you want to meet in person before committing, happy to do that then." Stop LinkedIn for 90 days. It's a 6-month game.</p>
+    </div>
+  </div>
+
+  <!-- Advisor Alignment Grid -->
+  <div class="alignment-grid">
+    <h2>Advisor Positions at a Glance</h2>
+    <div class="advisors">
+      <div class="advisor-chip chip-contrarian">
+        <div class="name">Contrarian</div>
+        <div class="stance">Buying cycle broken. GK network is the real asset. Maths are hard.</div>
+      </div>
+      <div class="advisor-chip chip-principles">
+        <div class="name">First Principles</div>
+        <div class="stance">Bottleneck is getting one yes. Walk into a pub. GK cred &gt; tech.</div>
+      </div>
+      <div class="advisor-chip chip-expansionist">
+        <div class="name">Expansionist</div>
+        <div class="stance">7k pubs in London. GK pilot = 18mo shortcut. Data asset play.</div>
+      </div>
+      <div class="advisor-chip chip-outsider">
+        <div class="name">Outsider</div>
+        <div class="stance">Pain ≠ willingness to pay. Trust is the product. India = objection.</div>
+      </div>
+      <div class="advisor-chip chip-executor">
+        <div class="name">Executor</div>
+        <div class="stance">Send 50 messages this week. One customer by Friday. Stop building.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collapsible Advisor Responses -->
+  <div class="sections-header">Full Advisor Responses</div>
+
+  <details>
+    <summary>🔴 The Contrarian</summary>
+    <div class="detail-body">
+      <p>The fatal flaw is the buying cycle, not the product. Pub owners drowning in admin don't browse their inbox looking for SaaS subscriptions. They're behind the bar at 7pm reading your cold email between pulling pints and arguing with a supplier. The decision-maker is also the floor manager, the stock-taker, and the person whose cousin just quit. Your sales cycle assumption is broken.</p>
+      <p>£55/month sounds cheap but it's a recurring commitment. A cash-strapped pub owner in 2026 UK hospitality — post-energy crisis, post-wage increases — sees "cancel anytime" and reads "another thing I'll forget to cancel." Friction isn't the setup fee. It's the mental overhead of a new vendor relationship.</p>
+      <p>26 unanswered reviews proves pain, not willingness to pay. They're not answering reviews because they don't have time and don't believe it moves revenue. You need to prove the link between replied reviews and covers. Without that, you're selling peace of mind to someone who's already made peace with the chaos.</p>
+      <p>The 3-month constraint is the real problem. At £55/mo, you need 18 paying clients to hit £1k MRR. From zero, in 90 days, via cold outreach, to one of the UK's most relationship-driven industries. The maths only work if your conversion rate is exceptional.</p>
+      <p>The Greene King angle is your actual asset — and you're not using it aggressively enough. One warm intro from a former colleague to a regional ops manager beats 200 cold emails. If you're not mining that network hard in week one, the product doesn't matter.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>🔵 The First Principles Thinker</summary>
+    <div class="detail-body">
+      <p>The actual problem is survival, not product selection. The question assumes the bottleneck is which product to lead with. It isn't. The bottleneck is converting one stranger into a paying customer within 90 days. Product choice is almost irrelevant at zero customers.</p>
+      <p>The product is the asset. Wrong. The asset is Greene King experience. A 25-year-old cold emailing London pub owners is ignored. A former Greene King ops person saying "I watched managers drown in this exact problem for two years" gets a reply. That credibility is the moat, not the tech.</p>
+      <p>Free trials delay the moment of truth. At £55/month, a pub owner who genuinely values the product will pay £55 upfront to start. If they won't, the trial won't fix that.</p>
+      <p>Digital outreach is possibly the wrong channel. Pubs are physical. Landlords are in the building. The fastest path to a conversation is walking into a pub at 3pm on a Tuesday, ordering a pint, and talking to the person behind the bar. Four cold emails sent is not outreach, it's procrastination with extra steps.</p>
+      <p>Revenue requires a human saying yes. Optimise for that conversation, not the product.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>🟢 The Expansionist</summary>
+    <div class="detail-body">
+      <p>The 26/30 signal is not a product validation — it's a market size signal. There are roughly 7,000 pubs in Greater London alone. At £55/month, even 1% penetration is £46,000 MRR. Stop thinking about 5 onboarding spots.</p>
+      <p>Greene King has 3,000+ pubs. You don't need to cold email strangers. You have a network inside the largest pub company in the UK. One ex-colleague who's now an ops manager, one regional manager you stayed in touch with — that's not a lead, that's a pilot programme. A single Greene King regional deal would leapfrog 18 months of cold outreach.</p>
+      <p>You're not selling a £55/month tool — you're selling a defensible data asset. Every pub voice profile you build, every reply you train, makes the product stickier and your dataset more valuable. At scale, this becomes something a hospitality SaaS company (or Greene King itself) acquires.</p>
+      <p>The constraint isn't product. It's distribution. You have an insider channel most founders would pay for — use it before you forget you have it.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>🟡 The Outsider</summary>
+    <div class="detail-body">
+      <p>The 26-out-of-30 stat is doing a lot of heavy lifting here. Unanswered reviews aren't the same as "willing to pay £55/month to fix it." That gap is the entire business risk, and it's being glossed over.</p>
+      <p>From outside: pub owners who haven't replied to reviews in months may not think it's a problem. They might know and not care. Or they're stretched so thin that adding a new subscription feels like one more thing to manage, not one less.</p>
+      <p>The pricing looks like it was built for ease of selling, not for what the market will bear. £55/month is suspiciously low — either it's priced to remove friction (smart) or it signals low confidence in the value.</p>
+      <p>The Greene King experience is genuinely useful, but it's operations experience at a large corporate chain. A single independent East London pub is a completely different beast. The owner is the manager is the bartender. Decision cycles are not the same.</p>
+      <p>The harder question nobody's asking: is a pub owner in East London going to give a stranger based in India admin access to their Google Business profile? Trust is the actual product here, not the automation.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>🟣 The Executor</summary>
+    <div class="detail-body">
+      <p>Reputation Manager is the right call. You can prove the problem exists in 10 minutes on Google Maps. That's a sales weapon, not a theory.</p>
+      <p>Monday morning, exactly: Pull up Google Maps. Screenshot 5 pubs with unanswered reviews — name the pub, show the ignored review, show the date. Write one cold email. Subject: "[Pub Name] — spotted something on your Google reviews." Body: show the specific ignored review, tell them you auto-draft replies, 14-day free trial, no card needed. Under 100 words. Send to 20 pubs today. Do the same on Instagram — DM with the screenshot of their own ignored review.</p>
+      <p>5 paying clients at £55/mo = £275/mo. That's proof of concept. Stop LinkedIn — it's a 6-month game. Stop building new features. Product works. Sell what exists.</p>
+      <p>If a pub owner says "I don't care about reviews, my inbox is drowning me" — offer Inbox Autopilot on the spot. Don't force the product, follow the pain.</p>
+      <p>First revenue target: one paying customer by Friday. Send 50 outreach messages this week. That's the whole plan.</p>
+    </div>
+  </details>
+
+  <!-- Collapsible Peer Review Highlights -->
+  <div class="sections-header">Peer Review Highlights</div>
+
+  <details>
+    <summary>What the peer reviews found</summary>
+    <div class="detail-body">
+      <p><strong>Strongest response:</strong> Split between the Contrarian (3 votes) and the First Principles Thinker (2 votes). The Contrarian's line — "26 unanswered reviews proves pain, not willingness to pay" — was cited as the sharpest single insight. The First Principles Thinker's "walk into a pub at 3pm on Tuesday" was cited as the most operationally actionable.</p>
+      <p><strong>Biggest blind spot:</strong> The Expansionist's Greene King pilot narrative was called out most often as the wrong timeframe — genuinely good strategy for 2027, disconnected from a 90-day survival constraint. The Executor's volume-first playbook was flagged for ignoring the trust and access problem entirely.</p>
+      <p><strong>What all five missed:</strong> The Google Business Profile access problem. Five reviewers, independently, identified the same gap. A pub owner will not hand admin credentials to a cold outreach stranger from India. This is a technical and trust blocker that no pricing tweak or free trial resolves. One reviewer proposed the solution: a "we draft, you post" lower-trust entry point that still generates value and revenue without requiring credential handover.</p>
+    </div>
+  </details>
+
+  <footer>
+    Council session completed · 20 April 2026 · Zero Clicks — Reputation Manager GTM<br>
+    Generated by LLM Council (adapted from Karpathy's methodology)
+  </footer>
+
+</div>
+</body>
+</html>
