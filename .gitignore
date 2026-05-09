@@ -14,3 +14,16 @@ out/
 *.pem
 npm-debug.log*
 .vercel
+
+# Demo/export assets — keep off Vercel
+exports/
+remotion-demo/
+council-report-*.html
+council-transcript-*.md
+loom-demo.html
+ops-dashboard.html
+reputation-manager-demo.html
+record-demo.js
+zero_clicks_ops_bible.py
+*.mp4
+*.gif
