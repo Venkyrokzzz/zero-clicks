@@ -1,39 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { checkRateLimit } from "@/lib/rateLimit";
-
-function requireAuth(req: NextRequest): NextResponse | null {
-  const secret = req.headers.get("x-dashboard-secret");
-  if (!process.env.DASHBOARD_SECRET || secret !== process.env.DASHBOARD_SECRET) {
-    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
-  }
-  return null;
-}
-
-// Mock data - replace with actual Google Sheets/database call
-const mockReviews = [
-  {
-    id: "1",
-    reviewer: "Jane Doe",
-    sentiment: "NEGATIVE",
-    summary: "Cold food and 45-minute wait with no staff communication. Legitimate service complaint.",
-    draftResponse:
-      "Hi Jane, I'm genuinely sorry to hear about your experience. Cold food and a 45-minute wait without any explanation from our team is not acceptable. You deserved better service. Would you be willing to come back and give us another chance? I'd like to make it right. Please get in touch with me directly.",
-    timestamp: new Date().toISOString(),
-    status: "pending",
-    escalationReason: "Service failure with multiple touchpoints (food quality, wait time, communication)",
-  },
-  {
-    id: "2",
-    reviewer: "John Smith",
-    sentiment: "POSITIVE",
-    summary: "Great atmosphere and friendly staff",
-    draftResponse:
-      "Thank you so much for the lovely feedback! We're thrilled you enjoyed the atmosphere and our team's service. We look forward to welcoming you back soon!",
-    timestamp: new Date(Date.now() - 86400000).toISOString(),
-    status: "sent",
-    escalationReason: "",
-  },
-];
+import { supabase } from "@/lib/supabase";
 
 export async function GET(request: NextRequest) {
   const ip =
@@ -43,27 +11,25 @@ export async function GET(request: NextRequest) {
   const { allowed } = checkRateLimit(ip, 60);
   if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
 
-  const authError = requireAuth(request);
-  if (authError) return authError;
-  try {
-    // TODO: Fetch from Google Sheets API
-    // const response = await fetch('https://sheets.googleapis.com/...');
-    // const data = await response.json();
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
-    const reviews = mockReviews;
+  const { data: reviews, error } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("clerk_user_id", userId)
+    .order("created_at", { ascending: false });
 
-    const metrics = {
-      totalReviews: reviews.length,
-      negativeCount: reviews.filter((r) => r.sentiment.includes("NEGATIVE")).length,
-      avgResponseTime: "2.5 hrs",
-      sentimentTrend: "+12%",
-    };
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    return NextResponse.json({ reviews, metrics });
-  } catch (error) {
-    console.error("Failed to fetch reviews:", error);
-    return NextResponse.json({ error: "Failed to fetch reviews" }, { status: 500 });
-  }
+  const metrics = {
+    totalReviews: reviews.length,
+    negativeCount: reviews.filter((r) => r.sentiment === "NEGATIVE").length,
+    pendingCount: reviews.filter((r) => r.status === "pending").length,
+    sentCount: reviews.filter((r) => r.status === "sent").length,
+  };
+
+  return NextResponse.json({ reviews, metrics });
 }
 
 export async function PUT(request: NextRequest) {
@@ -74,29 +40,20 @@ export async function PUT(request: NextRequest) {
   const { allowed } = checkRateLimit(ip, 60);
   if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
 
-  const authError = requireAuth(request);
-  if (authError) return authError;
-  try {
-    const body = await request.json();
-    const { id, status } = body;
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
-    // TODO: Send email via n8n webhook
-    if (status === "sent") {
-      // Trigger n8n workflow to send email
-      // await fetch('http://localhost:5678/webhook/send-review-response', {
-      //   method: 'POST',
-      //   body: JSON.stringify({ reviewId: id, ...review })
-      // });
+  const body = await request.json();
+  const { id, status } = body;
 
-      console.log(`Review ${id} approved and email queued for sending`);
-    }
+  // Ensure the review belongs to this user before updating
+  const { error } = await supabase
+    .from("reviews")
+    .update({ status, sent_at: status === "sent" ? new Date().toISOString() : null })
+    .eq("id", id)
+    .eq("clerk_user_id", userId);
 
-    // TODO: Update Google Sheets
-    // await updateGoogleSheets(id, { status });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Failed to update review:", error);
-    return NextResponse.json({ error: "Failed to update review" }, { status: 500 });
-  }
+  return NextResponse.json({ success: true });
 }

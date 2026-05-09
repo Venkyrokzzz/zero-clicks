@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { createHmac } from 'crypto'
+
+function signState(payload: string): string {
+  const secret = process.env.OAUTH_STATE_SECRET!
+  const hmac = createHmac('sha256', secret).update(payload).digest('hex')
+  return `${payload}.${hmac}`
+}
 
 export async function GET(req: NextRequest) {
   const ip =
@@ -8,23 +16,21 @@ export async function GET(req: NextRequest) {
     'unknown'
 
   const { allowed } = checkRateLimit(ip, 10)
-  if (!allowed) {
-    fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: process.env.TELEGRAM_ALERT_CHAT_ID,
-        text: `⚠️ Rate limit hit on /connect\nIP: ${ip}\nTime: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}`,
-      }),
-    }).catch(() => {})
-    return NextResponse.json({ error: 'Too many requests.' }, { status: 429 })
+  if (!allowed) return NextResponse.json({ error: 'Too many requests.' }, { status: 429 })
+
+  // Must be logged in
+  const { userId } = await auth()
+  if (!userId) {
+    return NextResponse.redirect(new URL('/sign-in', req.url))
   }
 
   const { searchParams } = new URL(req.url)
-  const pubName = searchParams.get('pubName') || ''
-  const managerName = searchParams.get('managerName') || ''
   const googleReviewsUrl = searchParams.get('googleReviewsUrl') || ''
-  const telegramChatId = searchParams.get('telegramChatId') || ''
+
+  // HMAC-signed state: nonce + clerk userId for CSRF protection
+  const nonce = crypto.randomUUID()
+  const payload = Buffer.from(JSON.stringify({ nonce, userId, googleReviewsUrl })).toString('base64url')
+  const signedState = signState(payload)
 
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID!,
@@ -37,7 +43,7 @@ export async function GET(req: NextRequest) {
     ].join(' '),
     access_type: 'offline',
     prompt: 'consent',
-    state: Buffer.from(JSON.stringify({ pubName, managerName, googleReviewsUrl, telegramChatId })).toString('base64'),
+    state: signedState,
   })
 
   return NextResponse.redirect(

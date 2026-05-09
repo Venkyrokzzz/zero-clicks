@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { ClerkProvider } from "@clerk/nextjs";
 import "../styles/globals.css";
 import NavbarWrapper from "../components/NavbarWrapper";
 import { ThemeProvider } from "../components/ThemeProvider";
@@ -60,21 +61,26 @@ export const metadata: Metadata = {
   icons: { icon: "/logo.png", apple: "/logo.png" },
 };
 
+const ANTI_FLASH = `(function(){try{var s=localStorage.getItem('zc-theme');document.documentElement.setAttribute('data-theme',s==='light'?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-GB" suppressHydrationWarning className={`${interBody.variable} ${interDisplay.variable}`}>
-      <head>
-        {/* Anti-flash: always dark unless user explicitly chose light */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var s=localStorage.getItem('zc-theme');document.documentElement.setAttribute('data-theme',s==='light'?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();` }} />
-        <JsonLd />
-      </head>
-      <body style={{ margin: 0 }}>
-        <ThemeProvider>
-          <NavbarWrapper />
-          {children}
-        </ThemeProvider>
-        <Analytics />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en-GB" suppressHydrationWarning className={`${interBody.variable} ${interDisplay.variable}`}>
+        <head>
+          {/* Anti-flash: always dark unless user explicitly chose light */}
+          {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+          <script dangerouslySetInnerHTML={{ __html: ANTI_FLASH }} />
+          <JsonLd />
+        </head>
+        <body style={{ margin: 0 }}>
+          <ThemeProvider>
+            <NavbarWrapper />
+            {children}
+          </ThemeProvider>
+          <Analytics />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

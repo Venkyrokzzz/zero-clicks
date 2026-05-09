@@ -98,14 +98,14 @@ export default function Hero() {
             transition={{ duration: 0.7, ease, delay: 0.05 }}
             style={{ display: "block" }}
           >
-            You run the business.
+            {HERO.headlineTop}
           </motion.span>
           <motion.span
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease, delay: 0.15 }}
             style={{ display: "block" }}
           >
-            AI runs everything else.
+            {HERO.headlineBottom}
           </motion.span>
         </h1>
 

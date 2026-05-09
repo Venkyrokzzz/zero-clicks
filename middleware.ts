@@ -1,10 +1,17 @@
-// middleware.ts — protects /dashboard from public access
+// middleware.ts — Clerk auth + CVE-2025-29927 mitigation
 // NOTE: middleware is NOT a security boundary on its own.
 // All API routes have their own auth checks (defence in depth).
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(req: NextRequest) {
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/onboarding(.*)",
+  "/connect(.*)",
+]);
+
+export default clerkMiddleware(async (auth, req: NextRequest) => {
   // CVE-2025-29927 mitigation — strip the internal Next.js subrequest header
   // if it arrives from outside. Attackers used this header to bypass middleware.
   const subrequest = req.headers.get("x-middleware-subrequest");
@@ -12,19 +19,16 @@ export function middleware(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { pathname } = req.nextUrl;
-
-  // Protect the dashboard UI — redirect to home if no valid cookie
-  if (pathname.startsWith("/dashboard")) {
-    const auth = req.cookies.get("dashboard-auth")?.value;
-    if (!process.env.DASHBOARD_SECRET || auth !== process.env.DASHBOARD_SECRET) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
+  if (isProtectedRoute(req)) {
+    await auth.protect();
   }
-
-  return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    // Skip Next.js internals and all static files
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Always run for API routes
+    "/(api|trpc)(.*)",
+  ],
 };
