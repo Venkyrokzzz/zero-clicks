@@ -7,15 +7,6 @@ const nextConfig = {
     serverComponentsExternalPackages: ["three", "@react-three/fiber", "@react-three/rapier", "meshline"],
   },
 
-  async rewrites() {
-    return [
-      {
-        source: '/__clerk/:path*',
-        destination: '/api/__clerk/:path*',
-      },
-    ];
-  },
-
   async redirects() {
     return [
       {
