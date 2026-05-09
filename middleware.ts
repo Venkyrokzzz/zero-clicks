@@ -11,18 +11,21 @@ const isProtectedRoute = createRouteMatcher([
   "/connect(.*)",
 ]);
 
-export default clerkMiddleware(async (auth, req: NextRequest) => {
-  // CVE-2025-29927 mitigation — strip the internal Next.js subrequest header
-  // if it arrives from outside. Attackers used this header to bypass middleware.
-  const subrequest = req.headers.get("x-middleware-subrequest");
-  if (subrequest) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+export default clerkMiddleware(
+  async (auth, req: NextRequest) => {
+    // CVE-2025-29927 mitigation — strip the internal Next.js subrequest header
+    // if it arrives from outside. Attackers used this header to bypass middleware.
+    const subrequest = req.headers.get("x-middleware-subrequest");
+    if (subrequest) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
-  if (isProtectedRoute(req)) {
-    await auth.protect();
-  }
-});
+    if (isProtectedRoute(req)) {
+      await auth.protect();
+    }
+  },
+  { frontendApiProxy: { enabled: true } }
+);
 
 export const config = {
   matcher: [
