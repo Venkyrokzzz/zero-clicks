@@ -7,6 +7,15 @@ const nextConfig = {
     serverComponentsExternalPackages: ["three", "@react-three/fiber", "@react-three/rapier", "meshline"],
   },
 
+  async rewrites() {
+    return [
+      {
+        source: '/__clerk/:path*',
+        destination: '/api/__clerk/:path*',
+      },
+    ];
+  },
+
   async redirects() {
     return [
       {
@@ -43,8 +52,9 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data:",
               "img-src 'self' blob: data: https:",
-              // Allow fetch to Web3Forms, Google OAuth, and n8n webhook
-              "connect-src 'self' https://api.web3forms.com https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com",
+              // Allow fetch to Web3Forms, Google OAuth, n8n webhook, and Clerk
+              "connect-src 'self' https://api.web3forms.com https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://clerk.0-clicks.uk https://*.clerk.accounts.dev https://clerk.com",
+              "frame-src 'self' https://accounts.google.com https://clerk.0-clicks.uk",
               "frame-ancestors 'none'",
             ].join("; "),
           },
