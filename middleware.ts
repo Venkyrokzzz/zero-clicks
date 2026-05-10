@@ -24,7 +24,7 @@ export default clerkMiddleware(
       await auth.protect();
     }
   },
-  {}
+  { contentSecurityPolicy: {} }
 );
 
 export const config = {
