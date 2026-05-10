@@ -26,14 +26,12 @@ export async function PUT(req: Request) {
 
   const { error } = await supabase
     .from("profiles")
-    .update({
-      business_name,
-      business_type,
-      manager_name,
-      updated_at: new Date().toISOString(),
-    })
+    .update({ business_name, business_type, manager_name })
     .eq("clerk_user_id", userId);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[api/profile PUT]", error.message, error.details, error.hint);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
   return NextResponse.json({ success: true });
 }
