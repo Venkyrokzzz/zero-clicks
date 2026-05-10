@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
   const { id: clerk_user_id, email_addresses } = evt.data;
   const email = email_addresses[0]?.email_address ?? "";
-  const trial_ends_at = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(); // 60 days
+  const trial_ends_at = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
 
   // Upsert profile
   const { error: profileError } = await supabase.from("profiles").upsert({

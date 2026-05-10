@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useUser } from "@clerk/nextjs";
 import ReviewCard from "@/components/ReviewCard";
+import { TrialBanner } from "@/components/TrialBanner";
 
 interface Review {
   id: string;
@@ -84,6 +85,9 @@ export default function Dashboard() {
           </h1>
           <p style={{ color: "#a1a1aa" }}>Here&apos;s what&apos;s happening with your reviews.</p>
         </motion.div>
+
+        {/* Trial banner */}
+        <TrialBanner />
 
         {/* Google connect banner */}
         {hasGoogle === false && (
