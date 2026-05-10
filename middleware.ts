@@ -24,7 +24,7 @@ export default clerkMiddleware(
       await auth.protect();
     }
   },
-  { frontendApiProxy: { enabled: true } }
+  {}
 );
 
 export const config = {
