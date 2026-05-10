@@ -172,6 +172,41 @@ export default function Home() {
               </svg>
             </Link>
 
+            {/* Start Free Trial CTA */}
+            <Link
+              href="/sign-up"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '14px 28px',
+                background: '#f59e0b',
+                color: '#000',
+                fontSize: '14px',
+                fontWeight: 700,
+                textDecoration: 'none',
+                borderRadius: '8px',
+                boxShadow: '0 0 32px rgba(245,158,11,0.25)',
+                transition: 'transform 150ms ease, box-shadow 150ms ease',
+                fontFamily: 'var(--font-body)',
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = 'translateY(-1px)';
+                el.style.boxShadow = '0 0 40px rgba(245,158,11,0.4)';
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = 'translateY(0)';
+                el.style.boxShadow = '0 0 32px rgba(245,158,11,0.25)';
+              }}
+            >
+              Start free trial — 30 days
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </Link>
+
             {/* Secondary CTA */}
             <Link
               href="/demo"
