@@ -1,14 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function ConnectPage() {
   const [form, setForm] = useState({
     pubName: '',
     managerName: '',
     googleReviewsUrl: '',
-    telegramChatId: '',
   })
   const [loading, setLoading] = useState(false)
 
@@ -84,20 +82,6 @@ export default function ConnectPage() {
                 onChange={e => setForm(f => ({ ...f, googleReviewsUrl: e.target.value }))}
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-white/30 transition-colors text-sm"
               />
-            </div>
-
-            <div>
-              <label className="text-[#aaa] text-xs font-medium uppercase tracking-wider mb-1.5 block">
-                Telegram Chat ID <span className="text-[#555] normal-case">(for alerts)</span>
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. 1127066101"
-                value={form.telegramChatId}
-                onChange={e => setForm(f => ({ ...f, telegramChatId: e.target.value }))}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-white/30 transition-colors text-sm"
-              />
-              <p className="text-[#555] text-xs mt-1.5">Message @ZeroClicksBot on Telegram to get your ID</p>
             </div>
           </div>
 
