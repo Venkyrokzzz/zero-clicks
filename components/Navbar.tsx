@@ -193,34 +193,42 @@ export default function Navbar() {
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "6px",
-                padding: "8px 16px",
-                background: "rgba(255,255,255,0.05)",
-                color: "rgba(255,255,255,0.6)",
+                gap: "7px",
+                padding: "9px 18px",
+                background: "rgba(255,255,255,0.04)",
+                color: "rgba(255,255,255,0.75)",
                 fontSize: "14px",
                 fontWeight: 500,
                 textDecoration: "none",
                 borderRadius: "9px",
-                letterSpacing: "0.01em",
+                letterSpacing: "0.02em",
                 fontFamily: "var(--font-body)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                transition: "color 150ms ease, background 150ms ease, border-color 150ms ease",
+                border: "1px solid rgba(255,255,255,0.12)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+                transition: "all 150ms ease",
                 whiteSpace: "nowrap",
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLElement;
                 el.style.color = "#fff";
                 el.style.background = "rgba(255,255,255,0.08)";
-                el.style.borderColor = "rgba(255,255,255,0.2)";
+                el.style.borderColor = "rgba(255,255,255,0.22)";
+                el.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.1), 0 0 12px rgba(255,255,255,0.04)";
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.color = "rgba(255,255,255,0.6)";
-                el.style.background = "rgba(255,255,255,0.05)";
-                el.style.borderColor = "rgba(255,255,255,0.1)";
+                el.style.color = "rgba(255,255,255,0.75)";
+                el.style.background = "rgba(255,255,255,0.04)";
+                el.style.borderColor = "rgba(255,255,255,0.12)";
+                el.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.06)";
               }}
             >
-              🔑 Client login
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                <polyline points="10 17 15 12 10 7"/>
+                <line x1="15" y1="12" x2="3" y2="12"/>
+              </svg>
+              Sign in
             </Link>
             <Link
               href="/contact"
@@ -355,16 +363,22 @@ export default function Navbar() {
                     gap: "8px",
                     padding: "14px 16px",
                     background: "rgba(255,255,255,0.05)",
-                    color: "rgba(255,255,255,0.7)",
+                    color: "rgba(255,255,255,0.8)",
                     borderRadius: "12px",
                     textDecoration: "none",
                     fontSize: "15px",
-                    fontWeight: 600,
+                    fontWeight: 500,
                     fontFamily: "var(--font-body)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    letterSpacing: "0.02em",
                   }}
                 >
-                  🔑 Client login
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                    <polyline points="10 17 15 12 10 7"/>
+                    <line x1="15" y1="12" x2="3" y2="12"/>
+                  </svg>
+                  Sign in
                 </Link>
                 <Link
                   href="/contact"
