@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+const ADMIN_EMAIL = 'zeroclicks.hq@gmail.com'
+
 type Client = {
   clerk_user_id: string
   email: string
@@ -46,7 +48,12 @@ export default function AdminPage() {
   useEffect(() => {
     fetch('/api/admin/clients')
       .then(r => r.json())
-      .then(d => { setClients(d.clients ?? []); setLoading(false) })
+      .then(d => {
+        // Filter out the admin account itself
+        const filtered = (d.clients ?? []).filter((c: Client) => c.email !== ADMIN_EMAIL)
+        setClients(filtered)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -105,21 +112,45 @@ export default function AdminPage() {
     )
   }
 
+  const activeClients = clients.filter(c => !c.trial_paused && c.plan !== 'trial' || (c.plan === 'trial' && daysLeft(c.trial_ends_at) !== null && (daysLeft(c.trial_ends_at) ?? 0) > 0))
+  const googleConnected = clients.filter(c => c.google_connected).length
+
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-6 py-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-white text-2xl font-bold">Admin Panel</h1>
-            <p className="text-[#555] text-sm mt-0.5">{clients.length} clients total</p>
+            <p className="text-[#555] text-sm mt-0.5">
+              {clients.length} clients · {googleConnected} Google connected
+            </p>
           </div>
+          {/* Login pill for pub owners */}
           <a
-            href="/dashboard"
-            className="text-[#555] text-sm hover:text-white transition-colors"
+            href="/sign-in"
+            className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-sm px-4 py-2 rounded-full transition-colors"
           >
-            ← Back to dashboard
+            <span>🔑</span>
+            <span>Pub owner login</span>
           </a>
+        </div>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          <div className="bg-[#111] border border-white/10 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-white">{clients.length}</div>
+            <div className="text-xs text-[#555] mt-1">Total clients</div>
+          </div>
+          <div className="bg-[#111] border border-white/10 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-green-400">{googleConnected}</div>
+            <div className="text-xs text-[#555] mt-1">Google connected</div>
+          </div>
+          <div className="bg-[#111] border border-white/10 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-white">{clients.reduce((a, c) => a + c.reviews_count, 0)}</div>
+            <div className="text-xs text-[#555] mt-1">Total reviews</div>
+          </div>
         </div>
 
         {clients.length === 0 ? (
@@ -133,12 +164,14 @@ export default function AdminPage() {
               return (
                 <div
                   key={client.clerk_user_id}
-                  className="bg-[#111] border border-white/10 rounded-xl p-5"
+                  className={`bg-[#111] border rounded-xl p-5 transition-colors ${
+                    client.trial_paused ? 'border-red-700/30' : 'border-white/10'
+                  }`}
                 >
                   <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4">
                     {/* Left: info */}
                     <div className="space-y-3">
-                      {/* Row 1: name + plan */}
+                      {/* Row 1: name + badges */}
                       <div className="flex items-center gap-3 flex-wrap">
                         <span className="text-white font-semibold">
                           {client.business_name ?? '(no business name)'}
@@ -156,10 +189,12 @@ export default function AdminPage() {
                         )}
                       </div>
 
-                      {/* Row 2: contact details */}
+                      {/* Row 2: contact */}
                       <div className="flex flex-wrap gap-4 text-xs text-[#777]">
                         <span>{client.email}</span>
-                        {client.location && <span>📍 {client.location}{client.postcode ? ` ${client.postcode}` : ''}</span>}
+                        {client.location && (
+                          <span>📍 {client.location}{client.postcode ? ` ${client.postcode}` : ''}</span>
+                        )}
                         {client.phone && <span>📞 {client.phone}</span>}
                       </div>
 
@@ -182,7 +217,7 @@ export default function AdminPage() {
                         {client.plan === 'trial' && days !== null && (
                           <div>
                             <span className="text-[#555]">Trial: </span>
-                            <span className={days <= 5 ? 'text-red-400' : days <= 10 ? 'text-amber-400' : 'text-white'}>
+                            <span className={days <= 5 ? 'text-red-400' : days <= 14 ? 'text-amber-400' : 'text-white'}>
                               {days > 0 ? `${days} days left` : 'expired'}
                             </span>
                           </div>
@@ -218,7 +253,6 @@ export default function AdminPage() {
 
                     {/* Right: actions */}
                     <div className="flex flex-col gap-2 min-w-[160px]">
-                      {/* Trial paused toggle */}
                       <button
                         onClick={() => togglePaused(client)}
                         disabled={isUpdating}
@@ -231,7 +265,6 @@ export default function AdminPage() {
                         {client.trial_paused ? '▶ Resume trial' : '⏸ Pause trial'}
                       </button>
 
-                      {/* Plan upgrade */}
                       <select
                         value={client.plan}
                         disabled={isUpdating}
@@ -243,7 +276,6 @@ export default function AdminPage() {
                         <option value="pro">Pro</option>
                       </select>
 
-                      {/* View detail */}
                       <a
                         href={`/admin/clients/${client.clerk_user_id}`}
                         className="text-xs px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-lg text-center transition-colors"
