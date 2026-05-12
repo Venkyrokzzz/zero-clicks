@@ -12,6 +12,8 @@ const isProtectedRoute = createRouteMatcher([
   "/admin(.*)",
 ]);
 
+const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
 export default clerkMiddleware(
@@ -33,6 +35,16 @@ export default clerkMiddleware(
       const role = (sessionClaims?.metadata as Record<string, string> | undefined)?.role;
       if (role !== 'admin') {
         return NextResponse.redirect(new URL('/dashboard', req.url));
+      }
+    }
+
+    // Smart post-login routing: after sign-in/sign-up, send admin to /admin, clients to /dashboard
+    if (isAuthRoute(req)) {
+      const { sessionClaims, userId } = await auth();
+      if (userId) {
+        const role = (sessionClaims?.metadata as Record<string, string> | undefined)?.role;
+        const dest = role === 'admin' ? '/admin' : '/dashboard';
+        return NextResponse.redirect(new URL(dest, req.url));
       }
     }
   },
