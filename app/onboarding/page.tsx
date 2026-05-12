@@ -130,6 +130,9 @@ export default function OnboardingPage() {
     business_name: "",
     business_type: "",
     manager_name: "",
+    location: "",
+    postcode: "",
+    phone: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -180,7 +183,7 @@ export default function OnboardingPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.business_name || !form.business_type || !form.manager_name) {
+    if (!form.business_name || !form.business_type || !form.manager_name || !form.location || !form.postcode || !form.phone) {
       setError("Please fill in all fields.");
       return;
     }
@@ -199,7 +202,15 @@ export default function OnboardingPage() {
       return;
     }
 
-    router.push("/dashboard");
+    // Go straight to Google OAuth — no separate connect page needed
+    const params = new URLSearchParams({
+      pubName: form.business_name,
+      location: form.location,
+      postCode: form.postcode,
+      phoneNumber: form.phone,
+      managerName: form.manager_name,
+    });
+    window.location.href = `/api/auth/google?${params.toString()}`;
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -458,6 +469,46 @@ export default function OnboardingPage() {
                 />
               </div>
 
+              <div>
+                <label style={{ display: "block", marginBottom: "0.4rem", fontWeight: 500 }}>
+                  City / Location
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Shoreditch, London"
+                  value={form.location}
+                  onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.4rem", fontWeight: 500 }}>
+                    Postcode
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. E1 6RU"
+                    value={form.postcode}
+                    onChange={e => setForm(f => ({ ...f, postcode: e.target.value }))}
+                    style={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", marginBottom: "0.4rem", fontWeight: 500 }}>
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="e.g. 07700 900077"
+                    value={form.phone}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+
               {error && (
                 <p style={{ color: "#ef4444", fontSize: "0.9rem" }}>{error}</p>
               )}
@@ -477,7 +528,7 @@ export default function OnboardingPage() {
                   opacity: loading ? 0.7 : 1,
                 }}
               >
-                {loading ? "Saving…" : "Let's go →"}
+                {loading ? "Connecting to Google…" : "Connect Google Business →"}
               </button>
             </form>
           </div>

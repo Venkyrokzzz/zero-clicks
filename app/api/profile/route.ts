@@ -30,11 +30,19 @@ export async function PUT(req: Request) {
 
     const body = await req.json();
     console.log("[api/profile PUT] body:", JSON.stringify(body));
-    const { business_name, business_type, manager_name } = body;
+    const { business_name, business_type, manager_name, location, postcode, phone } = body;
+
+    const update: Record<string, string | undefined> = {};
+    if (business_name !== undefined) update.business_name = business_name;
+    if (business_type !== undefined) update.business_type = business_type;
+    if (manager_name !== undefined) update.manager_name = manager_name;
+    if (location !== undefined) update.location = location;
+    if (postcode !== undefined) update.postcode = postcode;
+    if (phone !== undefined) update.phone = phone;
 
     const { error } = await supabase
       .from("profiles")
-      .update({ business_name, business_type, manager_name })
+      .update(update)
       .eq("clerk_user_id", userId);
 
     if (error) {
