@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 
-  // Join google_connections → profiles → settings
+  // Query 1: google_connections joined to profiles (direct FK exists)
   const { data, error } = await supabase
     .from("google_connections")
     .select(`
@@ -31,10 +31,6 @@ export async function GET(req: Request) {
         business_type,
         manager_name,
         location
-      ),
-      settings(
-        tone,
-        flag_negative
       )
     `)
     .eq("profiles.trial_paused", false);
@@ -55,10 +51,23 @@ export async function GET(req: Request) {
     return new Date(trialEnd) > now;
   });
 
+  // Query 2: fetch settings for all active users in one shot
+  const userIds = active.map((r: Record<string, unknown>) => r.clerk_user_id as string);
+  const settingsMap: Record<string, Record<string, unknown>> = {};
+  if (userIds.length > 0) {
+    const { data: settingsRows } = await supabase
+      .from("settings")
+      .select("clerk_user_id, tone, flag_negative")
+      .in("clerk_user_id", userIds);
+    for (const s of settingsRows ?? []) {
+      settingsMap[s.clerk_user_id] = s;
+    }
+  }
+
   // Flatten for easy n8n consumption
   const connections = active.map((row: Record<string, unknown>) => {
     const profile = row.profiles as Record<string, unknown>;
-    const settings = row.settings as Record<string, unknown> | null;
+    const settings = settingsMap[row.clerk_user_id as string] ?? null;
     return {
       clerk_user_id:           row.clerk_user_id,
       access_token:            row.access_token,
