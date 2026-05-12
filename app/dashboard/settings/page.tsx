@@ -165,7 +165,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)', padding: '32px 24px', color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)', padding: '104px 24px 48px', color: '#fff' }}>
       <div style={{ maxWidth: '640px', margin: '0 auto' }}>{children}</div>
     </div>
   )

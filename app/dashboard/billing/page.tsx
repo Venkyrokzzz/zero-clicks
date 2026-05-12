@@ -25,7 +25,7 @@ export default function BillingPage() {
     : null
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)', padding: '32px 24px', color: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)', padding: '104px 24px 48px', color: '#fff' }}>
       <div style={{ maxWidth: '640px', margin: '0 auto' }}>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '8px' }}>Billing</h1>
         <p style={{ color: '#a1a1aa', marginBottom: '36px' }}>Your plan and trial status.</p>
