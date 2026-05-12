@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.0-clicks.uk'
 
-function verifyState(signedState: string): { nonce: string; userId: string; googleReviewsUrl: string } | null {
+function verifyState(signedState: string): { nonce: string; userId: string; pubName: string; location: string; postCode: string; phoneNumber: string } | null {
   const secret = process.env.OAUTH_STATE_SECRET!
   const lastDot = signedState.lastIndexOf('.')
   if (lastDot === -1) return null
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${SITE_URL}/connect?error=invalid_state`)
   }
 
-  const { userId, googleReviewsUrl } = state
+  const { userId, pubName, location, postCode, phoneNumber } = state
 
   // Exchange code for tokens
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
   const { error: dbError } = await supabase.from('google_connections').upsert({
     clerk_user_id: userId,
     google_email: googleUser.email,
-    google_reviews_url: googleReviewsUrl,
+    google_reviews_url: '', // Will be populated by Magic Lookup in n8n
     refresh_token: tokens.refresh_token,
     access_token: tokens.access_token,
     access_token_expires_at: expiresAt,
@@ -86,6 +86,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${SITE_URL}/connect?error=db_error`)
   }
 
+  // Phase 2: save enriched profile fields from connect form
+  if (location || postCode || phoneNumber || pubName) {
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        ...(pubName && { business_name: pubName }),
+        ...(location && { location }),
+        ...(postCode && { postcode: postCode }),
+        ...(phoneNumber && { phone: phoneNumber }),
+      })
+      .eq('clerk_user_id', userId)
+
+    if (profileError) {
+      console.error('profile enrich error:', profileError)
+      // Non-fatal — don't block the redirect
+    }
+  }
+
   // Dual-write to n8n webhook (migration safety — keep until n8n cutover)
   await fetch(process.env.N8N_TOKEN_WEBHOOK!, {
     method: 'POST',
@@ -95,7 +113,10 @@ export async function GET(req: NextRequest) {
     },
     body: JSON.stringify({
       clerk_user_id: userId,
-      googleReviewsUrl,
+      pubName,
+      location,
+      postCode,
+      phoneNumber,
       email: googleUser.email,
       refreshToken: tokens.refresh_token,
       accessToken: tokens.access_token,

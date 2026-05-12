@@ -5,8 +5,10 @@ import { useState } from 'react'
 export default function ConnectPage() {
   const [form, setForm] = useState({
     pubName: '',
+    location: '',
+    postCode: '',
+    phoneNumber: '',
     managerName: '',
-    googleReviewsUrl: '',
   })
   const [loading, setLoading] = useState(false)
 
@@ -60,6 +62,46 @@ export default function ConnectPage() {
 
             <div>
               <label className="text-[#aaa] text-xs font-medium uppercase tracking-wider mb-1.5 block">
+                City / Location
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Shoreditch, London"
+                value={form.location}
+                onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-white/30 transition-colors text-sm"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-[#aaa] text-xs font-medium uppercase tracking-wider mb-1.5 block">
+                  Post Code
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. E1 6RU"
+                  value={form.postCode}
+                  onChange={e => setForm(f => ({ ...f, postCode: e.target.value }))}
+                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-white/30 transition-colors text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-[#aaa] text-xs font-medium uppercase tracking-wider mb-1.5 block">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  placeholder="e.g. 07700 900077"
+                  value={form.phoneNumber}
+                  onChange={e => setForm(f => ({ ...f, phoneNumber: e.target.value }))}
+                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-white/30 transition-colors text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[#aaa] text-xs font-medium uppercase tracking-wider mb-1.5 block">
                 Manager name
               </label>
               <input
@@ -71,23 +113,11 @@ export default function ConnectPage() {
               />
             </div>
 
-            <div>
-              <label className="text-[#aaa] text-xs font-medium uppercase tracking-wider mb-1.5 block">
-                Google Reviews URL <span className="text-[#555] normal-case">(optional)</span>
-              </label>
-              <input
-                type="url"
-                placeholder="https://g.page/r/your-business/review"
-                value={form.googleReviewsUrl}
-                onChange={e => setForm(f => ({ ...f, googleReviewsUrl: e.target.value }))}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-white/30 transition-colors text-sm"
-              />
-            </div>
           </div>
 
           <button
             onClick={handleConnect}
-            disabled={!form.pubName || !form.managerName || loading}
+            disabled={!form.pubName || !form.location || !form.postCode || !form.phoneNumber || !form.managerName || loading}
             className="w-full mt-8 bg-white text-black font-semibold py-3.5 rounded-lg hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm flex items-center justify-center gap-2"
           >
             {loading ? (

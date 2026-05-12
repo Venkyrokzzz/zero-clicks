@@ -9,7 +9,10 @@ const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
   "/onboarding(.*)",
   "/connect(.*)",
+  "/admin(.*)",
 ]);
+
+const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
 export default clerkMiddleware(
   async (auth, req: NextRequest) => {
@@ -22,6 +25,15 @@ export default clerkMiddleware(
 
     if (isProtectedRoute(req)) {
       await auth.protect();
+    }
+
+    // Admin routes: require role === 'admin' in Clerk publicMetadata
+    if (isAdminRoute(req)) {
+      const { sessionClaims } = await auth();
+      const role = (sessionClaims?.metadata as Record<string, string> | undefined)?.role;
+      if (role !== 'admin') {
+        return NextResponse.redirect(new URL('/dashboard', req.url));
+      }
     }
   },
   { contentSecurityPolicy: {} }
