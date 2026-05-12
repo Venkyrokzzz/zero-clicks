@@ -56,7 +56,15 @@ export async function GET(req: NextRequest) {
   const tokens = await tokenRes.json()
 
   if (!tokens.refresh_token) {
-    return NextResponse.redirect(`${SITE_URL}/connect?error=no_refresh_token`)
+    // Google didn't return a refresh token — re-trigger OAuth with the original form data
+    // so the user gets a seamless second consent screen rather than a broken connect page.
+    const retryParams = new URLSearchParams({
+      pubName,
+      location,
+      postCode,
+      phoneNumber,
+    })
+    return NextResponse.redirect(`${SITE_URL}/api/auth/google?${retryParams.toString()}`)
   }
 
   // Get Google user info (email)
