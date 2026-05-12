@@ -25,11 +25,14 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const googleReviewsUrl = searchParams.get('googleReviewsUrl') || ''
+  const pubName = searchParams.get('pubName') || ''
+  const location = searchParams.get('location') || ''
+  const postCode = searchParams.get('postCode') || ''
+  const phoneNumber = searchParams.get('phoneNumber') || ''
 
-  // HMAC-signed state: nonce + clerk userId for CSRF protection
+  // HMAC-signed state: nonce + clerk userId + search terms for CSRF and magic lookup
   const nonce = crypto.randomUUID()
-  const payload = Buffer.from(JSON.stringify({ nonce, userId, googleReviewsUrl })).toString('base64url')
+  const payload = Buffer.from(JSON.stringify({ nonce, userId, pubName, location, postCode, phoneNumber })).toString('base64url')
   const signedState = signState(payload)
 
   const params = new URLSearchParams({

@@ -38,7 +38,7 @@ export const HERO = {
 export const PROOF_BAR_ITEMS: string[] = [
   "26 of 30 London pubs have unanswered reviews",
   "1-star improvement = up to 9% more revenue",
-  "Average reply time: under 4 minutes",
+  "Average reply time: under 30 seconds",
   "Works for pubs, restaurants and hotels",
   "Replies in your voice — not a template",
   "1-2 star reviews flagged to you instantly",
@@ -166,18 +166,19 @@ export interface Package {
 export const PACKAGES: Package[] = [
   {
     name: "Starter",
-    tagline: "Dip your toe in. No commitment.",
-    price: "£55",
-    timeline: "per month — no setup fee",
-    description: "Template AI replies to your Google reviews. Good if you want to see automated replies before going all-in.",
+    tagline: "30-day free trial. No card needed.",
+    price: "£75",
+    timeline: "per month — after your free trial",
+    description: "AI-powered review replies in your pub's voice. Perfect for independent owners who want their time back.",
     features: [
-      "Template-based review replies",
-      "Google reviews covered",
+      "AI trained in your voice — not a template",
+      "All Google reviews covered",
       "Up to 20 reviews per month",
+      "30-day free trial included",
       "Email support",
     ],
     highlight: false,
-    cta: "Get started",
+    cta: "Start free trial",
   },
   {
     name: "Reputation Manager",
