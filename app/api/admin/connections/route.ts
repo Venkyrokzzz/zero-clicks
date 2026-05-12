@@ -1,5 +1,6 @@
 // app/api/admin/connections/route.ts — n8n fetches all active Google tokens from here
-// Called by n8n Review Monitor every 15 mins
+// Called by n8n Review Monitor every 30 mins
+// Returns everything n8n needs to fetch reviews + build Claude prompt
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
@@ -10,7 +11,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 
-  // Only return connections for non-paused, active clients
+  // Join google_connections → profiles → settings
   const { data, error } = await supabase
     .from("google_connections")
     .select(`
@@ -18,10 +19,23 @@ export async function GET(req: Request) {
       access_token,
       refresh_token,
       access_token_expires_at,
-      scopes,
+      account_id,
+      location_id,
       google_reviews_url,
       last_synced_at,
-      profiles!inner(plan, trial_paused, trial_ends_at, business_name)
+      profiles!inner(
+        plan,
+        trial_paused,
+        trial_ends_at,
+        business_name,
+        business_type,
+        manager_name,
+        location
+      ),
+      settings(
+        tone,
+        flag_negative
+      )
     `)
     .eq("profiles.trial_paused", false);
 
@@ -35,11 +49,36 @@ export async function GET(req: Request) {
   const active = (data ?? []).filter((row: Record<string, unknown>) => {
     const profile = row.profiles as Record<string, unknown> | null;
     if (!profile) return false;
-    if (profile.plan !== "trial") return true; // paid clients always active
+    if (profile.plan !== "trial") return true;
     const trialEnd = profile.trial_ends_at as string | null;
     if (!trialEnd) return false;
     return new Date(trialEnd) > now;
   });
 
-  return NextResponse.json({ connections: active });
+  // Flatten for easy n8n consumption
+  const connections = active.map((row: Record<string, unknown>) => {
+    const profile = row.profiles as Record<string, unknown>;
+    const settings = row.settings as Record<string, unknown> | null;
+    return {
+      clerk_user_id:           row.clerk_user_id,
+      access_token:            row.access_token,
+      refresh_token:           row.refresh_token,
+      access_token_expires_at: row.access_token_expires_at,
+      account_id:              row.account_id ?? null,
+      location_id:             row.location_id ?? null,
+      google_reviews_url:      row.google_reviews_url ?? null,
+      last_synced_at:          row.last_synced_at ?? null,
+      // Profile
+      business_name:           profile.business_name ?? null,
+      business_type:           profile.business_type ?? null,
+      manager_name:            profile.manager_name ?? null,
+      location:                profile.location ?? null,
+      plan:                    profile.plan,
+      // Settings
+      tone:                    settings?.tone ?? "warm-professional",
+      flag_negative:           settings?.flag_negative ?? true,
+    };
+  });
+
+  return NextResponse.json({ connections });
 }
