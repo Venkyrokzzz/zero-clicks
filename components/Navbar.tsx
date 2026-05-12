@@ -185,9 +185,43 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Right side: theme toggle + CTA */}
+          {/* Right side: theme toggle + login pill + CTA */}
           <div className="desktop-cta" style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, justifyContent: "flex-end" }}>
             <ThemeToggle />
+            <Link
+              href="/sign-in"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 16px",
+                background: "rgba(255,255,255,0.05)",
+                color: "rgba(255,255,255,0.6)",
+                fontSize: "14px",
+                fontWeight: 500,
+                textDecoration: "none",
+                borderRadius: "9px",
+                letterSpacing: "0.01em",
+                fontFamily: "var(--font-body)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                transition: "color 150ms ease, background 150ms ease, border-color 150ms ease",
+                whiteSpace: "nowrap",
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.color = "#fff";
+                el.style.background = "rgba(255,255,255,0.08)";
+                el.style.borderColor = "rgba(255,255,255,0.2)";
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.color = "rgba(255,255,255,0.6)";
+                el.style.background = "rgba(255,255,255,0.05)";
+                el.style.borderColor = "rgba(255,255,255,0.1)";
+              }}
+            >
+              🔑 Client login
+            </Link>
             <Link
               href="/contact"
               style={{
@@ -310,7 +344,28 @@ export default function Navbar() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.35 }}
+                style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "32px" }}
               >
+                <Link
+                  href="/sign-in"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    padding: "14px 16px",
+                    background: "rgba(255,255,255,0.05)",
+                    color: "rgba(255,255,255,0.7)",
+                    borderRadius: "12px",
+                    textDecoration: "none",
+                    fontSize: "15px",
+                    fontWeight: 600,
+                    fontFamily: "var(--font-body)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                >
+                  🔑 Client login
+                </Link>
                 <Link
                   href="/contact"
                   style={{
@@ -318,7 +373,6 @@ export default function Navbar() {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "8px",
-                    marginTop: "32px",
                     padding: "16px",
                     background: "#fff",
                     color: "#0a0c14",
