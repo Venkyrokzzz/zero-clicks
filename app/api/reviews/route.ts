@@ -46,6 +46,15 @@ export async function PUT(request: NextRequest) {
   const body = await request.json();
   const { id, status } = body;
 
+  // Input validation
+  if (!id || typeof id !== "string" || id.trim() === "") {
+    return NextResponse.json({ error: "Invalid or missing review id" }, { status: 400 });
+  }
+  const VALID_STATUSES = ["pending", "approved", "sent", "skipped"];
+  if (!status || !VALID_STATUSES.includes(status)) {
+    return NextResponse.json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}` }, { status: 400 });
+  }
+
   // Ensure the review belongs to this user before updating
   const { error } = await supabase
     .from("reviews")
