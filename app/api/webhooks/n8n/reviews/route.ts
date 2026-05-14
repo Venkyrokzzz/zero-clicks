@@ -10,7 +10,11 @@
 //   5. Trial/paused check (don't process paused accounts)
 //   6. Idempotent upsert on (clerk_user_id, external_id)
 import { NextRequest, NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { supabase } from '@/lib/supabase'
+import { buildSystemPrompt, buildUserMessage } from '@/lib/buildReplyPrompt'
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const MAX_PAYLOAD_BYTES = 32 * 1024 // 32 KB
 const VALID_SENTIMENTS = new Set(['POSITIVE', 'NEUTRAL', 'NEGATIVE'])
@@ -132,7 +136,42 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // ── 5. Upsert review — idempotent on (clerk_user_id, external_id) ─────────
+  // ── 5. Generate pub-voice reply with Claude ───────────────────────────────
+  // Fetch profile + settings for business context
+  let finalDraft = safeStr(draft_response) // use n8n draft if provided
+  try {
+    const [{ data: fullProfile }, { data: settings }] = await Promise.all([
+      supabase.from('profiles').select('business_name,manager_name,business_type,location').eq('clerk_user_id', clerk_user_id).single(),
+      supabase.from('settings').select('tone').eq('clerk_user_id', clerk_user_id).single(),
+    ])
+
+    const ctx = {
+      business_name: fullProfile?.business_name || 'our venue',
+      manager_name:  fullProfile?.manager_name  || 'the manager',
+      business_type: fullProfile?.business_type || 'pub',
+      location:      fullProfile?.location       || 'London',
+      tone:          settings?.tone              || 'warm-professional',
+      rating:        Number(rating) || 3,
+      review_text:   typeof review_text === 'string' ? review_text : '',
+      reviewer_name: typeof reviewer_name === 'string' ? reviewer_name : 'Guest',
+    }
+
+    const msg = await anthropic.messages.create({
+      model:      'claude-haiku-4-5',
+      max_tokens: 200,
+      system:     buildSystemPrompt(ctx),
+      messages:   [{ role: 'user', content: buildUserMessage(ctx) }],
+    })
+
+    if (msg.content[0].type === 'text' && msg.content[0].text.trim()) {
+      finalDraft = msg.content[0].text.trim()
+    }
+  } catch (err) {
+    console.error('[n8n/reviews] Claude draft failed, using fallback:', err)
+    // Don't block the save — just keep whatever draft n8n sent
+  }
+
+  // ── 7. Upsert review — idempotent on (clerk_user_id, external_id) ─────────
   const { error: upsertError } = await supabase.from('reviews').upsert(
     {
       clerk_user_id,
@@ -142,7 +181,7 @@ export async function POST(req: NextRequest) {
       sentiment:        safeStr(sentiment, 20),
       review_text:      safeStr(review_text),
       summary:          safeStr(summary, 1000),
-      draft_response:   safeStr(draft_response),
+      draft_response:   finalDraft,
       platform:         safeStr(platform, 50) ?? 'google',
       status:           safeStr(status, 20) ?? 'pending',
       google_created_at: typeof google_created_at === 'string' ? google_created_at : null,
