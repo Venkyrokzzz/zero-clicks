@@ -138,11 +138,13 @@ export async function POST(req: NextRequest) {
 
   // ── 5. Generate pub-voice reply with Claude ───────────────────────────────
   // Fetch profile + settings for business context
-  let finalDraft = safeStr(draft_response) // use n8n draft if provided
+  let finalDraft = safeStr(draft_response)
+  let finalStatus = safeStr(status, 20) ?? 'pending'
+  let autoSent = false
   try {
     const [{ data: fullProfile }, { data: settings }] = await Promise.all([
       supabase.from('profiles').select('business_name,manager_name,business_type,location').eq('clerk_user_id', clerk_user_id).single(),
-      supabase.from('settings').select('tone').eq('clerk_user_id', clerk_user_id).single(),
+      supabase.from('settings').select('tone,auto_send_positive').eq('clerk_user_id', clerk_user_id).single(),
     ])
 
     const ctx = {
@@ -166,6 +168,13 @@ export async function POST(req: NextRequest) {
     if (msg.content[0].type === 'text' && msg.content[0].text.trim()) {
       finalDraft = msg.content[0].text.trim()
     }
+
+    // Auto-send positive reviews if enabled in settings
+    const ratingNum = Number(rating) || 3
+    if (settings?.auto_send_positive && ratingNum >= 4 && finalStatus === 'pending') {
+      finalStatus = 'sent'
+      autoSent = true
+    }
   } catch (err) {
     console.error('[n8n/reviews] Claude draft failed, using fallback:', err)
     // Don't block the save — just keep whatever draft n8n sent
@@ -183,7 +192,8 @@ export async function POST(req: NextRequest) {
       summary:          safeStr(summary, 1000),
       draft_response:   finalDraft,
       platform:         safeStr(platform, 50) ?? 'google',
-      status:           safeStr(status, 20) ?? 'pending',
+      status:           finalStatus,
+      sent_at:          autoSent ? new Date().toISOString() : null,
       google_created_at: typeof google_created_at === 'string' ? google_created_at : null,
     },
     { onConflict: 'clerk_user_id,external_id' }
@@ -194,6 +204,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: upsertError.message }, { status: 500 })
   }
 
-  console.log('[n8n/reviews] Review saved for', clerk_user_id, '| external_id:', external_id)
-  return NextResponse.json({ success: true })
+  console.log('[n8n/reviews] Review saved for', clerk_user_id, '| external_id:', external_id, '| auto_sent:', autoSent)
+  return NextResponse.json({ success: true, auto_sent: autoSent })
 }
