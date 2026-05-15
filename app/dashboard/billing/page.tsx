@@ -9,75 +9,176 @@ interface Profile {
   business_name: string
 }
 
+interface ReviewMetrics {
+  totalReviews: number
+  sentCount: number
+  pendingCount: number
+}
+
+const PLAN_LABEL: Record<string, string> = {
+  trial: 'Free Trial',
+  starter: 'Starter',
+  pro: 'Pro',
+}
+
 export default function BillingPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [metrics, setMetrics] = useState<ReviewMetrics | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/profile')
-      .then(r => r.json())
-      .then(data => { setProfile(data); setLoading(false) })
-      .catch(() => setLoading(false))
+    Promise.all([
+      fetch('/api/profile').then(r => r.json()),
+      fetch('/api/reviews').then(r => r.json()),
+    ]).then(([p, r]) => {
+      setProfile(p)
+      if (r.metrics) setMetrics(r.metrics)
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [])
 
   const daysLeft = profile?.trial_ends_at
     ? Math.max(0, Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : null
 
+  const isTrial   = profile?.plan === 'trial'
+  const isPaid    = profile?.plan === 'starter' || profile?.plan === 'pro'
+  const isExpired = isTrial && daysLeft === 0
+
+  // trial progress bar (60-day trial)
+  const trialProgress = daysLeft !== null ? Math.round(((60 - daysLeft) / 60) * 100) : 0
+
+  const card: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: '12px',
+    padding: '20px 24px',
+    marginBottom: '12px',
+  }
+
+  const label: React.CSSProperties = {
+    fontSize: '0.72rem',
+    color: '#6b7280',
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
+    marginBottom: '6px',
+  }
+
+  if (loading) return (
+    <div style={{ minHeight: '100vh', background: '#0a0a0a', padding: '104px 24px', color: '#6b7280' }}>
+      Loading…
+    </div>
+  )
+
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)', padding: '104px 24px 48px', color: '#fff' }}>
-      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '8px' }}>Billing</h1>
-        <p style={{ color: '#a1a1aa', marginBottom: '36px' }}>Your plan and trial status.</p>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0a0a 0%,#111 100%)', padding: '104px 24px 64px', color: '#fff' }}>
+      <div style={{ maxWidth: '560px', margin: '0 auto' }}>
 
-        {loading ? (
-          <p style={{ color: '#a1a1aa' }}>Loading...</p>
-        ) : (
-          <>
-            {/* Plan card */}
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <div>
-                  <div style={{ fontSize: '0.8rem', color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>Current plan</div>
-                  <div style={{ fontSize: '1.6rem', fontWeight: 700, textTransform: 'capitalize' }}>{profile?.plan ?? 'Trial'}</div>
-                </div>
-                <div style={{ background: profile?.plan === 'trial' ? 'rgba(245,158,11,0.15)' : 'rgba(34,197,94,0.15)', color: profile?.plan === 'trial' ? '#f59e0b' : '#22c55e', padding: '6px 14px', borderRadius: '20px', fontWeight: 600, fontSize: '0.85rem' }}>
-                  {profile?.plan === 'trial' ? `${daysLeft} days left` : 'Active'}
-                </div>
-              </div>
+        {/* Page header */}
+        <div style={{ marginBottom: '28px' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '4px' }}>Billing</h1>
+          <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+            {isPaid ? `${profile?.business_name ?? 'Your workspace'} · Starter plan` : 'Free trial — no card required'}
+          </p>
+        </div>
 
-              {profile?.plan === 'trial' && (
-                <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '8px', padding: '12px 16px', fontSize: '0.9rem', color: '#a1a1aa' }}>
-                  Trial ends {profile?.trial_ends_at ? new Date(profile.trial_ends_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}
-                </div>
-              )}
+        {/* ── Current plan ─────────────────────────────────── */}
+        <div style={{ ...card, borderColor: isTrial && !isExpired ? 'rgba(245,158,11,0.2)' : isPaid ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <p style={label}>Current plan</p>
+              <p style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '2px' }}>
+                {PLAN_LABEL[profile?.plan ?? 'trial'] ?? 'Trial'}
+              </p>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>
+                {isPaid && '£49 / month · billed monthly'}
+                {isTrial && !isExpired && `Renews ${profile?.trial_ends_at ? new Date(profile.trial_ends_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}`}
+                {isExpired && 'Your trial has ended'}
+              </p>
             </div>
+            <span style={{
+              fontSize: '0.75rem', fontWeight: 600, padding: '4px 12px', borderRadius: '20px',
+              background: isExpired ? 'rgba(239,68,68,0.12)' : isTrial ? 'rgba(245,158,11,0.12)' : 'rgba(34,197,94,0.12)',
+              color:      isExpired ? '#ef4444' : isTrial ? '#f59e0b' : '#22c55e',
+            }}>
+              {isExpired ? 'Expired' : isTrial ? `${daysLeft}d left` : 'Active'}
+            </span>
+          </div>
 
-            {/* Pricing */}
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
-              <div style={{ fontSize: '0.8rem', color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Starter plan</div>
-              <div style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '4px' }}>£49<span style={{ fontSize: '1rem', color: '#a1a1aa', fontWeight: 400 }}>/month</span></div>
-              <div style={{ color: '#a1a1aa', fontSize: '0.9rem', marginBottom: '20px' }}>+ £499 one-time setup fee</div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', display: 'grid', gap: '8px' }}>
-                {['Unlimited review replies', 'AI-drafted in your voice', 'Flagged review alerts', 'One-tap approval', 'Google Business Profile connected'].map(f => (
-                  <li key={f} style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '0.9rem', color: '#d1d5db' }}>
-                    <span style={{ color: '#22c55e' }}>✓</span> {f}
-                  </li>
-                ))}
-              </ul>
+          {/* Trial progress bar */}
+          {isTrial && !isExpired && (
+            <div style={{ marginTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6b7280', marginBottom: '6px' }}>
+                <span>Trial usage</span>
+                <span>{60 - (daysLeft ?? 0)} of 60 days</span>
+              </div>
+              <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${trialProgress}%`, background: '#f59e0b', borderRadius: '4px', transition: 'width 0.6s ease' }} />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Usage this month ──────────────────────────────── */}
+        {metrics && (
+          <div style={card}>
+            <p style={label}>Usage</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginTop: '4px' }}>
+              {[
+                { n: metrics.totalReviews, l: 'Reviews received' },
+                { n: metrics.sentCount,    l: 'Replies sent' },
+                { n: metrics.pendingCount, l: 'Awaiting approval' },
+              ].map(({ n, l }) => (
+                <div key={l}>
+                  <p style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '2px' }}>{n}</p>
+                  <p style={{ fontSize: '0.78rem', color: '#6b7280', lineHeight: 1.3 }}>{l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Upgrade / manage ─────────────────────────────── */}
+        {!isPaid && (
+          <div style={{ ...card, background: 'rgba(245,158,11,0.04)', borderColor: 'rgba(245,158,11,0.15)', marginTop: '4px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <p style={{ fontWeight: 600, marginBottom: '2px' }}>Upgrade to Starter</p>
+                <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>£49/mo · £499 setup · unlimited reviews</p>
+              </div>
               <a
-                href="mailto:venkateshsurampudi1@gmail.com?subject=Zero Clicks — Ready to subscribe"
-                style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: '8px', background: '#f59e0b', color: '#000', fontWeight: 700, textDecoration: 'none', fontSize: '0.95rem' }}
+                href="mailto:venkateshsurampudi1@gmail.com?subject=Zero Clicks — Ready to subscribe&body=Hi Venky, I'd like to continue with Zero Clicks after my trial."
+                style={{
+                  padding: '9px 20px', borderRadius: '8px',
+                  background: '#f59e0b', color: '#000',
+                  fontWeight: 700, textDecoration: 'none',
+                  fontSize: '0.875rem', whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
               >
-                Get in touch to subscribe →
+                Get started →
               </a>
             </div>
-
-            <p style={{ color: '#555', fontSize: '0.8rem', textAlign: 'center' }}>
-              Stripe payments coming soon. For now, contact Venky directly.
-            </p>
-          </>
+          </div>
         )}
+
+        {/* ── Invoices (placeholder) ────────────────────────── */}
+        <div style={{ ...card, marginTop: '4px' }}>
+          <p style={label}>Invoices</p>
+          <p style={{ fontSize: '0.875rem', color: '#4b5563', marginTop: '8px' }}>
+            {isPaid ? 'Invoices will appear here.' : 'No invoices yet — you\'re on a free trial.'}
+          </p>
+        </div>
+
+        {/* ── Footer note ───────────────────────────────────── */}
+        <p style={{ fontSize: '0.78rem', color: '#374151', textAlign: 'center', marginTop: '20px', lineHeight: 1.6 }}>
+          Questions about billing?{' '}
+          <a href="mailto:venkateshsurampudi1@gmail.com" style={{ color: '#f59e0b', textDecoration: 'none' }}>
+            Email Venky directly
+          </a>
+          {' '}· No contracts · Cancel anytime
+        </p>
+
       </div>
     </div>
   )
