@@ -15,9 +15,11 @@ export default function FloatingChat() {
   const [state, setState] = useState<State>("idle");
   const msgRef = useRef<HTMLTextAreaElement>(null);
 
-  // Show bubble nudge after 8s if not opened
+  // Show bubble nudge after 20s, desktop only (mobile it blocks pricing buttons)
   useEffect(() => {
-    const t = setTimeout(() => setBubbleVisible(true), 8000);
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) return;
+    const t = setTimeout(() => setBubbleVisible(true), 20000);
     return () => clearTimeout(t);
   }, []);
 
@@ -132,6 +134,7 @@ export default function FloatingChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ duration: 0.2 }}
+            className="chat-panel"
             style={{
               position: "fixed",
               bottom: "86px",
@@ -262,6 +265,18 @@ export default function FloatingChat() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <style>{`
+        @media (max-width: 767px) {
+          .chat-panel {
+            right: 0 !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            border-radius: 16px 16px 0 0 !important;
+          }
+        }
+      `}</style>
 
       {/* Chat button */}
       <motion.button

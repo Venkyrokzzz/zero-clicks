@@ -97,7 +97,7 @@ function CheckIcon({ active }: { active: boolean }) {
 }
 
 function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; isInView: boolean }) {
-  const { name, tagline, price, originalPrice, timeline, features, valueStack, guarantee, scarcity, badge, highlight, cta } = pkg;
+  const { name, tagline, price, originalPrice, timeline, features, valueStack, guarantee, scarcity, badge, highlight, cta, ctaHref } = pkg;
   const [hovered, setHovered] = useState(false);
   const isEarlyBird = badge === "EARLY BIRD";
 
@@ -232,7 +232,7 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
         )}
 
         {/* CTA — pinned to bottom */}
-        <Link href={highlight ? "/contact" : "/sign-up"} style={{
+        <Link href={ctaHref} style={{
           background: highlight ? "var(--text-primary)" : isEarlyBird ? "#f59e0b" : "rgba(255,255,255,0.05)",
           color: highlight ? "#000" : isEarlyBird ? "#000" : "var(--text-primary)",
           border: highlight ? "none" : isEarlyBird ? "none" : "1px solid var(--border-mid)",

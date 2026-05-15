@@ -161,6 +161,7 @@ export interface Package {
   badge?: string;
   highlight: boolean;
   cta: string;
+  ctaHref: string;
 }
 
 export const PACKAGES: Package[] = [
@@ -182,6 +183,7 @@ export const PACKAGES: Package[] = [
     badge: "EARLY BIRD",
     highlight: false,
     cta: "Claim your spot →",
+    ctaHref: "/contact",
   },
   {
     name: "Standard",
@@ -198,6 +200,7 @@ export const PACKAGES: Package[] = [
     ],
     highlight: false,
     cta: "Start free trial",
+    ctaHref: "/sign-up",
   },
   {
     name: "Pro",
@@ -217,6 +220,7 @@ export const PACKAGES: Package[] = [
     badge: "MOST POPULAR",
     highlight: true,
     cta: "Get started — £499 + £75/mo",
+    ctaHref: "/contact",
   },
 ];
 
