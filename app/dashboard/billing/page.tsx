@@ -91,7 +91,7 @@ export default function BillingPage() {
                 {PLAN_LABEL[profile?.plan ?? 'trial'] ?? 'Trial'}
               </p>
               <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>
-                {isPaid && '£49 / month · billed monthly'}
+                {isPaid && `${profile?.plan === 'pro' ? '£75' : '£55'} / month · billed monthly`}
                 {isTrial && !isExpired && `Renews ${profile?.trial_ends_at ? new Date(profile.trial_ends_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}`}
                 {isExpired && 'Your trial has ended'}
               </p>
@@ -144,7 +144,7 @@ export default function BillingPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <p style={{ fontWeight: 600, marginBottom: '2px' }}>Upgrade to Starter</p>
-                <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>£49/mo · £499 setup · unlimited reviews</p>
+                <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>Standard £55/mo · Pro £75/mo · £499 setup</p>
               </div>
               <a
                 href="mailto:venkateshsurampudi1@gmail.com?subject=Zero Clicks — Ready to subscribe&body=Hi Venky, I'd like to continue with Zero Clicks after my trial."

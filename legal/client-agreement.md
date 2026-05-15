@@ -62,7 +62,7 @@ You agree to:
 | Item | Amount |
 |------|--------|
 | One-off setup fee | £499 |
-| Monthly subscription | £49/month per venue |
+| Monthly subscription | £55/month (Standard) or £75/month (Pro) |
 | Trial period | 60 days free — no setup fee charged until trial ends and you confirm continuation |
 | VAT | Not applicable (Zero Clicks is not VAT registered) |
 

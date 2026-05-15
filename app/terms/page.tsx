@@ -67,7 +67,7 @@ export default function TermsPage() {
 
           <h2 style={h2Style}>3. Fees and Payment</h2>
           <p style={pStyle}>
-            Our standard pricing is a one-off setup fee of £499 plus a monthly subscription of £49 per month,
+            Our pricing is a one-off setup fee of £499 plus a monthly subscription of £55 per month (Standard) or £75 per month (Pro),
             per venue. Prices are exclusive of VAT (we are not currently VAT registered). Monthly subscriptions
             are billed in advance. Invoices are issued on the first of each month. Payment is due within 14 days
             of the invoice date. We reserve the right to suspend the service for accounts overdue by more than

@@ -53,7 +53,7 @@ export function TrialBanner() {
             Get in touch to upgrade →
           </a>
           <p style={{ color: "#666", fontSize: "0.8rem", marginTop: "16px" }}>
-            £49/month · Cancel anytime · Live in 48 hours
+            From £55/month · Cancel anytime · Live in 48 hours
           </p>
         </div>
       </div>
