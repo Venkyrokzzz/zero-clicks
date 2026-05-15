@@ -59,7 +59,7 @@ export default function TermsPage() {
 
           <h2 style={h2Style}>2. Trial Period</h2>
           <p style={pStyle}>
-            New clients receive a 60-day free trial. No payment is required during the trial. At the end of
+            New clients receive a 30-day free trial. No payment is required during the trial. At the end of
             the trial period, continued use of the service requires a paid subscription. We will notify you
             by email at least 7 days before your trial expires. You may cancel at any time during the trial
             at no cost.

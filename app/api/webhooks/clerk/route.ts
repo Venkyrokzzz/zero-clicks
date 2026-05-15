@@ -81,7 +81,7 @@ async function handleUserCreated(data: ClerkUserEvent["data"]) {
     "";
 
   const trial_ends_at = new Date(
-    Date.now() + 60 * 24 * 60 * 60 * 1000 // 60 days
+    Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
   ).toISOString();
 
   // Upsert profile — idempotent if webhook fires twice

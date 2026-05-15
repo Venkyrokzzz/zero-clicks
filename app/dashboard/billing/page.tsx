@@ -45,8 +45,8 @@ export default function BillingPage() {
   const isPaid    = profile?.plan === 'starter' || profile?.plan === 'pro'
   const isExpired = isTrial && daysLeft === 0
 
-  // trial progress bar (60-day trial)
-  const trialProgress = daysLeft !== null ? Math.round(((60 - daysLeft) / 60) * 100) : 0
+  // trial progress bar (30-day trial)
+  const trialProgress = daysLeft !== null ? Math.round(((30 - daysLeft) / 30) * 100) : 0
 
   const card: React.CSSProperties = {
     background: 'rgba(255,255,255,0.03)',
@@ -110,7 +110,7 @@ export default function BillingPage() {
             <div style={{ marginTop: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#6b7280', marginBottom: '6px' }}>
                 <span>Trial usage</span>
-                <span>{60 - (daysLeft ?? 0)} of 60 days</span>
+                <span>{30 - (daysLeft ?? 0)} of 30 days</span>
               </div>
               <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${trialProgress}%`, background: '#f59e0b', borderRadius: '4px', transition: 'width 0.6s ease' }} />
