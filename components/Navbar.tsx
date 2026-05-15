@@ -382,7 +382,7 @@ export default function Navbar() {
               <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.15em", textTransform: "uppercase", padding: "14px 0 6px", fontFamily: "var(--font-mono)" }}>Products</p>
               {PRODUCTS.map((item, i) => (
                 <motion.div key={item.href} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: 0.1 + i * 0.04 }}>
-                  <Link href={item.href} style={{
+                  <Link href={item.href} onClick={() => setMobileOpen(false)} style={{
                     display: "block", fontSize: "18px", fontWeight: 600,
                     color: pathname === item.href ? "#fff" : "rgba(255,255,255,0.5)",
                     textDecoration: "none", padding: "10px 0",
@@ -405,6 +405,7 @@ export default function Navbar() {
                 >
                   <Link
                     href={item.href}
+                    onClick={() => setMobileOpen(false)}
                     style={{
                       display: "block",
                       fontSize: "18px",
@@ -430,6 +431,7 @@ export default function Navbar() {
               >
                 <Link
                   href="/sign-in"
+                  onClick={() => setMobileOpen(false)}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -456,6 +458,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/contact"
+                  onClick={() => setMobileOpen(false)}
                   style={{
                     display: "flex",
                     alignItems: "center",
