@@ -4,23 +4,39 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SITE } from "@/lib/content";
 import ThemeToggle from "./ThemeToggle";
 
+const PRODUCTS = [
+  { label: "Reputation Manager", href: "/products/reputation-manager", desc: "Auto-reply to Google reviews" },
+  { label: "Inbox Autopilot",    href: "/products/inbox-autopilot",    desc: "AI email triage & drafting" },
+  { label: "Footfall Engine",    href: "/products/footfall-engine",    desc: "Drive more walk-in traffic" },
+];
+
 const NAV_ITEMS = [
-  { label: "Reputation", href: "/products/reputation-manager" },
-  { label: "Inbox",      href: "/products/inbox-autopilot" },
-  { label: "Footfall",   href: "/products/footfall-engine" },
-  { label: "Demo",       href: "/demo" },
-  { label: "Pricing",    href: "/#pricing" },
+  { label: "Demo",    href: "/demo" },
+  { label: "Pricing", href: "/#pricing" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
+  const productsRef = useRef<HTMLDivElement>(null);
+
+  // Close products dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (productsRef.current && !productsRef.current.contains(e.target as Node)) {
+        setProductsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -120,17 +136,75 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop nav items — true centre via flex:1 columns */}
+          {/* Desktop nav items — centre */}
           <div
             className="desktop-nav-items"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              flex: 1,
-              justifyContent: "center",
-            }}
+            style={{ display: "flex", alignItems: "center", gap: "2px", flex: 1, justifyContent: "center" }}
           >
+            {/* Products dropdown */}
+            <div ref={productsRef} style={{ position: "relative" }}>
+              <button
+                onClick={() => setProductsOpen((o) => !o)}
+                style={{
+                  display: "flex", alignItems: "center", gap: "5px",
+                  padding: "9px 16px", borderRadius: "10px",
+                  fontSize: "14px", fontWeight: 500,
+                  color: pathname.startsWith("/products") ? "#e2e8f0" : "rgba(255,255,255,0.45)",
+                  background: pathname.startsWith("/products") ? "rgba(6,182,212,0.08)" : "transparent",
+                  border: "none", cursor: "pointer",
+                  fontFamily: "var(--font-body)", letterSpacing: "0.02em",
+                  transition: "color 200ms ease, background 200ms ease",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#e2e8f0"; (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+                onMouseLeave={(e) => { if (!pathname.startsWith("/products")) { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)"; (e.currentTarget as HTMLElement).style.background = "transparent"; } }}
+              >
+                Products
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                  style={{ transition: "transform 200ms ease", transform: productsOpen ? "rotate(180deg)" : "rotate(0deg)", opacity: 0.5 }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+
+              <AnimatePresence>
+                {productsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                    style={{
+                      position: "absolute", top: "calc(100% + 8px)", left: "50%",
+                      transform: "translateX(-50%)",
+                      background: "rgba(12,14,24,0.96)", backdropFilter: "blur(20px)",
+                      border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px",
+                      padding: "6px", minWidth: "220px",
+                      boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+                      zIndex: 100,
+                    }}
+                  >
+                    {PRODUCTS.map((p) => (
+                      <Link
+                        key={p.href}
+                        href={p.href}
+                        onClick={() => setProductsOpen(false)}
+                        style={{
+                          display: "block", padding: "10px 12px", borderRadius: "8px",
+                          textDecoration: "none",
+                          background: pathname === p.href ? "rgba(6,182,212,0.08)" : "transparent",
+                          transition: "background 150ms ease",
+                        }}
+                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = pathname === p.href ? "rgba(6,182,212,0.08)" : "transparent"; }}
+                      >
+                        <span style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#e2e8f0", marginBottom: "2px" }}>{p.label}</span>
+                        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)" }}>{p.desc}</span>
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {NAV_ITEMS.map((item) => {
               const active = isActive(item.href);
               return (
@@ -138,43 +212,25 @@ export default function Navbar() {
                   key={item.href}
                   href={item.href}
                   style={{
-                    position: "relative",
-                    padding: "9px 20px",
-                    borderRadius: "10px",
-                    fontSize: "16px",
-                    fontWeight: 500,
+                    position: "relative", padding: "9px 16px", borderRadius: "10px",
+                    fontSize: "14px", fontWeight: 500,
                     color: active ? "#e2e8f0" : "rgba(255,255,255,0.45)",
-                    textDecoration: "none",
-                    letterSpacing: "0.02em",
+                    textDecoration: "none", letterSpacing: "0.02em",
                     transition: "color 200ms ease, background 200ms ease",
-                    fontFamily: "var(--font-body)",
-                    whiteSpace: "nowrap",
+                    fontFamily: "var(--font-body)", whiteSpace: "nowrap",
                     background: active ? "rgba(6,182,212,0.08)" : "transparent",
                   }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      (e.currentTarget as HTMLElement).style.color = "#e2e8f0";
-                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)";
-                      (e.currentTarget as HTMLElement).style.background = "transparent";
-                    }
-                  }}
+                  onMouseEnter={(e) => { if (!active) { (e.currentTarget as HTMLElement).style.color = "#e2e8f0"; (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; } }}
+                  onMouseLeave={(e) => { if (!active) { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.45)"; (e.currentTarget as HTMLElement).style.background = "transparent"; } }}
                 >
                   {active && (
                     <motion.span
                       layoutId="navActive"
                       style={{
-                        position: "absolute",
-                        inset: 0,
-                        background: "rgba(6,182,212,0.08)",
-                        borderRadius: "9px",
+                        position: "absolute", inset: 0,
+                        background: "rgba(6,182,212,0.08)", borderRadius: "9px",
                         border: "1px solid rgba(6,182,212,0.18)",
-                        boxShadow: "inset 0 1px 0 rgba(6,182,212,0.1)",
-                        zIndex: -1,
+                        boxShadow: "inset 0 1px 0 rgba(6,182,212,0.1)", zIndex: -1,
                       }}
                       transition={{ type: "spring", stiffness: 400, damping: 34 }}
                     />
@@ -322,22 +378,40 @@ export default function Navbar() {
               transition={{ duration: 0.3, delay: 0.05 }}
               style={{ display: "flex", flexDirection: "column", gap: "4px", maxWidth: "480px", margin: "0 auto" }}
             >
+              {/* Products group */}
+              <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.15em", textTransform: "uppercase", padding: "14px 0 6px", fontFamily: "var(--font-mono)" }}>Products</p>
+              {PRODUCTS.map((item, i) => (
+                <motion.div key={item.href} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: 0.1 + i * 0.04 }}>
+                  <Link href={item.href} style={{
+                    display: "block", fontSize: "18px", fontWeight: 600,
+                    color: pathname === item.href ? "#fff" : "rgba(255,255,255,0.5)",
+                    textDecoration: "none", padding: "10px 0",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    fontFamily: "var(--font-display)", letterSpacing: "-0.02em",
+                  }}>
+                    {item.label}
+                  </Link>
+                </motion.div>
+              ))}
+
+              {/* Other nav */}
+              <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.15em", textTransform: "uppercase", padding: "14px 0 6px", fontFamily: "var(--font-mono)" }}>Navigation</p>
               {NAV_ITEMS.map((item, i) => (
                 <motion.div
                   key={item.href}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 + i * 0.04 }}
+                  transition={{ duration: 0.3, delay: 0.24 + i * 0.04 }}
                 >
                   <Link
                     href={item.href}
                     style={{
                       display: "block",
-                      fontSize: "22px",
+                      fontSize: "18px",
                       fontWeight: 600,
                       color: isActive(item.href) ? "#fff" : "rgba(255,255,255,0.5)",
                       textDecoration: "none",
-                      padding: "14px 0",
+                      padding: "10px 0",
                       borderBottom: "1px solid rgba(255,255,255,0.06)",
                       fontFamily: "var(--font-display)",
                       letterSpacing: "-0.02em",

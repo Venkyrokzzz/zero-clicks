@@ -75,7 +75,7 @@ export default function Dashboard() {
   const sent = reviews.filter(r => r.status === "sent");
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)", padding: "104px 24px 48px", color: "#fff" }}>
+    <div style={{ minHeight: "100vh", color: "#fff", padding: "40px 24px 80px" }}>
       <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
 
         {/* Header */}

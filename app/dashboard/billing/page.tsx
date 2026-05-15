@@ -65,13 +65,13 @@ export default function BillingPage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0a', padding: '104px 24px', color: '#6b7280' }}>
+    <div style={{ minHeight: '100vh', padding: '40px 24px', color: '#6b7280' }}>
       Loading…
     </div>
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0a0a0a 0%,#111 100%)', padding: '104px 24px 64px', color: '#fff' }}>
+    <div style={{ minHeight: '100vh', color: '#fff', padding: '40px 24px 80px' }}>
       <div style={{ maxWidth: '560px', margin: '0 auto' }}>
 
         {/* Page header */}
