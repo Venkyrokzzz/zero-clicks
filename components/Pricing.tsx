@@ -99,6 +99,7 @@ function CheckIcon({ active }: { active: boolean }) {
 function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; isInView: boolean }) {
   const { name, tagline, price, originalPrice, timeline, features, valueStack, guarantee, scarcity, badge, highlight, cta } = pkg;
   const [hovered, setHovered] = useState(false);
+  const isEarlyBird = badge === "EARLY BIRD";
 
   return (
     <motion.div
@@ -118,13 +119,13 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
       )}
 
       <div style={{
-        background: "var(--bg-surface)",
-        border: highlight ? "1px solid transparent" : "1px solid var(--border)",
+        background: isEarlyBird ? "rgba(245,158,11,0.04)" : "var(--bg-surface)",
+        border: highlight ? "1px solid transparent" : isEarlyBird ? "1px solid rgba(245,158,11,0.35)" : "1px solid var(--border)",
         borderRadius: "16px",
         padding: "28px 24px 24px",
         position: "relative", zIndex: 1,
         display: "flex", flexDirection: "column", height: "100%",
-        boxShadow: highlight ? "0 24px 60px rgba(0,0,0,0.5)" : hovered ? "0 12px 32px rgba(0,0,0,0.3)" : "none",
+        boxShadow: highlight ? "0 24px 60px rgba(0,0,0,0.5)" : isEarlyBird ? "0 0 24px rgba(245,158,11,0.08)" : hovered ? "0 12px 32px rgba(0,0,0,0.3)" : "none",
         transition: "box-shadow 280ms ease",
       }}>
 
@@ -132,9 +133,11 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
         {badge && (
           <span style={{
             position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)",
-            background: "var(--accent)", color: "#000", fontSize: 10, fontWeight: 700,
+            background: isEarlyBird ? "#f59e0b" : "var(--accent)",
+            color: "#000", fontSize: 10, fontWeight: 700,
             padding: "3px 10px", borderRadius: "4px", letterSpacing: "0.1em",
             whiteSpace: "nowrap", fontFamily: "var(--font-mono)",
+            boxShadow: isEarlyBird ? "0 0 12px rgba(245,158,11,0.4)" : "none",
           }}>
             {badge}
           </span>
@@ -230,9 +233,9 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
 
         {/* CTA — pinned to bottom */}
         <Link href={highlight ? "/contact" : "/sign-up"} style={{
-          background: highlight ? "var(--text-primary)" : "rgba(255,255,255,0.05)",
-          color: highlight ? "#000" : "var(--text-primary)",
-          border: highlight ? "none" : "1px solid var(--border-mid)",
+          background: highlight ? "var(--text-primary)" : isEarlyBird ? "#f59e0b" : "rgba(255,255,255,0.05)",
+          color: highlight ? "#000" : isEarlyBird ? "#000" : "var(--text-primary)",
+          border: highlight ? "none" : isEarlyBird ? "none" : "1px solid var(--border-mid)",
           width: "100%", padding: "11px 16px",
           borderRadius: "8px", fontSize: "13px",
           fontFamily: "var(--font-body)", fontWeight: 600,

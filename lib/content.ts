@@ -165,6 +165,25 @@ export interface Package {
 
 export const PACKAGES: Package[] = [
   {
+    name: "Founding Member",
+    tagline: "Lock in this price forever. First 10 clients only.",
+    price: "£35",
+    originalPrice: "£55",
+    timeline: "per month · no setup fee · price locked for life",
+    description: "Everything in Standard at a permanently reduced rate — your reward for being an early client.",
+    features: [
+      "Everything in Standard — nothing removed",
+      "£499 setup fee waived completely",
+      "£35/mo locked in — never increases",
+      "60-day free trial included",
+      "Direct access to Venky for onboarding",
+    ],
+    scarcity: "7 of 10 spots remaining",
+    badge: "EARLY BIRD",
+    highlight: false,
+    cta: "Claim your spot →",
+  },
+  {
     name: "Standard",
     tagline: "60-day free trial. No card needed.",
     price: "£55",
