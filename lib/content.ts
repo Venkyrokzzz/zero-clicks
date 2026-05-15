@@ -168,7 +168,7 @@ export const PACKAGES: Package[] = [
     name: "Standard",
     tagline: "60-day free trial. No card needed.",
     price: "£55",
-    timeline: "per month — after your free trial",
+    timeline: "per month · £499 one-time setup",
     description: "AI-powered review replies in your pub's voice. Perfect for independent owners who want their time back.",
     features: [
       "AI trained in your voice — not a template",

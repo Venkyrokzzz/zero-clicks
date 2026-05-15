@@ -229,7 +229,7 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
         )}
 
         {/* CTA — pinned to bottom */}
-        <Link href="/contact" style={{
+        <Link href={highlight ? "/contact" : "/sign-up"} style={{
           background: highlight ? "var(--text-primary)" : "rgba(255,255,255,0.05)",
           color: highlight ? "#000" : "var(--text-primary)",
           border: highlight ? "none" : "1px solid var(--border-mid)",
