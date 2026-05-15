@@ -13,6 +13,7 @@ export default function Pricing() {
     <section
       id="pricing"
       ref={sectionRef}
+      className="pricing-section"
       style={{ borderTop: "1px solid var(--border)", padding: "80px 48px", background: "transparent" }}
     >
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -24,7 +25,7 @@ export default function Pricing() {
           transition={{ duration: 0.6 }}
           style={{ marginBottom: "48px" }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "18px" }}>
+          <div className="pricing-header-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "18px" }}>
             <h2 style={{
               fontFamily: "var(--font-display)", fontWeight: 600, letterSpacing: "-0.03em",
               fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text-primary)", margin: 0, lineHeight: 1.1,
@@ -82,6 +83,11 @@ export default function Pricing() {
         @media (max-width: 860px) {
           .pricing-grid { grid-template-columns: 1fr !important; }
         }
+        @media (max-width: 640px) {
+          .pricing-section { padding: 60px 16px !important; }
+          .pricing-header-row { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+          .pricing-card-inner { padding: 20px 16px 16px !important; }
+        }
       `}</style>
     </section>
   );
@@ -118,7 +124,7 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
         </>
       )}
 
-      <div style={{
+      <div className="pricing-card-inner" style={{
         background: isEarlyBird ? "rgba(245,158,11,0.04)" : "var(--bg-surface)",
         border: highlight ? "1px solid transparent" : isEarlyBird ? "1px solid rgba(245,158,11,0.35)" : "1px solid var(--border)",
         borderRadius: "16px",
@@ -127,6 +133,8 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
         display: "flex", flexDirection: "column", height: "100%",
         boxShadow: highlight ? "0 24px 60px rgba(0,0,0,0.5)" : isEarlyBird ? "0 0 24px rgba(245,158,11,0.08)" : hovered ? "0 12px 32px rgba(0,0,0,0.3)" : "none",
         transition: "box-shadow 280ms ease",
+        minWidth: 0,
+        overflow: "hidden",
       }}>
 
         {/* Badge */}
@@ -184,7 +192,7 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
           {features.map((feature) => (
             <li key={feature} style={{ display: "flex", alignItems: "flex-start", gap: "9px" }}>
               <CheckIcon active={highlight} />
-              <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontFamily: "var(--font-body)", lineHeight: 1.45 }}>
+              <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontFamily: "var(--font-body)", lineHeight: 1.45, minWidth: 0, overflowWrap: "break-word" }}>
                 {feature}
               </span>
             </li>
@@ -200,9 +208,9 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
               </li>
               {valueStack.map((item) => (
                 <li key={item.item} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "9px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "9px", minWidth: 0 }}>
                     <CheckIcon active={true} />
-                    <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>{item.item}</span>
+                    <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontFamily: "var(--font-body)", minWidth: 0, overflowWrap: "break-word" }}>{item.item}</span>
                   </div>
                   <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontFamily: "var(--font-mono)", textDecoration: "line-through", opacity: 0.5, flexShrink: 0 }}>{item.value}</span>
                 </li>
