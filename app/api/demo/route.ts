@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { DEMO_SCENARIOS } from "@/lib/content";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
 // Simple in-memory rate limit: 20 demo requests per IP per hour
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
