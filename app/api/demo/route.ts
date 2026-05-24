@@ -1,9 +1,10 @@
 // app/api/demo/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { DEMO_SCENARIOS } from "@/lib/content";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // Simple in-memory rate limit: 20 demo requests per IP per hour
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json(
       { error: "API not configured." },
       { status: 500 }
@@ -63,19 +64,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 256,
-      system: scenario.systemPrompt,
-      messages: [{ role: "user", content: scenario.fullText }],
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: scenario.fullText }] }],
+      systemInstruction: scenario.systemPrompt,
+      generationConfig: {
+        maxOutputTokens: 256,
+      }
     });
 
-    const text =
-      message.content[0].type === "text" ? message.content[0].text : "";
+    const text = result.response.text() || "";
 
     return NextResponse.json({ response: text });
   } catch (err) {
-    console.error("Anthropic API error:", err);
+    console.error("Gemini API error:", err);
     return NextResponse.json(
       { error: "AI service temporarily unavailable." },
       { status: 502 }
