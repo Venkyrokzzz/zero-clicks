@@ -75,10 +75,10 @@ export async function POST(req: NextRequest) {
     const text = result.response.text() || "";
 
     return NextResponse.json({ response: text });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Gemini API error:", err);
     return NextResponse.json(
-      { error: "AI service temporarily unavailable." },
+      { error: err.message || "AI service temporarily unavailable." },
       { status: 502 }
     );
   }
