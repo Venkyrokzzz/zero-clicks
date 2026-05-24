@@ -184,7 +184,7 @@ export default function DemoProcessingPanel({ scenario }: Props) {
               margin: 0,
             }}
           >
-            Claude AI — Red Lion Agent
+            Zero Clicks AI Agent
           </p>
           <p
             style={{
