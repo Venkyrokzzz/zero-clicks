@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { DEMO_SCENARIOS } from "@/lib/content";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
 // Simple in-memory rate limit: 20 demo requests per IP per hour
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -64,9 +64,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const combinedPrompt = `${scenario.systemPrompt}\n\nUser Input:\n${scenario.fullText}`;
+
     const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: scenario.fullText }] }],
-      systemInstruction: scenario.systemPrompt,
+      contents: [{ role: "user", parts: [{ text: combinedPrompt }] }],
       generationConfig: {
         maxOutputTokens: 256,
       }
