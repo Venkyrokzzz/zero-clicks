@@ -86,10 +86,14 @@ export default function ContactForm() {
         }),
       });
       const json = await res.json();
-      if (!res.ok || !json.success) { setErrorMsg("Something went wrong. Email me directly at zeroclicks.hq@gmail.com"); setFormState("error"); return; }
+      if (!res.ok || !json.success) { 
+        setErrorMsg(json.message || "Something went wrong. Email me directly at zeroclicks.hq@gmail.com"); 
+        setFormState("error"); 
+        return; 
+      }
       setFormState("success");
-    } catch {
-      setErrorMsg("Something went wrong. Email me directly at zeroclicks.hq@gmail.com");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Network error. Check your adblocker or email zeroclicks.hq@gmail.com");
       setFormState("error");
     }
   };
