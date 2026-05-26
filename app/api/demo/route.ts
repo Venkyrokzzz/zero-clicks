@@ -64,14 +64,24 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const combinedPrompt = `${scenario.systemPrompt}\n\nUser Input:\n${scenario.fullText}`;
+    // HARDCODED BYPASS FOR LOOM RECORDING (NO API KEY NEEDED)
+    // We are simulating a perfect AI response so you can record your outreach videos right now for free.
+    
+    // Simulate 2 seconds of API processing time for realism in the video
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    
+    let mockResponseText = "";
+    if (scenario.type === "review") {
+      mockResponseText = "Hi there, thank you so much for visiting The Red Lion and leaving such a wonderful review! We are thrilled to hear you enjoyed the Sunday Roast and the atmosphere. I'll be sure to pass your kind words on to the kitchen team. We look forward to welcoming you back for another pint soon!\n\nBest regards,\nThe Red Lion Team";
+    } else {
+      mockResponseText = "Hi there,\n\nThank you for reaching out to The Red Lion! We would be absolutely delighted to host your group. We do have availability for 12 people this coming Saturday evening. \n\nI have provisionally held a table for you in our dining area. Could you please confirm what time you would like to arrive and if there are any dietary requirements in your party?\n\nLooking forward to hearing from you,\nThe Red Lion Team";
+    }
 
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: combinedPrompt }] }],
-      generationConfig: {
-        maxOutputTokens: 256,
+    const result = {
+      response: {
+        text: () => mockResponseText
       }
-    });
+    };
 
     const text = result.response.text() || "";
 
