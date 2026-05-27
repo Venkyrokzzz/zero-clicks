@@ -78,10 +78,11 @@ export async function POST(req: NextRequest) {
     });
 
     if (!groqResponse.ok) {
-      const errBody = await groqResponse.text();
-      console.error("Groq API error:", errBody);
+      const errBody = await groqResponse.json().catch(() => ({ error: { message: "Unknown error" } }));
+      const errorMessage = errBody?.error?.message || await groqResponse.text() || "AI service temporarily unavailable.";
+      console.error("Groq API error:", errorMessage);
       return NextResponse.json(
-        { error: "AI service temporarily unavailable." },
+        { error: `Groq Error: ${errorMessage}` },
         { status: 502 }
       );
     }
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("Groq API error:", err);
     return NextResponse.json(
-      { error: err.message || "AI service temporarily unavailable." },
+      { error: `Groq Exception: ${err.message || "Unknown error"}` },
       { status: 502 }
     );
   }
