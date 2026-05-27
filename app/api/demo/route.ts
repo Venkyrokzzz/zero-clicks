@@ -1,10 +1,6 @@
 // app/api/demo/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { DEMO_SCENARIOS } from "@/lib/content";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 // Simple in-memory rate limit: 20 demo requests per IP per hour
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -34,7 +30,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!process.env.GEMINI_API_KEY) {
+  if (!process.env.GROQ_API_KEY) {
     return NextResponse.json(
       { error: "API not configured." },
       { status: 500 }
@@ -64,30 +60,38 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // HARDCODED BYPASS FOR LOOM RECORDING (NO API KEY NEEDED)
-    // We are simulating a perfect AI response so you can record your outreach videos right now for free.
-    
-    // Simulate 2 seconds of API processing time for realism in the video
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    let mockResponseText = "";
-    if (scenario.type === "review") {
-      mockResponseText = "Hi there, thank you so much for visiting The Red Lion and leaving such a wonderful review! We are thrilled to hear you enjoyed the Sunday Roast and the atmosphere. I'll be sure to pass your kind words on to the kitchen team. We look forward to welcoming you back for another pint soon!\n\nBest regards,\nThe Red Lion Team";
-    } else {
-      mockResponseText = "Hi there,\n\nThank you for reaching out to The Red Lion! We would be absolutely delighted to host your group. We do have availability for 12 people this coming Saturday evening. \n\nI have provisionally held a table for you in our dining area. Could you please confirm what time you would like to arrive and if there are any dietary requirements in your party?\n\nLooking forward to hearing from you,\nThe Red Lion Team";
+    const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          { role: "system", content: scenario.systemPrompt },
+          { role: "user", content: scenario.fullText },
+        ],
+        max_tokens: 256,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!groqResponse.ok) {
+      const errBody = await groqResponse.text();
+      console.error("Groq API error:", errBody);
+      return NextResponse.json(
+        { error: "AI service temporarily unavailable." },
+        { status: 502 }
+      );
     }
 
-    const result = {
-      response: {
-        text: () => mockResponseText
-      }
-    };
-
-    const text = result.response.text() || "";
+    const data = await groqResponse.json();
+    const text = data.choices?.[0]?.message?.content || "";
 
     return NextResponse.json({ response: text });
   } catch (err: any) {
-    console.error("Gemini API error:", err);
+    console.error("Groq API error:", err);
     return NextResponse.json(
       { error: err.message || "AI service temporarily unavailable." },
       { status: 502 }
