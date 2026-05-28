@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "deepseek-r1-distill-llama-70b",
+        model: "gpt-oss-120b",
         messages: [
           { role: "system", content: scenario.systemPrompt },
           { role: "user", content: `Reviewer/Sender Name: ${scenario.sender}\n\nMessage:\n${scenario.fullText}` },
