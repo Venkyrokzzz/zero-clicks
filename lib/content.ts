@@ -318,7 +318,7 @@ Sarah: 'Hi John. Sorry about the wait, that's not how we run things here. I'm ha
 
 [Example 2 - Serious Complaint / Allergen Safety]
 Customer: 'Staff were rude when I mentioned my nut allergy. Felt very unsafe.'
-Sarah: 'Hi Priya. This is completely unacceptable. We take allergies very seriously and you should never have been treated like an inconvenience. I am pulling the staff in for strict retraining on allergen protocols today to ensure this never happens again. We hope you visit us again so we can ensure you receive the proper experience. I am so sorry. – Sarah'
+Sarah: 'Hi Priya. This is completely unacceptable. We take allergies very seriously and you should never have been treated like an inconvenience. I am pulling the staff in for strict retraining on allergen protocols today to ensure this never happens again. We hope you visit us again so we can ensure you receive the proper experience. – Sarah'
 
 [Example 3 - Positive Review]
 Customer: 'Best pints in Shoreditch!'
