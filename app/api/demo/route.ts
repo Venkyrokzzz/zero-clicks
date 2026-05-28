@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-oss-120b",
+        model: "llama-3.3-70b-versatile",
         messages: [
           { role: "system", content: scenario.systemPrompt },
           { role: "user", content: `Reviewer/Sender Name: ${scenario.sender}\n\nMessage:\n${scenario.fullText}` },
@@ -88,10 +88,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await groqResponse.json();
-    let text = data.choices?.[0]?.message?.content || "";
-    
-    // DeepSeek R1 outputs its internal reasoning inside <think> tags. Strip them before returning to the UI.
-    text = text.replace(/<think>[\s\S]*?<\/think>\n?/g, '').trim();
+    const text = data.choices?.[0]?.message?.content || "";
 
     return NextResponse.json({ response: text });
   } catch (err: any) {
