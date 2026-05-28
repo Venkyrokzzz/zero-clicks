@@ -1,6 +1,7 @@
 // app/api/demo/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { DEMO_SCENARIOS } from "@/lib/content";
+import Anthropic from "@anthropic-ai/sdk";
 
 // Simple in-memory rate limit: 20 demo requests per IP per hour
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -30,9 +31,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!process.env.GROQ_API_KEY) {
+  if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json(
-      { error: "API not configured." },
+      { error: "API not configured. Missing ANTHROPIC_API_KEY." },
       { status: 500 }
     );
   }
@@ -60,41 +61,27 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: scenario.systemPrompt },
-          { role: "user", content: `Reviewer/Sender Name: ${scenario.sender}\n\nMessage:\n${scenario.fullText}` },
-        ],
-        max_tokens: 256,
-        temperature: 0.6,
-      }),
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
     });
 
-    if (!groqResponse.ok) {
-      const errBody = await groqResponse.json().catch(() => ({ error: { message: "Unknown error" } }));
-      const errorMessage = errBody?.error?.message || await groqResponse.text() || "AI service temporarily unavailable.";
-      console.error("Groq API error:", errorMessage);
-      return NextResponse.json(
-        { error: `Groq Error: ${errorMessage}` },
-        { status: 502 }
-      );
-    }
+    const response = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 256,
+      temperature: 0.6,
+      system: scenario.systemPrompt,
+      messages: [
+        { role: "user", content: `Reviewer/Sender Name: ${scenario.sender}\n\nMessage:\n${scenario.fullText}` }
+      ]
+    });
 
-    const data = await groqResponse.json();
-    const text = data.choices?.[0]?.message?.content || "";
+    const text = response.content[0].type === "text" ? response.content[0].text : "";
 
     return NextResponse.json({ response: text });
   } catch (err: any) {
-    console.error("Groq API error:", err);
+    console.error("Anthropic API error:", err);
     return NextResponse.json(
-      { error: `Groq Exception: ${err.message || "Unknown error"}` },
+      { error: `Anthropic Error: ${err.message || "Unknown error"}` },
       { status: 502 }
     );
   }
