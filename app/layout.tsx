@@ -65,7 +65,12 @@ const ANTI_FLASH = `(function(){try{var s=localStorage.getItem('zc-theme');docum
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      afterSignInUrl="/dashboard"
+      afterSignUpUrl="/onboarding"
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+    >
       <html lang="en-GB" suppressHydrationWarning className={`${interBody.variable} ${interDisplay.variable}`}>
         <head>
           {/* Anti-flash: always dark unless user explicitly chose light */}
