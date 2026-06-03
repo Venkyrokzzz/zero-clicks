@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { supabase } from '@/lib/supabase'
 import { buildSystemPrompt, buildUserMessage } from '@/lib/buildReplyPrompt'
+import { verifyToken } from '@/lib/verifyToken'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -24,7 +25,7 @@ const VALID_STATUSES   = new Set(['pending', 'approved', 'sent', 'skipped'])
 export async function POST(req: NextRequest) {
   // ── 1. Shared-secret auth ─────────────────────────────────────────────────
   const token = req.headers.get('x-zeroclicks-token')
-  if (!token || token !== process.env.N8N_WEBHOOK_TOKEN) {
+  if (!verifyToken(token, process.env.N8N_WEBHOOK_TOKEN)) {
     console.warn('[n8n/reviews] Unauthorised request from', req.headers.get('x-forwarded-for'))
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
   }

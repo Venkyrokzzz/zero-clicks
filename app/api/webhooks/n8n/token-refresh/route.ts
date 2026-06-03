@@ -2,11 +2,11 @@
 // n8n calls this when Google returns 401 — we refresh the token and update Supabase
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { verifyToken } from "@/lib/verifyToken";
 
 export async function POST(req: Request) {
-  // Verify shared secret
   const token = req.headers.get("x-zeroclicks-token");
-  if (!token || token !== process.env.N8N_WEBHOOK_TOKEN) {
+  if (!verifyToken(token, process.env.N8N_WEBHOOK_TOKEN)) {
     return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 

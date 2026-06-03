@@ -3,11 +3,11 @@
 // Returns everything n8n needs to fetch reviews + build Claude prompt
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { verifyToken } from "@/lib/verifyToken";
 
 export async function GET(req: Request) {
-  // Auth: shared secret between n8n and Next.js
   const token = req.headers.get("x-zeroclicks-token");
-  if (!token || token !== process.env.N8N_WEBHOOK_TOKEN) {
+  if (!verifyToken(token, process.env.N8N_WEBHOOK_TOKEN)) {
     return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 

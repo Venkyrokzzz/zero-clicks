@@ -42,9 +42,15 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Missing clerk_user_id" }, { status: 400 });
   }
 
+  const VALID_PLANS = ['trial', 'founding', 'standard', 'pro', 'cancelled'];
   const update: Record<string, unknown> = {};
   if (trial_paused !== undefined) update.trial_paused = trial_paused;
-  if (plan !== undefined) update.plan = plan;
+  if (plan !== undefined) {
+    if (!VALID_PLANS.includes(plan)) {
+      return NextResponse.json({ error: `Invalid plan. Must be one of: ${VALID_PLANS.join(', ')}` }, { status: 400 });
+    }
+    update.plan = plan;
+  }
   if (notes !== undefined) update.notes = notes;
 
   if (Object.keys(update).length === 0) {
