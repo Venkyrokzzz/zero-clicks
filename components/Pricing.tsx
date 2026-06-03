@@ -120,10 +120,7 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
 
   async function handleCheckout() {
     const plan = PLAN_KEYS[name];
-    if (!plan) {
-      console.error("[checkout] No plan key found for:", name);
-      return;
-    }
+    if (!plan) return;
     setLoading(true);
     try {
       const res = await fetch("/api/checkout", {
@@ -131,6 +128,10 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),
       });
+      if (res.status === 401) {
+        window.location.href = `/sign-up?redirect_url=${encodeURIComponent("/#pricing")}`;
+        return;
+      }
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
