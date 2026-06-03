@@ -63,7 +63,7 @@ export default function BillingPage() {
     : null
 
   const isTrial   = profile?.plan === 'trial'
-  const isPaid    = profile?.plan === 'starter' || profile?.plan === 'pro'
+  const isPaid    = ['starter', 'standard', 'pro'].includes(profile?.plan ?? '')
   const isExpired = isTrial && daysLeft === 0
 
   // trial progress bar (30-day trial)

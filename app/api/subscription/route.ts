@@ -22,7 +22,7 @@ export async function GET() {
   const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))) : 0;
   const isTrialActive = data.plan === "trial" && daysLeft > 0;
   const isTrialExpired = data.plan === "trial" && daysLeft <= 0;
-  const isPaid = data.plan === "starter" || data.plan === "pro";
+  const isPaid = ["starter", "standard", "pro"].includes(data.plan);
 
   return NextResponse.json({
     plan: data.plan,
