@@ -21,8 +21,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetch('/api/settings')
-      .then(r => r.json())
-      .then(data => { setSettings(data); setLoading(false) })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setSettings(data); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 

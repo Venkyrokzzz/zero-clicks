@@ -47,11 +47,11 @@ export default function BillingPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/profile').then(r => r.json()),
-      fetch('/api/reviews').then(r => r.json()),
+      fetch('/api/profile').then(r => r.ok ? r.json() : null),
+      fetch('/api/reviews').then(r => r.ok ? r.json() : null),
     ]).then(([p, r]) => {
-      setProfile(p)
-      if (r.metrics) setMetrics(r.metrics)
+      if (p) setProfile(p)
+      if (r?.metrics) setMetrics(r.metrics)
       setLoading(false)
     }).catch(() => setLoading(false))
   }, [])
