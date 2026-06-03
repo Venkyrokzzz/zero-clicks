@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface Profile {
   plan: string
@@ -25,6 +26,26 @@ export default function BillingPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [metrics, setMetrics] = useState<ReviewMetrics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [upgrading, setUpgrading] = useState(false)
+  const router = useRouter()
+
+  async function handleUpgrade(plan: 'standard' | 'pro') {
+    setUpgrading(true)
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      else alert('Something went wrong. Please try again.')
+    } catch {
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setUpgrading(false)
+    }
+  }
 
   useEffect(() => {
     Promise.all([
@@ -141,23 +162,37 @@ export default function BillingPage() {
         {/* ── Upgrade / manage ─────────────────────────────── */}
         {!isPaid && (
           <div style={{ ...card, background: 'rgba(245,158,11,0.04)', borderColor: 'rgba(245,158,11,0.15)', marginTop: '4px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <p style={{ fontWeight: 600, marginBottom: '2px' }}>Upgrade to Starter</p>
-                <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>Standard £55/mo · Pro £75/mo · £499 setup</p>
+                <p style={{ fontWeight: 600, marginBottom: '2px' }}>Upgrade your plan</p>
+                <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>£499 one-time setup · cancel anytime</p>
               </div>
-              <a
-                href="mailto:venkateshsurampudi1@gmail.com?subject=Zero Clicks — Ready to subscribe&body=Hi Venky, I'd like to continue with Zero Clicks after my trial."
-                style={{
-                  padding: '9px 20px', borderRadius: '8px',
-                  background: '#f59e0b', color: '#000',
-                  fontWeight: 700, textDecoration: 'none',
-                  fontSize: '0.875rem', whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                }}
-              >
-                Get started →
-              </a>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => handleUpgrade('standard')}
+                  disabled={upgrading}
+                  style={{
+                    padding: '9px 20px', borderRadius: '8px',
+                    background: 'rgba(255,255,255,0.06)', color: '#fff',
+                    fontWeight: 600, border: '1px solid rgba(255,255,255,0.12)',
+                    fontSize: '0.875rem', whiteSpace: 'nowrap', cursor: upgrading ? 'wait' : 'pointer',
+                  }}
+                >
+                  Standard £55/mo
+                </button>
+                <button
+                  onClick={() => handleUpgrade('pro')}
+                  disabled={upgrading}
+                  style={{
+                    padding: '9px 20px', borderRadius: '8px',
+                    background: '#f59e0b', color: '#000',
+                    fontWeight: 700, border: 'none',
+                    fontSize: '0.875rem', whiteSpace: 'nowrap', cursor: upgrading ? 'wait' : 'pointer',
+                  }}
+                >
+                  {upgrading ? 'Redirecting…' : 'Pro £75/mo →'}
+                </button>
+              </div>
             </div>
           </div>
         )}
