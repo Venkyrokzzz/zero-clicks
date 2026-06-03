@@ -39,7 +39,7 @@ export default function BillingPage() {
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
-      else alert('Something went wrong. Please try again.')
+      else alert('Error: ' + (data.error ?? 'Unknown error'))
     } catch {
       alert('Something went wrong. Please try again.')
     } finally {

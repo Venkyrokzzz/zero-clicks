@@ -49,34 +49,40 @@ export async function POST(req: NextRequest) {
   const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
   const name = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
 
-  const customerId = await getOrCreateStripeCustomer(userId, email, name);
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  try {
+    const customerId = await getOrCreateStripeCustomer(userId, email, name);
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
-  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-    { price: PRICE_IDS[plan as keyof typeof PRICE_IDS], quantity: 1 },
-  ];
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+      { price: PRICE_IDS[plan as keyof typeof PRICE_IDS], quantity: 1 },
+    ];
 
-  // For standard and pro — add setup fee as invoice item (charged once in first invoice)
-  if (PLANS_WITH_SETUP.includes(plan)) {
-    await stripe.invoiceItems.create({
+    // For standard and pro — add setup fee as invoice item (charged once in first invoice)
+    if (PLANS_WITH_SETUP.includes(plan)) {
+      await stripe.invoiceItems.create({
+        customer: customerId,
+        price_data: {
+          currency: "gbp",
+          product: "prod_Ud7gA6YSXIN0Gv",
+          unit_amount: 49900,
+        },
+      });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
       customer: customerId,
-      price_data: {
-        currency: "gbp",
-        product: "prod_Ud7gA6YSXIN0Gv",
-        unit_amount: 49900,
-      },
+      line_items: lineItems,
+      subscription_data: { metadata: { clerk_user_id: userId, plan } },
+      success_url: `${baseUrl}/dashboard?checkout=success`,
+      cancel_url: `${baseUrl}/#pricing`,
+      metadata: { clerk_user_id: userId, plan },
     });
+
+    return NextResponse.json({ url: session.url });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[checkout] Error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customerId,
-    line_items: lineItems,
-    subscription_data: { metadata: { clerk_user_id: userId, plan } },
-    success_url: `${baseUrl}/dashboard?checkout=success`,
-    cancel_url: `${baseUrl}/#pricing`,
-    metadata: { clerk_user_id: userId, plan },
-  });
-
-  return NextResponse.json({ url: session.url });
 }
