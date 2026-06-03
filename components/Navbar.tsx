@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useUser } from "@clerk/nextjs";
 import { SITE } from "@/lib/content";
 import ThemeToggle from "./ThemeToggle";
 
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { isSignedIn, user } = useUser();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
@@ -244,48 +246,63 @@ export default function Navbar() {
           {/* Right side: theme toggle + login pill + CTA */}
           <div className="desktop-cta" style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, justifyContent: "flex-end" }}>
             <ThemeToggle />
-            <Link
-              href="/sign-in"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "7px",
-                padding: "9px 18px",
-                background: "rgba(255,255,255,0.04)",
-                color: "rgba(255,255,255,0.75)",
-                fontSize: "14px",
-                fontWeight: 500,
-                textDecoration: "none",
-                borderRadius: "9px",
-                letterSpacing: "0.02em",
-                fontFamily: "var(--font-body)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
-                transition: "all 150ms ease",
-                whiteSpace: "nowrap",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.color = "#fff";
-                el.style.background = "rgba(255,255,255,0.08)";
-                el.style.borderColor = "rgba(255,255,255,0.22)";
-                el.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.1), 0 0 12px rgba(255,255,255,0.04)";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.color = "rgba(255,255,255,0.75)";
-                el.style.background = "rgba(255,255,255,0.04)";
-                el.style.borderColor = "rgba(255,255,255,0.12)";
-                el.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.06)";
-              }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                <polyline points="10 17 15 12 10 7"/>
-                <line x1="15" y1="12" x2="3" y2="12"/>
-              </svg>
-              Sign in
-            </Link>
+            {isSignedIn ? (
+              <Link
+                href="/dashboard"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "7px",
+                  padding: "9px 18px",
+                  background: "rgba(255,255,255,0.04)",
+                  color: "rgba(255,255,255,0.75)",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  borderRadius: "9px",
+                  letterSpacing: "0.02em",
+                  fontFamily: "var(--font-body)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+                  transition: "all 150ms ease",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                {user?.firstName ?? "Dashboard"}
+              </Link>
+            ) : (
+              <Link
+                href="/sign-in"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "7px",
+                  padding: "9px 18px",
+                  background: "rgba(255,255,255,0.04)",
+                  color: "rgba(255,255,255,0.75)",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  borderRadius: "9px",
+                  letterSpacing: "0.02em",
+                  fontFamily: "var(--font-body)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+                  transition: "all 150ms ease",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                  <polyline points="10 17 15 12 10 7"/>
+                  <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                Sign in
+              </Link>
+            )}
             <Link
               href="/contact"
               style={{
@@ -430,7 +447,7 @@ export default function Navbar() {
                 style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "32px" }}
               >
                 <Link
-                  href="/sign-in"
+                  href={isSignedIn ? "/dashboard" : "/sign-in"}
                   onClick={() => setMobileOpen(false)}
                   style={{
                     display: "flex",
@@ -450,11 +467,9 @@ export default function Navbar() {
                   }}
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                    <polyline points="10 17 15 12 10 7"/>
-                    <line x1="15" y1="12" x2="3" y2="12"/>
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                   </svg>
-                  Sign in
+                  {isSignedIn ? (user?.firstName ?? "Dashboard") : "Sign in"}
                 </Link>
                 <Link
                   href="/contact"
