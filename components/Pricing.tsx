@@ -102,10 +102,49 @@ function CheckIcon({ active }: { active: boolean }) {
   );
 }
 
+const PLAN_KEYS: Record<string, string> = {
+  "Founding Member": "founding",
+  "Reputation Manager — Founding Member": "founding",
+  "Standard": "standard",
+  "Reputation Manager Standard": "standard",
+  "Reputation Manager — Standard": "standard",
+  "Pro": "pro",
+  "Reputation Manager — Pro": "pro",
+};
+
 function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; isInView: boolean }) {
-  const { name, tagline, price, originalPrice, timeline, features, valueStack, guarantee, scarcity, badge, highlight, cta, ctaHref } = pkg;
+  const { name, tagline, price, originalPrice, timeline, features, valueStack, guarantee, scarcity, badge, highlight, cta } = pkg;
   const [hovered, setHovered] = useState(false);
+  const [loading, setLoading] = useState(false);
   const isEarlyBird = badge === "EARLY BIRD";
+
+  async function handleCheckout() {
+    const plan = PLAN_KEYS[name];
+    if (!plan) {
+      console.error("[checkout] No plan key found for:", name);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("[checkout] No URL returned:", data);
+        alert("Something went wrong. Please try again.");
+      }
+    } catch (err) {
+      console.error("[checkout] Error:", err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <motion.div
@@ -240,22 +279,24 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
         )}
 
         {/* CTA — pinned to bottom */}
-        <Link href={ctaHref} style={{
+        <button onClick={handleCheckout} disabled={loading} style={{
           background: highlight ? "var(--text-primary)" : isEarlyBird ? "#f59e0b" : "rgba(255,255,255,0.05)",
           color: highlight ? "#000" : isEarlyBird ? "#000" : "var(--text-primary)",
           border: highlight ? "none" : isEarlyBird ? "none" : "1px solid var(--border-mid)",
           width: "100%", padding: "11px 16px",
           borderRadius: "8px", fontSize: "13px",
           fontFamily: "var(--font-body)", fontWeight: 600,
-          textDecoration: "none", textAlign: "center", display: "block",
+          cursor: loading ? "wait" : "pointer",
+          textAlign: "center", display: "block",
           letterSpacing: "0.01em",
           transition: "opacity 200ms ease",
+          opacity: loading ? 0.7 : 1,
         }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "0.85"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+          onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLElement).style.opacity = "0.85"; }}
+          onMouseLeave={e => { if (!loading) (e.currentTarget as HTMLElement).style.opacity = "1"; }}
         >
-          {cta}
-        </Link>
+          {loading ? "Redirecting…" : cta}
+        </button>
       </div>
     </motion.div>
   );
