@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 
 interface Profile {
   plan: string
@@ -27,7 +26,6 @@ export default function BillingPage() {
   const [metrics, setMetrics] = useState<ReviewMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [upgrading, setUpgrading] = useState(false)
-  const router = useRouter()
 
   async function handleUpgrade(plan: 'standard' | 'pro') {
     setUpgrading(true)
