@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabase } from "@/lib/supabase";
+import { FOUNDING_OPEN } from "@/lib/foundingConfig";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -43,6 +44,10 @@ export async function POST(req: NextRequest) {
 
   if (!plan || !(plan in PRICE_IDS) || plan === "setup_fee") {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+  }
+
+  if (plan === "founding" && !FOUNDING_OPEN) {
+    return NextResponse.json({ error: "Founding Member plan is now closed. All 10 spots have been taken." }, { status: 410 });
   }
 
   const user = await currentUser();

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { PACKAGES, PRICING_ADDONS, type Package } from "@/lib/content";
+import { FOUNDING_OPEN, FOUNDING_SPOTS_REMAINING, FOUNDING_TOTAL } from "@/lib/foundingConfig";
 
 export default function Pricing() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -117,6 +118,8 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
   const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(false);
   const isEarlyBird = badge === "EARLY BIRD";
+  const isFoundingClosed = name === "Founding Member" && !FOUNDING_OPEN;
+  const spotsText = name === "Founding Member" ? `${FOUNDING_SPOTS_REMAINING} of ${FOUNDING_TOTAL} spots remaining` : scarcity;
 
   async function handleCheckout() {
     const plan = PLAN_KEYS[name];
@@ -130,6 +133,10 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
       });
       if (res.status === 401) {
         window.location.href = `/sign-up?redirect_url=${encodeURIComponent("/#pricing")}`;
+        return;
+      }
+      if (res.status === 410) {
+        alert("Founding Member spots are now closed — all 10 have been taken. Check out the Standard plan.");
         return;
       }
       const data = await res.json();
@@ -270,20 +277,20 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
                 <span style={{ fontSize: "10px", color: "#10b981", fontFamily: "var(--font-body)", lineHeight: 1.3 }}>{guarantee}</span>
               </div>
             )}
-            {scarcity && (
+            {spotsText && (
               <div style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
-                <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#ef4444", boxShadow: "0 0 4px #ef4444", animation: "status-pulse 1.5s ease-in-out infinite", flexShrink: 0 }} />
-                <span style={{ fontSize: "10px", color: "#ef4444", fontFamily: "var(--font-mono)", fontWeight: 600 }}>{scarcity}</span>
+                <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: isFoundingClosed ? "#6b7280" : "#ef4444", boxShadow: isFoundingClosed ? "none" : "0 0 4px #ef4444", animation: isFoundingClosed ? "none" : "status-pulse 1.5s ease-in-out infinite", flexShrink: 0 }} />
+                <span style={{ fontSize: "10px", color: isFoundingClosed ? "#6b7280" : "#ef4444", fontFamily: "var(--font-mono)", fontWeight: 600 }}>{isFoundingClosed ? "CLOSED — 10/10 spots taken" : spotsText}</span>
               </div>
             )}
           </div>
         )}
 
         {/* CTA — pinned to bottom */}
-        <button onClick={handleCheckout} disabled={loading} style={{
-          background: highlight ? "var(--text-primary)" : isEarlyBird ? "#f59e0b" : "rgba(255,255,255,0.05)",
-          color: highlight ? "#000" : isEarlyBird ? "#000" : "var(--text-primary)",
-          border: highlight ? "none" : isEarlyBird ? "none" : "1px solid var(--border-mid)",
+        <button onClick={handleCheckout} disabled={loading || isFoundingClosed} style={{
+          background: isFoundingClosed ? "rgba(255,255,255,0.03)" : highlight ? "var(--text-primary)" : isEarlyBird ? "#f59e0b" : "rgba(255,255,255,0.05)",
+          color: isFoundingClosed ? "#6b7280" : highlight ? "#000" : isEarlyBird ? "#000" : "var(--text-primary)",
+          border: isFoundingClosed ? "1px solid rgba(255,255,255,0.06)" : highlight ? "none" : isEarlyBird ? "none" : "1px solid var(--border-mid)",
           width: "100%", padding: "11px 16px",
           borderRadius: "8px", fontSize: "13px",
           fontFamily: "var(--font-body)", fontWeight: 600,
@@ -293,10 +300,10 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
           transition: "opacity 200ms ease",
           opacity: loading ? 0.7 : 1,
         }}
-          onMouseEnter={e => { if (!loading) (e.currentTarget as HTMLElement).style.opacity = "0.85"; }}
-          onMouseLeave={e => { if (!loading) (e.currentTarget as HTMLElement).style.opacity = "1"; }}
+          onMouseEnter={e => { if (!loading && !isFoundingClosed) (e.currentTarget as HTMLElement).style.opacity = "0.85"; }}
+          onMouseLeave={e => { if (!loading && !isFoundingClosed) (e.currentTarget as HTMLElement).style.opacity = "1"; }}
         >
-          {loading ? "Redirecting…" : cta}
+          {isFoundingClosed ? "Fully booked — spots closed" : loading ? "Redirecting…" : cta}
         </button>
       </div>
     </motion.div>

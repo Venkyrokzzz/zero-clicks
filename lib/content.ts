@@ -183,7 +183,7 @@ export const PACKAGES: Package[] = [
     badge: "EARLY BIRD",
     highlight: false,
     cta: "Claim your spot →",
-    ctaHref: "/contact",
+    ctaHref: "/sign-up",
   },
   {
     name: "Standard",
