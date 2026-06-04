@@ -14,6 +14,22 @@ export async function GET(request: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
+  // Check access — block expired trials
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan, trial_ends_at")
+    .eq("clerk_user_id", userId)
+    .single();
+
+  if (profile) {
+    const isPaid = ["starter", "standard", "pro"].includes(profile.plan);
+    const trialEnd = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+    const trialExpired = profile.plan === "trial" && trialEnd && trialEnd < new Date();
+    if (!isPaid && trialExpired) {
+      return NextResponse.json({ error: "Trial expired", code: "TRIAL_EXPIRED" }, { status: 403 });
+    }
+  }
+
   const { data: reviews, error } = await supabase
     .from("reviews")
     .select("*")
@@ -44,21 +60,34 @@ export async function PUT(request: NextRequest) {
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
   const body = await request.json();
-  const { id, status } = body;
+  const { id, status, draft_response } = body;
 
-  // Input validation
   if (!id || typeof id !== "string" || id.trim() === "") {
     return NextResponse.json({ error: "Invalid or missing review id" }, { status: 400 });
   }
-  const VALID_STATUSES = ["pending", "approved", "sent", "skipped"];
-  if (!status || !VALID_STATUSES.includes(status)) {
-    return NextResponse.json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}` }, { status: 400 });
+
+  const update: Record<string, unknown> = {};
+
+  // Draft-only save (no status change)
+  if (draft_response !== undefined && status === undefined) {
+    if (typeof draft_response !== "string") {
+      return NextResponse.json({ error: "draft_response must be a string" }, { status: 400 });
+    }
+    update.draft_response = draft_response;
+  } else {
+    // Status update (optionally with draft)
+    const VALID_STATUSES = ["pending", "approved", "sent", "skipped"];
+    if (!status || !VALID_STATUSES.includes(status)) {
+      return NextResponse.json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}` }, { status: 400 });
+    }
+    update.status = status;
+    update.sent_at = status === "sent" ? new Date().toISOString() : null;
+    if (draft_response !== undefined) update.draft_response = draft_response;
   }
 
-  // Ensure the review belongs to this user before updating
   const { error } = await supabase
     .from("reviews")
-    .update({ status, sent_at: status === "sent" ? new Date().toISOString() : null })
+    .update(update)
     .eq("id", id)
     .eq("clerk_user_id", userId);
 

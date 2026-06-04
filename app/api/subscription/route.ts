@@ -9,7 +9,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("plan, trial_ends_at")
+    .select("plan, trial_ends_at, subscription_status")
     .eq("clerk_user_id", userId)
     .single();
 
@@ -23,14 +23,17 @@ export async function GET() {
   const isTrialActive = data.plan === "trial" && daysLeft > 0;
   const isTrialExpired = data.plan === "trial" && daysLeft <= 0;
   const isPaid = ["starter", "standard", "pro"].includes(data.plan);
+  const isPastDue = data.subscription_status === "past_due";
 
   return NextResponse.json({
     plan: data.plan,
     trialEndsAt: data.trial_ends_at,
+    subscriptionStatus: data.subscription_status,
     daysLeft,
     isTrialActive,
     isTrialExpired,
     isPaid,
+    isPastDue,
     hasAccess: isTrialActive || isPaid,
   });
 }

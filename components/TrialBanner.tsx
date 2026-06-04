@@ -1,12 +1,37 @@
 // components/TrialBanner.tsx — shows trial countdown or expired overlay
 "use client";
 
+import Link from "next/link";
 import { useSubscription } from "@/hooks/useSubscription";
 
 export function TrialBanner() {
   const { sub, loading } = useSubscription();
 
   if (loading || !sub) return null;
+
+  // Past due — show payment warning banner
+  if (sub.isPastDue) {
+    return (
+      <div style={{
+        background: "rgba(239,68,68,0.1)",
+        border: "1px solid #ef4444",
+        borderRadius: "10px",
+        padding: "12px 20px",
+        marginBottom: "24px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}>
+        <span style={{ color: "#ef4444", fontWeight: 500, fontSize: "0.9rem" }}>
+          ⚠️ Your last payment failed — update your card to keep access
+        </span>
+        <Link href="/dashboard/billing" style={{ color: "#ef4444", fontWeight: 600, fontSize: "0.85rem", textDecoration: "none" }}>
+          Fix payment →
+        </Link>
+      </div>
+    );
+  }
+
   if (sub.isPaid) return null;
 
   // Trial expired — full-screen overlay
@@ -37,8 +62,8 @@ export function TrialBanner() {
           <p style={{ color: "#a1a1aa", marginBottom: "28px", lineHeight: 1.6 }}>
             Your 30-day free trial is over. Upgrade to keep your automated review replies running.
           </p>
-          <a
-            href="mailto:venkateshsurampudi1@gmail.com?subject=Zero Clicks — Ready to upgrade&body=Hi Venky, I'd like to continue with Zero Clicks. Let's chat about the starter plan."
+          <Link
+            href="/dashboard/billing"
             style={{
               display: "inline-block",
               background: "#f59e0b",
@@ -50,10 +75,10 @@ export function TrialBanner() {
               fontSize: "1rem",
             }}
           >
-            Get in touch to upgrade →
-          </a>
+            Upgrade now →
+          </Link>
           <p style={{ color: "#666", fontSize: "0.8rem", marginTop: "16px" }}>
-            From £55/month · Cancel anytime · Live in 48 hours
+            From £35/month · Cancel anytime · Live in 48 hours
           </p>
         </div>
       </div>
@@ -83,8 +108,8 @@ export function TrialBanner() {
       }}>
         {urgentStyle ? "⚠️" : "⏳"} {sub.daysLeft} day{sub.daysLeft !== 1 ? "s" : ""} left on your free trial
       </span>
-      <a
-        href="mailto:venkateshsurampudi1@gmail.com?subject=Zero Clicks — Ready to upgrade"
+      <Link
+        href="/dashboard/billing"
         style={{
           color: urgentStyle ? "#ef4444" : "#f59e0b",
           fontWeight: 600,
@@ -93,7 +118,7 @@ export function TrialBanner() {
         }}
       >
         Upgrade →
-      </a>
+      </Link>
     </div>
   );
 }

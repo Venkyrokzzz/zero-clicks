@@ -6,10 +6,12 @@ import { useState, useEffect } from "react";
 interface Subscription {
   plan: string;
   trialEndsAt: string | null;
+  subscriptionStatus: string | null;
   daysLeft: number;
   isTrialActive: boolean;
   isTrialExpired: boolean;
   isPaid: boolean;
+  isPastDue: boolean;
   hasAccess: boolean;
 }
 
