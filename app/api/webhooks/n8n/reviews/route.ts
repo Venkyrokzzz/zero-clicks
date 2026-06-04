@@ -170,9 +170,12 @@ export async function POST(req: NextRequest) {
       finalDraft = msg.content[0].text.trim()
     }
 
-    // Auto-send positive reviews if enabled in settings
+    // Auto-send 3-5 star reviews if enabled — hold 1-2 stars and complaint keywords
     const ratingNum = Number(rating) || 3
-    if (settings?.auto_send_positive && ratingNum >= 4 && finalStatus === 'pending') {
+    const COMPLAINT_KEYWORDS = ['cold', 'slow', 'rude', 'wrong order', 'disgusting', 'never again', 'awful', 'terrible', 'horrible', 'worst', 'dirty', 'unacceptable', 'refund', 'complaint']
+    const reviewText = (safeStr(review_text, 5000) ?? '').toLowerCase()
+    const hasComplaint = COMPLAINT_KEYWORDS.some(kw => reviewText.includes(kw))
+    if (settings?.auto_send_positive && ratingNum >= 3 && !hasComplaint && finalStatus === 'pending') {
       finalStatus = 'sent'
       autoSent = true
     }

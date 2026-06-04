@@ -72,8 +72,8 @@ export default function SettingsPage() {
       {/* Toggles */}
       <Section title="Behaviour">
         <Toggle
-          label="Auto-send positive replies"
-          desc="5-star reviews get sent automatically without your approval."
+          label="Auto-send 3-5 star replies"
+          desc="3, 4 and 5-star reviews are sent automatically. 1-2 stars and complaints always held for your approval."
           checked={settings.auto_send_positive}
           onChange={v => setSettings(s => ({ ...s, auto_send_positive: v }))}
         />
