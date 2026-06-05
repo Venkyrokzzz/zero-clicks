@@ -1,5 +1,6 @@
 // next.config.mjs
 // Security headers applied globally. Update CSP if you add third-party scripts.
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig = {
   // Prevent Three.js / R3F / Rapier from being bundled server-side
@@ -55,4 +56,11 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: "zero-clicks",
+  project: "javascript-nextjs",
+  silent: true,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+  disableLogger: true,
+});
