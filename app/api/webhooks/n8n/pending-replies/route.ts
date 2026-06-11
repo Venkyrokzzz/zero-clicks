@@ -10,46 +10,53 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 
-  // Get all sent reviews that haven't been posted to Google yet
-  const { data, error } = await supabase
+  // Step 1: get sent reviews not yet posted
+  const { data: reviews, error } = await supabase
     .from("reviews")
-    .select(`
-      id,
-      clerk_user_id,
-      external_id,
-      draft_response,
-      google_connections!inner(
-        access_token,
-        refresh_token,
-        access_token_expires_at,
-        account_id,
-        location_id
-      )
-    `)
+    .select("id, clerk_user_id, external_id, draft_response")
     .eq("status", "sent")
     .is("posted_to_google_at", null)
-    .not("google_connections.account_id", "is", null)
     .limit(50);
 
   if (error) {
-    console.error("[pending-replies] error:", error);
+    console.error("[pending-replies] reviews error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const replies = (data ?? []).map((r: Record<string, unknown>) => {
-    const gc = r.google_connections as Record<string, unknown>;
-    return {
-      review_id:               r.id,
-      clerk_user_id:           r.clerk_user_id,
-      external_id:             r.external_id,
-      reply_text:              r.draft_response,
-      access_token:            gc.access_token,
-      refresh_token:           gc.refresh_token,
-      access_token_expires_at: gc.access_token_expires_at,
-      account_id:              gc.account_id,
-      location_id:             gc.location_id,
-    };
-  });
+  if (!reviews?.length) return NextResponse.json({ replies: [] });
+
+  // Step 2: fetch google_connections for those user IDs
+  const userIds = [...new Set(reviews.map(r => r.clerk_user_id))];
+  const { data: connections, error: connErr } = await supabase
+    .from("google_connections")
+    .select("clerk_user_id, access_token, refresh_token, access_token_expires_at, account_id, location_id")
+    .in("clerk_user_id", userIds)
+    .not("account_id", "is", null);
+
+  if (connErr) {
+    console.error("[pending-replies] connections error:", connErr);
+    return NextResponse.json({ error: connErr.message }, { status: 500 });
+  }
+
+  const connMap = Object.fromEntries((connections ?? []).map(c => [c.clerk_user_id, c]));
+
+  const replies = reviews
+    .map(r => {
+      const gc = connMap[r.clerk_user_id];
+      if (!gc) return null;
+      return {
+        review_id:               r.id,
+        clerk_user_id:           r.clerk_user_id,
+        external_id:             r.external_id,
+        reply_text:              r.draft_response,
+        access_token:            gc.access_token,
+        refresh_token:           gc.refresh_token,
+        access_token_expires_at: gc.access_token_expires_at,
+        account_id:              gc.account_id,
+        location_id:             gc.location_id,
+      };
+    })
+    .filter(Boolean);
 
   return NextResponse.json({ replies });
 }
