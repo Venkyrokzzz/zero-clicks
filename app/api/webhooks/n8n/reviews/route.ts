@@ -10,12 +10,9 @@
 //   5. Trial/paused check (don't process paused accounts)
 //   6. Idempotent upsert on (clerk_user_id, external_id)
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { supabase } from '@/lib/supabase'
 import { buildSystemPrompt, buildUserMessage } from '@/lib/buildReplyPrompt'
 import { verifyToken } from '@/lib/verifyToken'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const MAX_PAYLOAD_BYTES = 32 * 1024 // 32 KB
 const VALID_SENTIMENTS = new Set(['POSITIVE', 'NEUTRAL', 'NEGATIVE'])
@@ -159,16 +156,24 @@ export async function POST(req: NextRequest) {
       reviewer_name: typeof reviewer_name === 'string' ? reviewer_name : 'Guest',
     }
 
-    const msg = await anthropic.messages.create({
-      model:      'claude-haiku-4-5-20251001',
-      max_tokens: 200,
-      system:     buildSystemPrompt(ctx),
-      messages:   [{ role: 'user', content: buildUserMessage(ctx) }],
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 200,
+        messages: [
+          { role: 'system', content: buildSystemPrompt(ctx) },
+          { role: 'user',   content: buildUserMessage(ctx) },
+        ],
+      }),
     })
-
-    if (msg.content[0].type === 'text' && msg.content[0].text.trim()) {
-      finalDraft = msg.content[0].text.trim()
-    }
+    const groqData = await groqRes.json()
+    const text = groqData?.choices?.[0]?.message?.content?.trim()
+    if (text) finalDraft = text
 
     // Auto-send 3-5 star reviews if enabled — hold 1-2 stars and complaint keywords
     const ratingNum = Number(rating) || 3
