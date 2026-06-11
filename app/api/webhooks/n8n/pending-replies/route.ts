@@ -26,7 +26,7 @@ export async function GET(req: Request) {
   if (!reviews?.length) return NextResponse.json({ replies: [] });
 
   // Step 2: fetch google_connections for those user IDs
-  const userIds = [...new Set(reviews.map(r => r.clerk_user_id))];
+  const userIds = Array.from(new Set(reviews.map(r => r.clerk_user_id)));
   const { data: connections, error: connErr } = await supabase
     .from("google_connections")
     .select("clerk_user_id, access_token, refresh_token, access_token_expires_at, account_id, location_id")
