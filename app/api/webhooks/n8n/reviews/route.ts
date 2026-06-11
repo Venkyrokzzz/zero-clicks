@@ -176,12 +176,19 @@ export async function POST(req: NextRequest) {
 
     // Defence layer 2: reject drafts showing signs of prompt-injection leakage.
     // If the model echoed an injected instruction, fall back to a safe generic reply.
+    const SAFE_FALLBACK = 'Thanks for taking the time to leave a review — we really appreciate it. If there’s anything we can help with, do get in touch with us directly and we’ll be happy to assist.'
     if (text) {
       const lower = text.toLowerCase()
-      const INJECTION_MARKERS = ['hacked', 'system prompt', 'ignore all previous', 'ignore previous instruction', 'as an ai', 'i cannot reveal']
-      if (INJECTION_MARKERS.some(m => lower.includes(m))) {
+      const INJECTION_MARKERS = [
+        'hacked', 'pwned', 'system prompt', 'debug mode', 'ignore all previous',
+        'ignore previous instruction', 'ignore your rules', 'as an ai', 'i cannot reveal',
+        'i am an ai', 'language model', 'verbatim',
+      ]
+      // Also flag suspiciously short all-caps single-word replies (e.g. "PWNED")
+      const isSuspiciousShout = /^[A-Z\s!.]{2,15}$/.test(text.trim())
+      if (INJECTION_MARKERS.some(m => lower.includes(m)) || isSuspiciousShout) {
         console.warn('[n8n/reviews] Injection markers in draft — using safe fallback. external_id:', external_id)
-        text = 'Thanks for taking the time to leave a review — we really appreciate it. If there’s anything we can help with, do get in touch with us directly and we’ll be happy to assist.'
+        text = SAFE_FALLBACK
       }
       finalDraft = text
     }
