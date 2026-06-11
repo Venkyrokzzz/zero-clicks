@@ -172,8 +172,19 @@ export async function POST(req: NextRequest) {
       }),
     })
     const groqData = await groqRes.json()
-    const text = groqData?.choices?.[0]?.message?.content?.trim()
-    if (text) finalDraft = text
+    let text = groqData?.choices?.[0]?.message?.content?.trim()
+
+    // Defence layer 2: reject drafts showing signs of prompt-injection leakage.
+    // If the model echoed an injected instruction, fall back to a safe generic reply.
+    if (text) {
+      const lower = text.toLowerCase()
+      const INJECTION_MARKERS = ['hacked', 'system prompt', 'ignore all previous', 'ignore previous instruction', 'as an ai', 'i cannot reveal']
+      if (INJECTION_MARKERS.some(m => lower.includes(m))) {
+        console.warn('[n8n/reviews] Injection markers in draft — using safe fallback. external_id:', external_id)
+        text = 'Thanks for taking the time to leave a review — we really appreciate it. If there’s anything we can help with, do get in touch with us directly and we’ll be happy to assist.'
+      }
+      finalDraft = text
+    }
 
     // Auto-send 3-5 star reviews if enabled — hold 1-2 stars and complaint keywords
     const ratingNum = Number(rating) || 3
