@@ -1,0 +1,19 @@
+name: Poll Reviews
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call poll-reviews
+        run: |
+          STATUS=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            -X GET "https://www.0-clicks.uk/api/cron/poll-reviews" \
+            -H "x-zeroclicks-token: ${{ secrets.N8N_WEBHOOK_TOKEN }}")
+          echo "HTTP $STATUS"
+          cat /tmp/response.json
+          [ "$STATUS" = "200" ] || exit 1
