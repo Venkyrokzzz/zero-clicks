@@ -1,4 +1,4 @@
-name: Poll Reviews
+name: Review Loop
 
 on:
   schedule:
@@ -6,14 +6,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  poll:
+  review-loop:
     runs-on: ubuntu-latest
     steps:
-      - name: Call poll-reviews
+      - name: Poll for new reviews
         run: |
-          STATUS=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+          STATUS=$(curl -s -o /tmp/poll.json -w "%{http_code}" \
             -X GET "https://www.0-clicks.uk/api/cron/poll-reviews" \
             -H "x-zeroclicks-token: ${{ secrets.N8N_WEBHOOK_TOKEN }}")
-          echo "HTTP $STATUS"
-          cat /tmp/response.json
+          echo "poll-reviews HTTP $STATUS"
+          cat /tmp/poll.json
+          [ "$STATUS" = "200" ] || exit 1
+
+      - name: Post approved replies to Google
+        run: |
+          STATUS=$(curl -s -o /tmp/replies.json -w "%{http_code}" \
+            -X GET "https://www.0-clicks.uk/api/cron/post-replies" \
+            -H "x-zeroclicks-token: ${{ secrets.N8N_WEBHOOK_TOKEN }}")
+          echo "post-replies HTTP $STATUS"
+          cat /tmp/replies.json
           [ "$STATUS" = "200" ] || exit 1
