@@ -188,6 +188,7 @@ export async function POST(req: NextRequest) {
         "on us", "on the house", "complimentary", "free of charge", "no charge",
         "free drink", "free pint", "free meal", "free round", "free glass",
         "we'll refund", "we will refund", "give you a refund", "full refund",
+        "a refund", "discuss a refund", "offer a refund", "issue a refund",
         "money back", "compensation", "voucher", "discount", "off your next",
         "next visit on us", "next one on us",
       ]
