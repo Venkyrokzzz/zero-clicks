@@ -132,17 +132,19 @@ function ReviewRow({ review, selected, onClick }: {
 
 // ── Review Detail ──────────────────────────────────────────────────────────
 
-function ReviewDetail({ review, onApprove, onSkip, onEdit, onBack }: {
+function ReviewDetail({ review, onApprove, onSkip, onEdit, onRegenerate, onBack }: {
   review: Review;
   onApprove: (id: string, draft: string) => Promise<void>;
   onSkip: (id: string) => Promise<void>;
   onEdit: (id: string, draft: string) => Promise<void>;
+  onRegenerate: (id: string) => Promise<string>;
   onBack?: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(review.draft_response || "");
   const [saving, setSaving] = useState(false);
   const [approving, setApproving] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
 
   useEffect(() => {
     setEditing(false);
@@ -264,7 +266,31 @@ function ReviewDetail({ review, onApprove, onSkip, onEdit, onBack }: {
             <p style={{ margin: 0, fontSize: "10px", color: "#475569", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>
               AI Draft Reply
             </p>
-            {!editing && draft && <CopyBtn text={draft} />}
+            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+              <button
+                onClick={async () => {
+                  setRegenerating(true);
+                  try {
+                    const newDraft = await onRegenerate(review.id);
+                    setDraft(newDraft);
+                  } finally {
+                    setRegenerating(false);
+                  }
+                }}
+                disabled={regenerating || editing}
+                title="Regenerate with current settings"
+                style={{
+                  padding: "5px 10px", borderRadius: "6px",
+                  border: "1px solid rgba(99,102,241,0.25)",
+                  background: regenerating ? "rgba(99,102,241,0.04)" : "rgba(99,102,241,0.06)",
+                  color: regenerating ? "#6366f1" : "#818cf8",
+                  fontSize: "11px", fontWeight: 700, cursor: regenerating || editing ? "not-allowed" : "pointer",
+                  fontFamily: "inherit", letterSpacing: "0.04em", transition: "all 150ms ease",
+                  opacity: editing ? 0.4 : 1,
+                }}
+              >{regenerating ? "↻ Generating…" : "↻ Regenerate"}</button>
+              {!editing && draft && <CopyBtn text={draft} />}
+            </div>
           </div>
 
           {editing ? (
@@ -466,6 +492,18 @@ export default function Dashboard() {
     showToast("Draft saved");
   }
 
+  async function handleRegenerate(id: string): Promise<string> {
+    const res = await fetch("/api/reviews/regenerate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Regenerate failed");
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, draft_response: data.draft } : r));
+    showToast("↻ Draft regenerated");
+    return data.draft;
+  }
+
   const filtered = filter === "flagged"
     ? reviews.filter(r => r.rating <= 2 && r.status === "pending")
     : reviews.filter(r => filter === "all" || r.status === filter);
@@ -632,6 +670,7 @@ export default function Dashboard() {
               onApprove={handleApprove}
               onSkip={handleSkip}
               onEdit={handleEdit}
+              onRegenerate={handleRegenerate}
               onBack={mobileView === "detail" ? () => setMobileView("list") : undefined}
             />
           ) : (
