@@ -10,6 +10,7 @@
 //   5. Trial/paused check (don't process paused accounts)
 //   6. Idempotent upsert on (clerk_user_id, external_id)
 import { NextRequest, NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { supabase } from '@/lib/supabase'
 import { buildSystemPrompt, buildUserMessage } from '@/lib/buildReplyPrompt'
 import { verifyToken } from '@/lib/verifyToken'
@@ -156,23 +157,17 @@ export async function POST(req: NextRequest) {
       reviewer_name: typeof reviewer_name === 'string' ? reviewer_name : 'Guest',
     }
 
-    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: 200,
-        messages: [
-          { role: 'system', content: buildSystemPrompt(ctx) },
-          { role: 'user',   content: buildUserMessage(ctx) },
-        ],
-      }),
+    const anthropic = new Anthropic()
+    const message = await anthropic.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 200,
+      system: buildSystemPrompt(ctx),
+      messages: [
+        { role: 'user', content: buildUserMessage(ctx) },
+      ],
     })
-    const groqData = await groqRes.json()
-    let text = groqData?.choices?.[0]?.message?.content?.trim()
+    const firstBlock = message.content[0]
+    let text = firstBlock && firstBlock.type === 'text' ? firstBlock.text.trim() : undefined
 
     // Defence layer 2: reject injection leakage AND compensation offers.
     // Compensation phrases on a public Google reply are a liability — anyone can claim them.

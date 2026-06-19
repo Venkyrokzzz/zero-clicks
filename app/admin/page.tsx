@@ -28,9 +28,12 @@ function daysLeft(trial_ends_at: string | null): number | null {
 
 function PlanBadge({ plan }: { plan: string }) {
   const colours: Record<string, string> = {
-    trial: 'bg-amber-900/40 text-amber-400 border-amber-700/30',
-    starter: 'bg-blue-900/40 text-blue-400 border-blue-700/30',
-    pro: 'bg-green-900/40 text-green-400 border-green-700/30',
+    trial:    'bg-amber-900/40 text-amber-400 border-amber-700/30',
+    founding: 'bg-purple-900/40 text-purple-400 border-purple-700/30',
+    standard: 'bg-blue-900/40 text-blue-400 border-blue-700/30',
+    pro:      'bg-green-900/40 text-green-400 border-green-700/30',
+    demo:     'bg-pink-900/40 text-pink-400 border-pink-700/30',
+    cancelled:'bg-white/5 text-white/30 border-white/10',
   }
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full border ${colours[plan] ?? 'bg-white/10 text-white/50 border-white/10'}`}>
@@ -272,8 +275,11 @@ export default function AdminPage() {
                         className="text-xs px-3 py-2 bg-[#1a1a1a] border border-white/10 rounded-lg text-white focus:outline-none focus:border-white/30 disabled:opacity-40"
                       >
                         <option value="trial">Trial</option>
-                        <option value="starter">Starter</option>
+                        <option value="founding">Founding</option>
+                        <option value="standard">Standard</option>
                         <option value="pro">Pro</option>
+                        <option value="demo">Demo</option>
+                        <option value="cancelled">Cancelled</option>
                       </select>
 
                       <a

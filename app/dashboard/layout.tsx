@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
 const NAV = [
   {
@@ -49,6 +50,8 @@ const NAV = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user } = useUser();
+  const isAdmin = user?.publicMetadata?.role === 'admin';
 
   const isActive = (item: typeof NAV[number]) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
@@ -97,20 +100,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        {/* Right: back to site */}
-        <Link href="/" style={{
-          fontSize: "12px", color: "rgba(255,255,255,0.3)", textDecoration: "none",
-          display: "flex", alignItems: "center", gap: "5px",
-          transition: "color 150ms ease",
-        }}
-          onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
-          onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-          Back to site
-        </Link>
+        {/* Right: admin link + back to site */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {isAdmin && (
+            <Link href="/admin" style={{
+              fontSize: "12px", color: "#a855f7", textDecoration: "none",
+              display: "flex", alignItems: "center", gap: "5px",
+              background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)",
+              padding: "5px 10px", borderRadius: "6px",
+              transition: "all 150ms ease",
+            }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(168,85,247,0.15)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(168,85,247,0.08)"; }}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+              Admin
+            </Link>
+          )}
+          <Link href="/" style={{
+            fontSize: "12px", color: "rgba(255,255,255,0.3)", textDecoration: "none",
+            display: "flex", alignItems: "center", gap: "5px",
+            transition: "color 150ms ease",
+          }}
+            onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to site
+          </Link>
+        </div>
       </div>
 
       {/* ── Page content */}

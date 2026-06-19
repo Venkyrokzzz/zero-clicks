@@ -20,13 +20,14 @@ export async function GET(req: Request) {
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-  const [{ data: profile }, { data: connection }, { count }] = await Promise.all([
+  const [{ data: profile }, { data: connection }, { count }, { data: settings }] = await Promise.all([
     supabase.from("profiles").select("*").eq("clerk_user_id", id).single(),
     supabase.from("google_connections").select("*").eq("clerk_user_id", id).maybeSingle(),
     supabase.from("reviews").select("*", { count: "exact", head: true }).eq("clerk_user_id", id),
+    supabase.from("settings").select("tone,auto_send_positive").eq("clerk_user_id", id).maybeSingle(),
   ]);
 
-  return NextResponse.json({ profile, connection, reviews_count: count ?? 0 });
+  return NextResponse.json({ profile, connection, settings, reviews_count: count ?? 0 });
 }
 
 // PATCH /api/admin/client — update trial_paused, plan, or notes
