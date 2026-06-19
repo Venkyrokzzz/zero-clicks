@@ -132,13 +132,16 @@ function ReviewRow({ review, selected, onClick }: {
 
 // ── Review Detail ──────────────────────────────────────────────────────────
 
-function ReviewDetail({ review, onApprove, onSkip, onEdit, onRegenerate, onBack }: {
+function ReviewDetail({ review, onApprove, onSkip, onEdit, onRegenerate, onBack, position, onPrev, onNext }: {
   review: Review;
   onApprove: (id: string, draft: string) => Promise<void>;
   onSkip: (id: string) => Promise<void>;
   onEdit: (id: string, draft: string) => Promise<void>;
   onRegenerate: (id: string) => Promise<string>;
   onBack?: () => void;
+  position?: { current: number; total: number };
+  onPrev?: () => void;
+  onNext?: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(review.draft_response || "");
@@ -180,13 +183,51 @@ function ReviewDetail({ review, onApprove, onSkip, onEdit, onRegenerate, onBack 
         background: isFlagged ? "rgba(239,68,68,0.03)" : "transparent",
         flexShrink: 0,
       }}>
-        {onBack && (
-          <button onClick={onBack} style={{
-            background: "none", border: "none", padding: "0 0 10px", cursor: "pointer",
-            color: "#475569", fontSize: "12px", fontWeight: 600, fontFamily: "inherit",
-            display: "flex", alignItems: "center", gap: "4px",
-          }}>← Back</button>
-        )}
+        {/* Nav row: back (mobile) + prev/next */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: onBack || position ? "10px" : 0 }}>
+          {onBack ? (
+            <button onClick={onBack} style={{
+              background: "none", border: "none", padding: 0, cursor: "pointer",
+              color: "#475569", fontSize: "12px", fontWeight: 600, fontFamily: "inherit",
+              display: "flex", alignItems: "center", gap: "4px",
+            }}>← Back</button>
+          ) : <span />}
+          {position && (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <button
+                onClick={onPrev}
+                disabled={position.current === 0}
+                title="Previous review (←)"
+                style={{
+                  width: 28, height: 28, borderRadius: "7px", border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(255,255,255,0.03)", color: position.current === 0 ? "#1e293b" : "#64748b",
+                  fontSize: "13px", cursor: position.current === 0 ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit",
+                  transition: "all 120ms ease",
+                }}
+                onMouseEnter={e => { if (position.current > 0) (e.currentTarget as HTMLElement).style.color = "#f1f5f9"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = position.current === 0 ? "#1e293b" : "#64748b"; }}
+              >‹</button>
+              <span style={{ fontSize: "11px", color: "#334155", fontWeight: 600, minWidth: "40px", textAlign: "center" }}>
+                {position.current + 1} / {position.total}
+              </span>
+              <button
+                onClick={onNext}
+                disabled={position.current === position.total - 1}
+                title="Next review (→)"
+                style={{
+                  width: 28, height: 28, borderRadius: "7px", border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(255,255,255,0.03)", color: position.current === position.total - 1 ? "#1e293b" : "#64748b",
+                  fontSize: "13px", cursor: position.current === position.total - 1 ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "inherit",
+                  transition: "all 120ms ease",
+                }}
+                onMouseEnter={e => { if (position.current < position.total - 1) (e.currentTarget as HTMLElement).style.color = "#f1f5f9"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = position.current === position.total - 1 ? "#1e293b" : "#64748b"; }}
+              >›</button>
+            </div>
+          )}
+        </div>
         {isFlagged && (
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
@@ -513,6 +554,26 @@ export default function Dashboard() {
     ...filtered.filter(r => r.status !== "pending"),
   ];
   const selected = reviews.find(r => r.id === selectedId) ?? null;
+  const currentIndex = ordered.findIndex(r => r.id === selectedId);
+
+  function goToIndex(idx: number) {
+    if (idx >= 0 && idx < ordered.length) {
+      setSelectedId(ordered[idx].id);
+      setMobileView("detail");
+    }
+  }
+
+  // Keyboard navigation: ← → arrows when not editing text
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   { e.preventDefault(); goToIndex(currentIndex - 1); }
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); goToIndex(currentIndex + 1); }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [currentIndex, ordered]);
   const pubName = (user?.publicMetadata?.business_name as string) || `${user?.firstName || "Your"}'s Venue`;
 
   const METRIC_CARDS = [
@@ -672,6 +733,9 @@ export default function Dashboard() {
               onEdit={handleEdit}
               onRegenerate={handleRegenerate}
               onBack={mobileView === "detail" ? () => setMobileView("list") : undefined}
+              position={ordered.length > 0 ? { current: currentIndex, total: ordered.length } : undefined}
+              onPrev={() => goToIndex(currentIndex - 1)}
+              onNext={() => goToIndex(currentIndex + 1)}
             />
           ) : (
             <EmptyDetail />
