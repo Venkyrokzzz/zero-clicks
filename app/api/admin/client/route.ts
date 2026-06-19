@@ -43,7 +43,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Missing clerk_user_id" }, { status: 400 });
   }
 
-  const VALID_PLANS = ['trial', 'founding', 'standard', 'pro', 'cancelled'];
+  const VALID_PLANS = ['trial', 'founding', 'standard', 'pro', 'demo', 'admin', 'cancelled'];
   const update: Record<string, unknown> = {};
   if (trial_paused !== undefined) update.trial_paused = trial_paused;
   if (plan !== undefined) {

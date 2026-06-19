@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Navbar from './Navbar'
 
-const HIDE_NAV_PATHS = ['/connect', '/dashboard', '/onboarding']
+const HIDE_NAV_PATHS = ['/connect', '/dashboard', '/onboarding', '/admin']
 
 export default function NavbarWrapper() {
   const pathname = usePathname()

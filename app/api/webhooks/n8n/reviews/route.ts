@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
   try {
     const [{ data: fullProfile }, { data: settings }] = await Promise.all([
       supabase.from('profiles').select('business_name,manager_name,business_type,location').eq('clerk_user_id', clerk_user_id).single(),
-      supabase.from('settings').select('tone,auto_send_positive').eq('clerk_user_id', clerk_user_id).single(),
+      supabase.from('settings').select('tone,auto_send_positive,signature').eq('clerk_user_id', clerk_user_id).single(),
     ])
 
     const ctx = {
@@ -194,6 +194,10 @@ export async function POST(req: NextRequest) {
       } else if (COMPENSATION_MARKERS.some(m => lower.includes(m))) {
         console.warn('[n8n/reviews] Compensation offer in draft - stripping and using fallback. external_id:', external_id)
         text = SAFE_FALLBACK
+      }
+      // Append signature if set
+      if (text && settings?.signature && typeof settings.signature === 'string' && settings.signature.trim()) {
+        text = `${text}\n\n${settings.signature.trim()}`
       }
       finalDraft = text
     }

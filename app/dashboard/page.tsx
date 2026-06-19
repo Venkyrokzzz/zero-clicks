@@ -404,7 +404,7 @@ export default function Dashboard() {
   const [hasGoogle, setHasGoogle] = useState<boolean | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
-  const [filter, setFilter] = useState<"all" | "pending" | "sent" | "skipped">("all");
+  const [filter, setFilter] = useState<"all" | "flagged" | "pending" | "approved" | "sent" | "skipped">("all");
   const [toast, setToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
@@ -466,7 +466,9 @@ export default function Dashboard() {
     showToast("Draft saved");
   }
 
-  const filtered = reviews.filter(r => filter === "all" || r.status === filter);
+  const filtered = filter === "flagged"
+    ? reviews.filter(r => r.rating <= 2 && r.status === "pending")
+    : reviews.filter(r => filter === "all" || r.status === filter);
   const ordered = [
     ...filtered.filter(r => r.rating <= 2 && r.status === "pending"),
     ...filtered.filter(r => r.status === "pending" && r.rating > 2),
@@ -588,7 +590,7 @@ export default function Dashboard() {
             display: "flex", gap: "3px", padding: "10px 10px 8px",
             borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0,
           }}>
-            {(["all", "pending", "sent", "skipped"] as const).map(f => (
+            {(["all", "flagged", "pending", "approved", "sent", "skipped"] as const).map(f => (
               <button key={f} onClick={() => setFilter(f)} style={{
                 flex: 1, padding: "5px 2px", borderRadius: "6px", border: "none",
                 background: filter === f ? "rgba(245,158,11,0.1)" : "transparent",
