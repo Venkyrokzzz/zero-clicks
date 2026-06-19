@@ -493,47 +493,57 @@ export default function Dashboard() {
           .dash-left { display: ${mobileView === "list" ? "flex" : "none"} !important; width: 100% !important; }
           .dash-right { display: ${mobileView === "detail" ? "flex" : "none"} !important; }
         }
+        .dash-topbar { flex-wrap: wrap; }
+        .dash-pills { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        @media (max-width: 600px) {
+          .dash-topbar { padding: 8px 12px !important; gap: 8px !important; }
+          .dash-pills { width: 100%; order: 3; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+          .dash-pills::-webkit-scrollbar { height: 2px; }
+          .dash-venue-name { order: 1; }
+          .dash-refresh { order: 2; margin-left: auto; }
+          .dash-pill-label { display: none; }
+        }
       `}</style>
 
       {/* ── Top bar ── */}
-      <div style={{
+      <div className="dash-topbar" style={{
         padding: "10px 20px", borderBottom: "1px solid rgba(255,255,255,0.05)",
-        display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px",
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px",
         background: "#0a0e18", flexShrink: 0,
       }}>
-        {/* Left: name */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {/* Left: venue name */}
+        <div className="dash-venue-name" style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
           <div style={{
-            width: 28, height: 28, borderRadius: "8px",
+            width: 28, height: 28, borderRadius: "8px", flexShrink: 0,
             background: "linear-gradient(135deg,#1e3a5f,#3b82f6)",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: "12px", fontWeight: 800, color: "#fff",
           }}>
             {pubName[0]?.toUpperCase() ?? "P"}
           </div>
-          <div>
-            <div style={{ fontSize: "13px", fontWeight: 700, color: "#f1f5f9" }}>{pubName}</div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: "13px", fontWeight: 700, color: "#f1f5f9", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pubName}</div>
             <div style={{ fontSize: "10px", color: "#334155", letterSpacing: "0.04em" }}>Review Manager</div>
           </div>
         </div>
 
         {/* Centre: metric pills */}
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+        <div className="dash-pills">
           {METRIC_CARDS.map(m => (
             <div key={m.label} style={{
-              display: "flex", alignItems: "center", gap: "6px",
+              display: "flex", alignItems: "center", gap: "5px", flexShrink: 0,
               background: m.bg, border: `1px solid ${m.border}`,
               borderRadius: "7px", padding: "4px 10px",
             }}>
-              <span style={{ fontSize: "14px", fontWeight: 800, color: m.color }}>{m.val}</span>
-              <span style={{ fontSize: "10px", color: "#475569", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>{m.label}</span>
+              <span style={{ fontSize: "13px", fontWeight: 800, color: m.color, lineHeight: 1 }}>{m.val}</span>
+              <span className="dash-pill-label" style={{ fontSize: "10px", color: "#475569", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>{m.label}</span>
             </div>
           ))}
         </div>
 
         {/* Right: refresh */}
-        <button onClick={() => fetchReviews()} style={{
-          padding: "6px 12px", borderRadius: "7px",
+        <button className="dash-refresh" onClick={() => fetchReviews()} style={{
+          padding: "6px 12px", borderRadius: "7px", flexShrink: 0,
           border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)",
           color: "#475569", fontSize: "11px", fontWeight: 600, cursor: "pointer",
           fontFamily: "inherit", transition: "all 150ms ease",

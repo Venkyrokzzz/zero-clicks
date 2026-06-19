@@ -123,17 +123,16 @@ export default function AdminPage() {
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-start justify-between gap-4 mb-8 flex-wrap">
           <div>
             <h1 className="text-white text-2xl font-bold">Admin Panel</h1>
             <p className="text-[#555] text-sm mt-0.5">
               {clients.length} clients · {googleConnected} Google connected
             </p>
           </div>
-          {/* Login pill for pub owners */}
           <a
             href="/sign-in"
-            className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-sm px-4 py-2 rounded-full transition-colors"
+            className="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-sm px-4 py-2 rounded-full transition-colors shrink-0"
           >
             <span>🔑</span>
             <span>Pub owner login</span>
@@ -171,9 +170,9 @@ export default function AdminPage() {
                     client.trial_paused ? 'border-red-700/30' : 'border-white/10'
                   }`}
                 >
-                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-start">
                     {/* Left: info */}
-                    <div className="space-y-3">
+                    <div className="space-y-3 min-w-0">
                       {/* Row 1: name + badges */}
                       <div className="flex items-center gap-3 flex-wrap">
                         <span className="text-white font-semibold">
@@ -254,18 +253,18 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* Right: actions */}
-                    <div className="flex flex-col gap-2 min-w-[160px]">
+                    {/* Right: actions — row on mobile, column on desktop */}
+                    <div className="flex flex-row flex-wrap gap-2 lg:flex-col lg:min-w-[160px]">
                       <button
                         onClick={() => togglePaused(client)}
                         disabled={isUpdating}
-                        className={`text-xs px-3 py-2 rounded-lg border transition-colors disabled:opacity-40 ${
+                        className={`text-xs px-3 py-2 rounded-lg border transition-colors disabled:opacity-40 whitespace-nowrap ${
                           client.trial_paused
                             ? 'bg-green-900/20 border-green-700/30 text-green-400 hover:bg-green-900/40'
                             : 'bg-red-900/20 border-red-700/30 text-red-400 hover:bg-red-900/40'
                         }`}
                       >
-                        {client.trial_paused ? '▶ Resume trial' : '⏸ Pause trial'}
+                        {client.trial_paused ? '▶ Resume' : '⏸ Pause'}
                       </button>
 
                       <select
@@ -284,7 +283,7 @@ export default function AdminPage() {
 
                       <a
                         href={`/admin/clients/${client.clerk_user_id}`}
-                        className="text-xs px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-lg text-center transition-colors"
+                        className="text-xs px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-lg text-center transition-colors whitespace-nowrap"
                       >
                         View details →
                       </a>
