@@ -34,15 +34,13 @@ export default function FloatingChat() {
     if (!message.trim()) return;
     setState("sending");
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const res = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: "92c11065-17cf-48b9-83c2-5813301f5891",
           name: name || "Anonymous",
           email: email || "visitor@zeroclicks.hq",
           message,
-          subject: `Chat widget — ${name || "Anonymous"}`,
         }),
       });
       const json = await res.json();
