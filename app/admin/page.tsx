@@ -47,6 +47,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
   const [editNotes, setEditNotes] = useState<Record<string, string>>({})
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     fetch('/api/admin/clients')
@@ -115,8 +116,15 @@ export default function AdminPage() {
     )
   }
 
-  const activeClients = clients.filter(c => !c.trial_paused && c.plan !== 'trial' || (c.plan === 'trial' && daysLeft(c.trial_ends_at) !== null && (daysLeft(c.trial_ends_at) ?? 0) > 0))
   const googleConnected = clients.filter(c => c.google_connected).length
+  const q = search.toLowerCase().trim()
+  const visible = q
+    ? clients.filter(c =>
+        (c.business_name ?? '').toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        (c.location ?? '').toLowerCase().includes(q)
+      )
+    : clients
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-6 py-8">
@@ -155,11 +163,27 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {clients.length === 0 ? (
-          <div className="text-[#555] text-sm">No clients yet.</div>
+        {/* Search */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search by name, email or location…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-[#444] focus:outline-none focus:border-white/25"
+          />
+          {q && (
+            <p className="text-xs text-[#555] mt-2">
+              {visible.length} result{visible.length !== 1 ? 's' : ''} for &ldquo;{search}&rdquo;
+            </p>
+          )}
+        </div>
+
+        {visible.length === 0 ? (
+          <div className="text-[#555] text-sm">{q ? 'No clients match that search.' : 'No clients yet.'}</div>
         ) : (
           <div className="space-y-3">
-            {clients.map(client => {
+            {visible.map(client => {
               const days = daysLeft(client.trial_ends_at)
               const isUpdating = updating === client.clerk_user_id
 
