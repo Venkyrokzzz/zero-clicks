@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Pricing — AI Automation for UK Pubs & Restaurants | Zero Clicks",
   description:
-    "Simple, transparent pricing for UK pub and restaurant owners. Inbox Autopilot starts from £35/mo. No contracts. Cancel any time.",
+    "Founding offer for UK pubs & restaurants: we build your AI review system free and you pay nothing until it's live. From £35/mo. No contracts.",
   alternates: { canonical: "https://www.0-clicks.uk/pricing" },
   openGraph: {
     title: "Pricing — Zero Clicks",
@@ -38,7 +38,7 @@ export default function PricingPage() {
               lineHeight: 1.6,
             }}
           >
-            One-time system build, then a simple monthly fee. No hidden costs, no long-term contracts.
+            For our first 10 pubs: we build your whole system free, and you pay nothing until it&apos;s live and replying to real reviews. No contracts — cancel the monthly any time.
           </p>
         </div>
         <Pricing />
