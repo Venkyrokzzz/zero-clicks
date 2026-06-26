@@ -19,8 +19,8 @@ export const SITE = {
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
 export const HERO = {
-  headlineTop: "Front of house,",
-  headlineBottom: "not behind a screen.",
+  headlineTop: "AI review & inbox automation",
+  headlineBottom: "for UK pubs & restaurants.",
   subtext:
     "One less thing to open your laptop for — every single day. Zero Clicks handles your Google reviews and inbox so UK pub owners stay on the floor, not on the computer.",
   ctaPrimary: {
