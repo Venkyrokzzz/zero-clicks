@@ -38,7 +38,7 @@ export default function PricingPage() {
               lineHeight: 1.6,
             }}
           >
-            No contracts. No setup fees hidden in the small print. Cancel any time.
+            One-time system build, then a simple monthly fee. No hidden costs, no long-term contracts.
           </p>
         </div>
         <Pricing />
