@@ -17,8 +17,9 @@ const PRODUCTS = [
 ];
 
 const NAV_ITEMS = [
+  { label: "How it works", href: "/how-it-works" },
   { label: "Demo",    href: "/demo" },
-  { label: "Pricing", href: "/#pricing" },
+  { label: "Pricing", href: "/pricing" },
 ];
 
 export default function Navbar() {
