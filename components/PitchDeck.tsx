@@ -700,7 +700,9 @@ function SlideCTA() {
         style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}
       >
         <a
-          href="/contact#call-request"
+          href="https://calendly.com/zeroclicks-hq"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             display: "inline-flex",
             alignItems: "center",

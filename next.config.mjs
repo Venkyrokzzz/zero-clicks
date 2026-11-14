@@ -11,7 +11,7 @@ const nextConfig = {
     return [
       {
         source: '/call',
-        destination: '/contact#call-request',
+        destination: 'https://calendly.com/zeroclicks-hq/30min',
         permanent: false,
       },
     ];
