@@ -55,8 +55,7 @@ export default function PrivacyPage() {
             This is used solely to respond to your enquiry.
           </p>
           <p style={pStyle}>
-            <strong>Calendly:</strong> When you book a call, Calendly collects your name, email, and calendar data.
-            Their privacy policy applies — see <a href="https://calendly.com/privacy" style={{ color: "var(--accent)" }} target="_blank" rel="noopener noreferrer">calendly.com/privacy</a>.
+            <strong>Call requests:</strong> When you request a call, we collect the contact details and availability you submit so we can respond directly by email.
           </p>
           <p style={pStyle}>
             <strong>Analytics:</strong> We use Vercel Analytics to collect anonymous, aggregated pageview data
@@ -89,7 +88,7 @@ export default function PrivacyPage() {
           </p>
           <ul style={{ ...pStyle, paddingLeft: "20px" }}>
             <li>Resend — delivers contact form submissions by email (no data retained after forwarding)</li>
-            <li>Calendly — booking system for discovery calls</li>
+            <li>Our contact form — call requests and enquiries</li>
             <li>Vercel — hosting and anonymous analytics</li>
             <li>n8n (self-hosted) — automation workflows for client review replies</li>
             <li>Anthropic Claude API — AI-generated reply drafts (no personal data stored by Anthropic)</li>

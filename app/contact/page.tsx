@@ -67,17 +67,17 @@ export default function ContactPage() {
             {CONTACT_PAGE.subtext}
           </p>
 
-          {/* Two-column: Calendly block + Contact form */}
+          {/* Two-column: call request + contact form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
 
-            {/* Left: Book a call */}
-            <div>
+            {/* Left: Request a call */}
+            <div id="call-request">
               <p style={{
                 fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase",
                 color: "var(--accent)", fontFamily: "var(--font-body)", fontWeight: 600,
                 marginBottom: "12px",
               }}>
-                Option 1 — Book a call
+                Option 1 — Request a call
               </p>
               <h2 style={{
                 fontFamily: "var(--font-display)", fontWeight: 400,
@@ -90,10 +90,10 @@ export default function ContactPage() {
                 fontSize: "0.875rem", color: "var(--text-secondary)", lineHeight: 1.75,
                 fontFamily: "var(--font-body)", marginBottom: "28px",
               }}>
-                Pick a time that suits you. We'll map your biggest manual bottleneck and tell you exactly what we'd automate and what it'd cost — on the call, not in a follow-up email.
+                Tell us a little about your business and preferred times. We'll reply directly to arrange a call that works for you.
               </p>
 
-              {/* Calendly CTA block */}
+              {/* First-party call request block */}
               <div style={{
                 background: "var(--bg-card)",
                 border: "1px solid var(--border-mid)",
