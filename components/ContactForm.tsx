@@ -83,12 +83,6 @@ export default function ContactForm() {
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        if (res.status === 503) {
-          const subject = encodeURIComponent(`New enquiry from ${data.name} — Zero Clicks`);
-          const body = encodeURIComponent(`Name: ${data.name}\nEmail: ${data.email}\nCompany: ${data.company || "-"}\nBudget: ${data.budget || "-"}\n\n${data.message}`);
-          window.location.href = `mailto:zeroclicks.hq@gmail.com?subject=${subject}&body=${body}`;
-          return;
-        }
         setErrorMsg(json.error || "Something went wrong. Email me directly at zeroclicks.hq@gmail.com");
         setFormState("error");
         return;
