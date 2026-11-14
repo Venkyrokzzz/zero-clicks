@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
     console.error("[contact] RESEND_API_KEY not set");
-    return NextResponse.json({ error: "Server configuration error." }, { status: 500 });
+    return NextResponse.json({ error: "Email delivery is temporarily unavailable. Please email zeroclicks.hq@gmail.com directly." }, { status: 503 });
   }
 
   try {

@@ -76,20 +76,16 @@ export default function ContactForm() {
     setFormState("submitting");
     setErrorMsg("");
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: "92c11065-17cf-48b9-83c2-5813301f5891",
-          ...data,
-          subject: `New enquiry from ${data.name} — Zero Clicks`,
-        }),
+        body: JSON.stringify(data),
       });
       const json = await res.json();
-      if (!res.ok || !json.success) { 
-        setErrorMsg(json.message || "Something went wrong. Email me directly at zeroclicks.hq@gmail.com"); 
-        setFormState("error"); 
-        return; 
+      if (!res.ok || !json.success) {
+        setErrorMsg(json.error || "Something went wrong. Email me directly at zeroclicks.hq@gmail.com");
+        setFormState("error");
+        return;
       }
       setFormState("success");
     } catch (err: any) {
@@ -156,6 +152,9 @@ export default function ContactForm() {
         </div>
       </div>
 
+      <p style={{ color: "var(--text-secondary)", fontSize: "0.82rem", margin: 0 }}>
+        Prefer email? <a href="mailto:zeroclicks.hq@gmail.com" style={{ color: "var(--accent)" }}>zeroclicks.hq@gmail.com</a>
+      </p>
       <div>
         <label htmlFor="company" style={labelStyle}>
           Company <span style={{ color: "var(--text-muted)", textTransform: "none", letterSpacing: 0, fontSize: "11px" }}>(optional)</span>

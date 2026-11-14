@@ -4,7 +4,7 @@ import { track } from "@/lib/analytics";
 export default function CalendlyButton() {
   return (
     <a
-      href="https://calendly.com/zeroclicks-hq/15min"
+      href="https://calendly.com/zeroclicks-hq/30min"
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => track("calendly_open", { location: "contact_page" })}

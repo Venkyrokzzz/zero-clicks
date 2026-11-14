@@ -171,7 +171,7 @@ function PackageCard({ pkg, index }: { pkg: typeof PACKAGES[number]; index: numb
       </ul>
 
       <Link
-        href="https://calendly.com/zeroclicks-hq/discovery"
+        href="https://calendly.com/zeroclicks-hq/30min"
         target="_blank"
         rel="noopener noreferrer"
         style={{
