@@ -1,3 +1,4 @@
+import { googleRating, googleReviewsUrl } from '@/lib/googleReviews';
 // app/api/cron/poll-reviews/route.ts
 // Replaces the n8n Review Poller workflow.
 // Called every 30 min by n8n (or Vercel cron on Pro).
@@ -5,10 +6,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { verifyToken } from '@/lib/verifyToken'
-
-const STAR_TO_NUMBER: Record<string, number> = {
-  ONE_STAR: 1, TWO_STARS: 2, THREE_STARS: 3, FOUR_STARS: 4, FIVE_STARS: 5,
-}
 
 function toSentiment(rating: number) {
   if (rating >= 4) return 'POSITIVE'
@@ -47,6 +44,7 @@ export async function GET(req: NextRequest) {
     .from('google_connections')
     .select('clerk_user_id, account_id, location_id, access_token, refresh_token, access_token_expires_at')
     .not('account_id', 'is', null)
+    .not('location_id', 'is', null)
     .not('refresh_token', 'is', null)
 
   if (connErr) return NextResponse.json({ error: connErr.message }, { status: 500 })
@@ -79,7 +77,7 @@ export async function GET(req: NextRequest) {
       const parent     = `accounts/${accountId}/locations/${locationId}`
 
       const reviewsRes = await fetch(
-        `https://mybusinessreviews.googleapis.com/v1/${parent}/reviews?pageSize=50&orderBy=updateTime+desc`,
+        `${googleReviewsUrl(conn.account_id, conn.location_id)}?pageSize=50&orderBy=updateTime+desc`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
 
@@ -109,10 +107,11 @@ export async function GET(req: NextRequest) {
 
         if (existing) continue
 
-        const rating = STAR_TO_NUMBER[review.starRating] ?? 3
+        const rating = googleRating(review.starRating)
+        if (!rating) continue
 
         // Forward to reviews webhook — reuses all existing AI draft, injection filter, auto-send logic
-        await fetch(`${siteBase}/api/webhooks/n8n/reviews`, {
+        const ingestion = await fetch(`${siteBase}/api/webhooks/n8n/reviews`, {
           method: 'POST',
           headers: {
             'Content-Type':       'application/json',
@@ -129,6 +128,7 @@ export async function GET(req: NextRequest) {
             google_created_at: review.createTime ?? null,
           }),
         })
+        if (!ingestion.ok) throw new Error(`Review ingestion failed: ${ingestion.status}`)
         newCount++
       }
 
@@ -139,5 +139,5 @@ export async function GET(req: NextRequest) {
   }
 
   console.log('[cron/poll-reviews]', JSON.stringify(results))
-  return NextResponse.json({ processed: connections.length, results })
+  return NextResponse.json({ processed: connections.length, results }, { status: results.some(r => 'error' in r) ? 502 : 200 })
 }

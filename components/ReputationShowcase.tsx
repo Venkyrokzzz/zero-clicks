@@ -170,7 +170,7 @@ export default function ReputationShowcase() {
             </h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '12px', fontFamily: 'var(--font-body)', maxWidth: '480px', lineHeight: 1.6 }}>
               Most pubs take 2+ days to reply to complaints. By then the damage is done.
-              We reply in under 30 seconds — in your voice.
+              Review drafts in your voice, with approval before publication.
             </p>
           </div>
           <div className="rep-code-label" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '13px', paddingBottom: '6px' }}>// 02 Product Flow</div>

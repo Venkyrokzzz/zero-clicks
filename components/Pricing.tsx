@@ -41,7 +41,7 @@ export default function Pricing() {
           <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.18)", borderRadius: "6px", padding: "8px 14px" }}>
             <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", flexShrink: 0, boxShadow: "0 0 6px #ef4444" }} />
             <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>
-              <span style={{ color: "#ef4444", fontWeight: 600 }}>90 min/day × 250 days = £9,375/year lost to unanswered reviews.</span>{" "}We fix it. From £35/month — and you pay nothing until it&apos;s live.
+              <span style={{ color: "#ef4444", fontWeight: 600 }}>Spend less time writing Google review replies.</span>{" "}Choose a plan after discussing your venue and onboarding requirements.
             </p>
           </div>
         </motion.div>
@@ -119,10 +119,12 @@ function PricingCard({ pkg, delay, isInView }: { pkg: Package; delay: number; is
   const [loading, setLoading] = useState(false);
   const isEarlyBird = badge === "EARLY BIRD" || badge === "FOUNDING OFFER";
   const isFoundingClosed = name === "Founding Member" && !FOUNDING_OPEN;
-  const spotsText = name === "Founding Member" ? `${FOUNDING_SPOTS_REMAINING} of ${FOUNDING_TOTAL} spots remaining` : scarcity;
+  const spotsText = scarcity;
 
   async function handleCheckout() {
     const plan = PLAN_KEYS[name];
+    if (plan === 'standard') { window.location.href = '/sign-up'; return; }
+    if (plan === 'founding') { window.location.href = '/contact'; return; }
     if (!plan) return;
     setLoading(true);
     try {

@@ -264,7 +264,7 @@ export default function HeroPanel() {
             gap: "12px", paddingTop: "4px",
           }}>
             {[
-              { val: "<4 min", label: "avg reply time" },
+              { val: "Review", label: "before publishing" },
               { val: "24/7", label: "always watching" },
               { val: "48 hrs", label: "to go live" },
             ].map((s) => (

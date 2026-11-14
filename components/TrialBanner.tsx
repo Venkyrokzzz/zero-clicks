@@ -78,7 +78,7 @@ export function TrialBanner() {
             Upgrade now →
           </Link>
           <p style={{ color: "#666", fontSize: "0.8rem", marginTop: "16px" }}>
-            From £35/month · Cancel anytime · Live in 48 hours
+            From £35/month · Cancel anytime · Guided Google onboarding
           </p>
         </div>
       </div>

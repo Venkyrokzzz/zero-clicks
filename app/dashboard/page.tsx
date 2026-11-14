@@ -10,6 +10,7 @@ interface Review {
   reviewer_name: string;
   rating: number;
   sentiment: string;
+  posted_to_google_at?: string | null;
   summary: string;
   draft_response: string;
   created_at: string;
@@ -74,7 +75,7 @@ const SENTIMENT_COLOR: Record<string, string> = {
 const STATUS: Record<string, { color: string; label: string; dot: string }> = {
   pending:  { color: "#f59e0b", label: "Pending",  dot: "#f59e0b" },
   approved: { color: "#3b82f6", label: "Approved", dot: "#3b82f6" },
-  sent:     { color: "#10b981", label: "Sent",     dot: "#10b981" },
+  sent:     { color: "#10b981", label: "Queued / posted",     dot: "#10b981" },
   skipped:  { color: "#475569", label: "Skipped",  dot: "#475569" },
 };
 
@@ -422,7 +423,7 @@ function ReviewDetail({ review, onApprove, onSkip, onEdit, onRegenerate, onBack,
             padding: "12px", borderRadius: "10px",
             background: "rgba(5,150,105,0.07)", border: "1px solid rgba(16,185,129,0.2)",
             color: "#10b981", fontSize: "13px", fontWeight: 700,
-          }}>✓ Reply sent — guest notified</div>
+          }}>{review.posted_to_google_at ? '✓ Published on Google' : 'Approved — queued for publication'}</div>
         )}
         {review.status === "skipped" && (
           <div style={{
@@ -503,12 +504,13 @@ export default function Dashboard() {
   }, []);
 
   async function handleApprove(id: string, draft: string) {
-    await fetch("/api/reviews", {
+    const response = await fetch("/api/reviews", {
       method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, status: "sent", draft_response: draft }),
     });
+    if (!response.ok) { showToast('Approval failed. Please retry.'); return; }
     setReviews(prev => prev.map(r => r.id === id ? { ...r, status: "sent", draft_response: draft } : r));
-    showToast("✓ Reply sent");
+    showToast("✓ Approved — queued for publication");
     const next = reviews.find(r => r.id !== id && r.status === "pending");
     if (next) setSelectedId(next.id);
   }
@@ -580,7 +582,7 @@ export default function Dashboard() {
     { label: "Total", val: metrics.totalReviews, color: "#f59e0b", bg: "rgba(245,158,11,0.06)", border: "rgba(245,158,11,0.15)" },
     { label: "Flagged", val: metrics.negativeCount, color: "#ef4444", bg: "rgba(239,68,68,0.06)", border: "rgba(239,68,68,0.15)" },
     { label: "Pending", val: metrics.pendingCount, color: "#f59e0b", bg: "rgba(245,158,11,0.06)", border: "rgba(245,158,11,0.12)" },
-    { label: "Sent", val: metrics.sentCount, color: "#10b981", bg: "rgba(16,185,129,0.06)", border: "rgba(16,185,129,0.15)" },
+    { label: "Queued / posted", val: metrics.sentCount, color: "#10b981", bg: "rgba(16,185,129,0.06)", border: "rgba(16,185,129,0.15)" },
   ];
 
   return (

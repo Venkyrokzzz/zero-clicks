@@ -1,82 +1,40 @@
-import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
-import { supabase } from "@/lib/supabase";
-
+import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
+import { supabase } from '@/lib/supabase';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const supported = new Set(['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted', 'invoice.paid', 'invoice.payment_failed']);
 
 export async function POST(req: NextRequest) {
-  const body = await req.text();
-  const sig = req.headers.get("stripe-signature");
-
-  if (!sig || !webhookSecret) {
-    return NextResponse.json({ error: "Missing signature or secret" }, { status: 400 });
-  }
-
+  const signature = req.headers.get('stripe-signature');
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!signature || !secret) return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
   let event: Stripe.Event;
+  try { event = stripe.webhooks.constructEvent(await req.text(), signature, secret); }
+  catch { return NextResponse.json({ error: 'Invalid signature' }, { status: 400 }); }
+  if (!supported.has(event.type)) return NextResponse.json({ received: true });
   try {
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-  } catch (err) {
-    console.error("[stripe-webhook] Signature verification failed:", err);
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    const object = event.data.object as unknown as { customer?: string | { id: string } | null };
+    const customerId = typeof object.customer === 'string' ? object.customer : object.customer?.id;
+    if (!customerId) throw new Error('Missing customer');
+    // Reconcile current Stripe state rather than applying an old event's status.
+    const subscriptions = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 100 });
+    const sub = subscriptions.data.find(s => ['active', 'trialing'].includes(s.status))
+      ?? subscriptions.data.find(s => ['past_due', 'unpaid', 'paused'].includes(s.status))
+      ?? subscriptions.data[0];
+    if (!sub) throw new Error('Subscription not yet available');
+    const userId = sub.metadata.clerk_user_id;
+    const plan = sub.metadata.plan;
+    if (!userId || !['founding', 'standard', 'pro', 'starter'].includes(plan)) throw new Error('Unknown subscription owner or plan');
+    const { data, error } = await supabase.from('profiles').update({
+      plan: sub.status === 'canceled' ? 'cancelled' : plan,
+      stripe_customer_id: customerId,
+      subscription_status: sub.status,
+      updated_at: new Date().toISOString(),
+    }).eq('clerk_user_id', userId).select('clerk_user_id');
+    if (error || data?.length !== 1) throw new Error('Subscription persistence failed');
+    return NextResponse.json({ received: true });
+  } catch (error) {
+    console.error('[stripe-webhook] Reconciliation failed', error);
+    return NextResponse.json({ error: 'Unable to synchronise subscription' }, { status: 503 });
   }
-
-  switch (event.type) {
-    case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.clerk_user_id;
-      const plan = session.metadata?.plan;
-
-      if (!userId || !plan) break;
-
-      await supabase
-        .from("profiles")
-        .update({
-          plan,
-          stripe_customer_id: session.customer as string,
-          subscription_status: "active",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("clerk_user_id", userId);
-
-      console.log(`[stripe-webhook] Activated plan '${plan}' for user ${userId}`);
-      break;
-    }
-
-    case "customer.subscription.deleted": {
-      const sub = event.data.object as Stripe.Subscription;
-      const userId = sub.metadata?.clerk_user_id;
-      if (!userId) break;
-
-      await supabase
-        .from("profiles")
-        .update({
-          plan: "cancelled",
-          subscription_status: "cancelled",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("clerk_user_id", userId);
-
-      console.log(`[stripe-webhook] Cancelled subscription for user ${userId}`);
-      break;
-    }
-
-    case "invoice.payment_failed": {
-      const invoice = event.data.object as Stripe.Invoice;
-      const customerId = invoice.customer as string;
-
-      await supabase
-        .from("profiles")
-        .update({
-          subscription_status: "past_due",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("stripe_customer_id", customerId);
-
-      console.log(`[stripe-webhook] Payment failed for customer ${customerId}`);
-      break;
-    }
-  }
-
-  return NextResponse.json({ received: true });
 }

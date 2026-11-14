@@ -433,7 +433,7 @@ export default function ClientDetailPage() {
           {/* Auto-send toggle */}
           <div className="flex items-center justify-between bg-[#1a1a1a] rounded-lg px-4 py-3 border border-white/5">
             <div>
-              <p className="text-sm text-white font-medium">Auto-send 3–5★ replies</p>
+              <p className="text-sm text-white font-medium">Auto-send suitable 4–5★ replies</p>
               <p className="text-xs text-white/30 mt-0.5">Posts automatically without approval for positive reviews</p>
             </div>
             <button

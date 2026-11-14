@@ -1,3 +1,4 @@
+import { serviceAccess } from '@/lib/requireService';
 // app/api/webhooks/n8n/pending-replies/route.ts
 // n8n polls this every 5 mins to get approved replies waiting to be posted to Google
 import { NextResponse } from "next/server";
@@ -38,12 +39,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: connErr.message }, { status: 500 });
   }
 
+  const access = Object.fromEntries(await Promise.all(userIds.map(async id => [id, await serviceAccess(id)])));
   const connMap = Object.fromEntries((connections ?? []).map(c => [c.clerk_user_id, c]));
 
   const replies = reviews
     .map(r => {
       const gc = connMap[r.clerk_user_id];
-      if (!gc) return null;
+      if (!gc || !access[r.clerk_user_id]) return null;
       return {
         review_id:               r.id,
         clerk_user_id:           r.clerk_user_id,

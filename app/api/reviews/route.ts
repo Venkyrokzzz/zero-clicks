@@ -1,3 +1,4 @@
+import { serviceAccess } from '@/lib/requireService';
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { checkRateLimit } from "@/lib/rateLimit";
@@ -14,21 +15,7 @@ export async function GET(request: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
-  // Check access — block expired trials
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("plan, trial_ends_at")
-    .eq("clerk_user_id", userId)
-    .single();
-
-  if (profile) {
-    const isPaid = ["starter", "standard", "pro"].includes(profile.plan);
-    const trialEnd = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
-    const trialExpired = profile.plan === "trial" && trialEnd && trialEnd < new Date();
-    if (!isPaid && trialExpired) {
-      return NextResponse.json({ error: "Trial expired", code: "TRIAL_EXPIRED" }, { status: 403 });
-    }
-  }
+  if (!(await serviceAccess(userId))) return NextResponse.json({ error: 'Subscription inactive', code: 'TRIAL_EXPIRED' }, { status: 403 });
 
   const { data: reviews, error } = await supabase
     .from("reviews")
@@ -59,6 +46,7 @@ export async function PUT(request: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
+  if (!(await serviceAccess(userId))) return NextResponse.json({ error: 'Subscription inactive' }, { status: 403 });
   const body = await request.json();
   const { id, status, draft_response } = body;
 

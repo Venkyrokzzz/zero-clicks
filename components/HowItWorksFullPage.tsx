@@ -69,7 +69,7 @@ const ONBOARDING_STEPS = [
     number: "02",
     title: "We build it for you",
     description: "We connect your Google reviews, set your AI's tone and signature, and run test drafts using your real reviews. You see everything before it goes anywhere.",
-    callout: "48 hours. You do nothing.",
+    callout: "Guided setup, subject to Google access.",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
@@ -111,7 +111,7 @@ const FAQS = [
   },
   {
     q: "How long does setup take?",
-    a: "48 hours from your qualifying call to your first draft reply. We move fast because you shouldn't have to wait.",
+    a: "We confirm your setup timeline after checking Google account access and your venue requirements.",
   },
   {
     q: "What if the replies don't sound like me?",
@@ -406,7 +406,7 @@ export default function HowItWorksFullPage() {
               fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
               letterSpacing: "-0.03em", color: "var(--text-primary)", margin: "0 0 16px",
             }}>
-              From "interested" to live in 48 hours
+              From first conversation to your first review reply
             </h2>
             <p style={{
               fontFamily: "var(--font-body)", fontSize: "1rem",

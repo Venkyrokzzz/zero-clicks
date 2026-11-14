@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { cookies } from 'next/headers'
 import { createHmac } from 'crypto'
 
 function signState(payload: string): string {
@@ -32,8 +33,9 @@ export async function GET(req: NextRequest) {
 
   // HMAC-signed state: nonce + clerk userId + search terms for CSRF and magic lookup
   const nonce = crypto.randomUUID()
-  const payload = Buffer.from(JSON.stringify({ nonce, userId, pubName, location, postCode, phoneNumber })).toString('base64url')
+  const payload = Buffer.from(JSON.stringify({ nonce, expiresAt: Date.now() + 600000, userId, pubName, location, postCode, phoneNumber })).toString('base64url')
   const signedState = signState(payload)
+  cookies().set('zc_oauth_nonce', nonce, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/api/auth/google', maxAge: 600 })
 
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID!,

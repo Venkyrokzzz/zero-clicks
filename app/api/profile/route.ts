@@ -29,7 +29,6 @@ export async function PUT(req: Request) {
     if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
     const body = await req.json();
-    console.log("[api/profile PUT] body:", JSON.stringify(body));
     const { business_name, business_type, manager_name, location, postcode, phone } = body;
 
     const update: Record<string, string | undefined> = {};

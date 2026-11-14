@@ -19,10 +19,10 @@ export const SITE = {
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
 export const HERO = {
-  headlineTop: "AI review & inbox automation",
+  headlineTop: "Google review reply assistance",
   headlineBottom: "for UK pubs & restaurants.",
   subtext:
-    "One less thing to open your laptop for — every single day. Zero Clicks handles your Google reviews and inbox so UK pub owners stay on the floor, not on the computer.",
+    "One less thing to open your laptop for — every single day. Zero Clicks helps manage your Google review replies so UK pub owners stay on the floor, not on the computer.",
   ctaPrimary: {
     label: "Book a free 15-min call",
     href: "/contact",
@@ -36,14 +36,14 @@ export const HERO = {
 // ── Proof bar ─────────────────────────────────────────────────────────────────
 // Items repeat automatically in the marquee — no need to duplicate.
 export const PROOF_BAR_ITEMS: string[] = [
-  "26 of 30 London pubs have unanswered reviews",
-  "1-star improvement = up to 9% more revenue",
-  "Average reply time: under 30 seconds",
+  "Built for independent hospitality venues",
+  "Keep your Google reviews answered",
+  "Review drafts ready for approval",
   "Works for pubs, restaurants and hotels",
   "Replies in your voice — not a template",
-  "1-2 star reviews flagged to you instantly",
-  "Live in 48 hours",
-  "UK-based, always available",
+  "Low-star reviews held for approval",
+  "Guided Google onboarding",
+  "Support from your onboarding contact",
 ];
 
 // ── Services ──────────────────────────────────────────────────────────────────
@@ -180,7 +180,7 @@ export const PACKAGES: Package[] = [
       "Direct access to Venky for onboarding",
     ],
     guarantee: "£0 until it's live & working",
-    scarcity: "7 of 10 spots remaining",
+
     badge: "FOUNDING OFFER",
     highlight: false,
     cta: "Claim your spot →",
@@ -194,7 +194,7 @@ export const PACKAGES: Package[] = [
     description: "AI-powered review replies in your pub's voice. Perfect for independent owners who want their time back.",
     features: [
       "AI trained in your voice — not a template",
-      "All Google reviews covered, unlimited",
+      "New Google reviews monitored after connection",
       "Dashboard — approve replies in one tap",
       "Negative review alerts",
       "30-day free trial included",
@@ -208,7 +208,7 @@ export const PACKAGES: Package[] = [
     tagline: "Everything in Standard, done for you.",
     price: "£75",
     timeline: "per month · £499 one-time setup",
-    description: "A fully managed service — your voice, your rules, replies go live automatically. Zero manual work from you.",
+    description: "Guided setup and optional automatic replies to suitable positive reviews. Complaints need your approval.",
     features: [
       "Everything in Standard",
       "Auto-send positive replies (4-5 stars)",
@@ -217,8 +217,8 @@ export const PACKAGES: Package[] = [
       "Monthly review insights report",
       "Priority support",
     ],
-    scarcity: "5 onboarding spots left this month",
-    badge: "MOST POPULAR",
+
+    badge: "MANAGED",
     highlight: true,
     cta: "Get started — £499 + £75/mo",
     ctaHref: "/contact",
@@ -287,7 +287,7 @@ export const DEMO_PAGE = {
   },
   cta: {
     headline: "Want this running in your pub by next week?",
-    subtext: "Setup in 48 hours. No tech knowledge needed. Cancel any time.",
+    subtext: "Guided setup, subject to Google access. No technical knowledge needed.",
     buttonLabel: "Book a Free Call →",
     buttonHref: "/contact",
     proof: "Join pub owners across the UK who've taken back their evenings.",

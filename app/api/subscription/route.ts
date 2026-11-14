@@ -1,3 +1,4 @@
+import { hasServiceAccess } from '@/lib/entitlements';
 // app/api/subscription/route.ts — returns plan + trial status for current user
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
@@ -9,7 +10,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("plan, trial_ends_at, subscription_status")
+    .select("plan, trial_ends_at, subscription_status, trial_paused")
     .eq("clerk_user_id", userId)
     .single();
 
@@ -22,7 +23,7 @@ export async function GET() {
   const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))) : 0;
   const isTrialActive = data.plan === "trial" && daysLeft > 0;
   const isTrialExpired = data.plan === "trial" && daysLeft <= 0;
-  const isPaid = ["starter", "standard", "pro"].includes(data.plan);
+  const isPaid = ["founding", "starter", "standard", "pro"].includes(data.plan);
   const isPastDue = data.subscription_status === "past_due";
 
   return NextResponse.json({
@@ -34,6 +35,6 @@ export async function GET() {
     isTrialExpired,
     isPaid,
     isPastDue,
-    hasAccess: isTrialActive || isPaid,
+    hasAccess: hasServiceAccess(data),
   });
 }

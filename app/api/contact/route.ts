@@ -29,6 +29,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
+  if (!body || typeof body !== 'object' || ['name', 'email', 'message'].some(k => typeof body[k] !== 'string') || ['company', 'budget'].some(k => body[k] !== undefined && typeof body[k] !== 'string')) {
+    return NextResponse.json({ error: 'Invalid fields' }, { status: 400 });
+  }
+  const escape = (value: string) => value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
   const { name, email, company, message, budget } = body as Record<string, string>;
 
   if (!name || !email || !message) {
@@ -69,12 +73,12 @@ export async function POST(req: NextRequest) {
         subject: `New enquiry from ${name} — Zero Clicks`,
         html: `
           <h2>New enquiry</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-          ${company ? `<p><strong>Company:</strong> ${company}</p>` : ""}
-          ${budget ? `<p><strong>Budget:</strong> ${budget}</p>` : ""}
+          <p><strong>Name:</strong> ${escape(name)}</p>
+          <p><strong>Email:</strong> <a href="mailto:${escape(email)}">${escape(email)}</a></p>
+          ${company ? `<p><strong>Company:</strong> ${escape(company)}</p>` : ""}
+          ${budget ? `<p><strong>Budget:</strong> ${escape(budget)}</p>` : ""}
           <p><strong>Message:</strong></p>
-          <p style="white-space:pre-wrap">${message}</p>
+          <p style="white-space:pre-wrap">${escape(message)}</p>
         `,
       }),
     });

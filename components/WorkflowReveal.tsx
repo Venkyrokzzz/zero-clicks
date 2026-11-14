@@ -281,7 +281,7 @@ export default function WorkflowReveal() {
             fontSize: "13px", color: "var(--text-muted)", fontFamily: "var(--font-body)",
             lineHeight: 1.6,
           }}>
-            Built in n8n. Powered by Claude AI. Live in 48 hours.{" "}
+            Built in n8n. Powered by Claude AI. Guided Google onboarding.{" "}
             <span style={{ color: "var(--text-secondary)" }}>
               No code. No maintenance. No missed emails.
             </span>

@@ -1,3 +1,4 @@
+import { serviceAccess } from '@/lib/requireService';
 // app/api/reviews/regenerate/route.ts
 // Regenerates the AI draft for an existing review using current settings
 import { auth } from '@clerk/nextjs/server'
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
 
+  if (!(await serviceAccess(userId))) return NextResponse.json({ error: 'Subscription inactive' }, { status: 403 });
   const { id } = await req.json()
   if (!id) return NextResponse.json({ error: 'Missing review id' }, { status: 400 })
 

@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     template: "%s | Zero Clicks",
   },
   description:
-    "Zero Clicks automates the daily grind for UK pubs, restaurants and hotels — reviews replied to in under 4 minutes, inbox handled, nothing dropped. Live in 48 hours.",
+    "Zero Clicks automates the daily grind for UK pubs, restaurants and hotels — Google review drafts in your voice, with guided onboarding and approval before publication.",
   keywords: [
     "AI automation UK hospitality",
     "pub review automation",

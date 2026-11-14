@@ -18,7 +18,7 @@ export default function DemoPage() {
     <main>
       <CursorGlow />
       <ScrollProgress />
-      <Navbar />
+
       <DemoHero />
       <DemoCommandCentre />
       <DemoCTA />

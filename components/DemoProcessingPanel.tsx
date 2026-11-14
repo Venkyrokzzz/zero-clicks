@@ -36,7 +36,7 @@ const STEPS: Array<{
     icon: "📱",
     label: (s) =>
       s.priority === "HIGH"
-        ? "WhatsApp alert sent to Sarah (owner)"
+        ? "Simulated WhatsApp alert to Sarah (owner)"
         : "Handled automatically. Logged to dashboard.",
   },
 ];
@@ -460,7 +460,7 @@ export default function DemoProcessingPanel({ scenario }: Props) {
                   lineHeight: 1.5,
                 }}
               >
-                <strong>WhatsApp alert sent to Sarah</strong>
+                <strong>Simulated WhatsApp alert to Sarah</strong>
                 <br />
                 "Hi Sarah — urgent {scenario.source.toLowerCase()} just in. I&apos;ve drafted a response. Tap to review."
               </p>

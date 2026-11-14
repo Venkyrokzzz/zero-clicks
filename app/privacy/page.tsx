@@ -30,7 +30,7 @@ export default function PrivacyPage() {
 
   return (
     <>
-      <Navbar />
+
       <main style={{ minHeight: "100vh", background: "var(--bg)", paddingTop: "120px", paddingBottom: "100px" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto", padding: "0 24px" }}>
           <p style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "16px" }}>
@@ -88,7 +88,7 @@ export default function PrivacyPage() {
             We use the following third-party services to operate the site:
           </p>
           <ul style={{ ...pStyle, paddingLeft: "20px" }}>
-            <li>Web3Forms — processes contact form submissions (no data retained after forwarding)</li>
+            <li>Resend — delivers contact form submissions by email (no data retained after forwarding)</li>
             <li>Calendly — booking system for discovery calls</li>
             <li>Vercel — hosting and anonymous analytics</li>
             <li>n8n (self-hosted) — automation workflows for client review replies</li>

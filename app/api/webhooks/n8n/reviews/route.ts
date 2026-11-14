@@ -1,3 +1,4 @@
+import { hasServiceAccess } from '@/lib/entitlements';
 // app/api/webhooks/n8n/reviews/route.ts
 // n8n POSTs here when a new Google review is detected
 // Stores the review in Supabase against the correct clerk_user_id
@@ -113,7 +114,7 @@ export async function POST(req: NextRequest) {
   // ── 4. User existence + trial/paused check ────────────────────────────────
   const { data: profile } = await supabase
     .from('profiles')
-    .select('clerk_user_id, trial_paused, trial_ends_at, plan')
+    .select('clerk_user_id, trial_paused, trial_ends_at, plan, subscription_status')
     .eq('clerk_user_id', clerk_user_id)
     .single()
 
@@ -122,18 +123,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unknown user' }, { status: 404 })
   }
 
-  // Block paused trials
-  if (profile.trial_paused) {
-    return NextResponse.json({ error: 'Account paused', skipped: true }, { status: 200 })
-  }
+  if (!hasServiceAccess(profile)) return NextResponse.json({ error: 'Subscription inactive', skipped: true }, { status: 200 });
 
-  // Block expired trials (non-paying)
-  if (profile.plan === 'trial' && profile.trial_ends_at) {
-    const trialEnd = new Date(profile.trial_ends_at)
-    if (trialEnd < new Date()) {
-      return NextResponse.json({ error: 'Trial expired', skipped: true }, { status: 200 })
-    }
+  if (typeof external_id !== 'string' || !external_id.trim()) {
+    return NextResponse.json({ error: 'external_id is required' }, { status: 400 })
   }
+  const { data: existing, error: lookupError } = await supabase.from('reviews')
+    .select('id').eq('clerk_user_id', clerk_user_id).eq('external_id', external_id).maybeSingle()
+  if (lookupError) return NextResponse.json({ error: 'Review lookup failed' }, { status: 503 })
+  if (existing) return NextResponse.json({ success: true, duplicate: true })
 
   // ── 5. Generate pub-voice reply with Claude ───────────────────────────────
   // Fetch profile + settings for business context
@@ -204,10 +202,10 @@ export async function POST(req: NextRequest) {
 
     // Auto-send 3-5 star reviews if enabled — hold 1-2 stars and complaint keywords
     const ratingNum = Number(rating) || 3
-    const COMPLAINT_KEYWORDS = ['cold', 'slow', 'rude', 'wrong order', 'disgusting', 'never again', 'awful', 'terrible', 'horrible', 'worst', 'dirty', 'unacceptable', 'refund', 'complaint']
+    const COMPLAINT_KEYWORDS = ['allerg', 'injur', 'sick', 'poison', 'discrimin', 'racis', 'unsafe', 'harass', 'cold', 'slow', 'rude', 'wrong order', 'disgusting', 'never again', 'awful', 'terrible', 'horrible', 'worst', 'dirty', 'unacceptable', 'refund', 'complaint']
     const reviewText = (safeStr(review_text, 5000) ?? '').toLowerCase()
     const hasComplaint = COMPLAINT_KEYWORDS.some(kw => reviewText.includes(kw))
-    if (settings?.auto_send_positive && ratingNum >= 3 && !hasComplaint && finalStatus === 'pending') {
+    if (profile.plan === 'pro' && settings?.auto_send_positive && ratingNum >= 4 && !hasComplaint && finalStatus === 'pending') {
       finalStatus = 'sent'
       autoSent = true
     }
@@ -232,7 +230,7 @@ export async function POST(req: NextRequest) {
       sent_at:          autoSent ? new Date().toISOString() : null,
       google_created_at: typeof google_created_at === 'string' ? google_created_at : null,
     },
-    { onConflict: 'clerk_user_id,external_id' }
+    { onConflict: 'clerk_user_id,external_id', ignoreDuplicates: true }
   )
 
   if (upsertError) {

@@ -1,3 +1,5 @@
+import { googleReplyUrl } from '@/lib/googleReviews';
+import { serviceAccess } from '@/lib/requireService';
 // app/api/cron/post-replies/route.ts
 // Replaces the n8n ZC — Post Replies workflow.
 // Called every 30 min by GitHub Actions (same cadence as poll-reviews).
@@ -32,14 +34,12 @@ async function refreshAccessToken(refreshToken: string): Promise<{ access_token:
 
 async function postReplyToGoogle(
   accessToken: string,
+  accountId: string,
   locationId: string,
   externalId: string,
   replyText: string,
 ): Promise<{ ok: boolean; status: number; body: string }> {
-  // external_id may be a full resource name — extract just the review ID
-  const reviewId = externalId.includes('/') ? externalId.split('/').pop()! : externalId
-  const cleanLocationId = locationId.replace('locations/', '')
-  const url = `https://mybusinessreviews.googleapis.com/v1/locations/${cleanLocationId}/reviews/${reviewId}/reply`
+  const url = googleReplyUrl(accountId, locationId, externalId)
 
   const res = await fetch(url, {
     method: 'PUT',
@@ -78,9 +78,10 @@ export async function GET(req: NextRequest) {
   const userIds = Array.from(new Set(reviews.map(r => r.clerk_user_id)))
   const { data: connections, error: connErr } = await supabase
     .from('google_connections')
-    .select('clerk_user_id, access_token, refresh_token, access_token_expires_at, location_id')
+    .select('clerk_user_id, access_token, refresh_token, access_token_expires_at, account_id, location_id')
     .in('clerk_user_id', userIds)
     .not('location_id', 'is', null)
+    .not('account_id', 'is', null)
 
   if (connErr) return NextResponse.json({ error: connErr.message }, { status: 500 })
 
@@ -88,6 +89,7 @@ export async function GET(req: NextRequest) {
   const results = []
 
   for (const review of reviews) {
+    if (!(await serviceAccess(review.clerk_user_id))) continue;
     const conn = connMap[review.clerk_user_id]
     if (!conn) {
       results.push({ id: review.id, error: 'No Google connection' })
@@ -119,7 +121,7 @@ export async function GET(req: NextRequest) {
     // Attempt to post reply — retry up to 3 times on 401/403 (transient Google issues)
     let result = { ok: false, status: 0, body: '' }
     for (let attempt = 1; attempt <= 3; attempt++) {
-      result = await postReplyToGoogle(accessToken, conn.location_id, review.external_id, review.draft_response)
+      result = await postReplyToGoogle(accessToken, conn.account_id, conn.location_id, review.external_id, review.draft_response)
       if (result.ok) break
       if (result.status === 401 || result.status === 403) {
         if (attempt < 3) await sleep(30_000)
@@ -141,5 +143,5 @@ export async function GET(req: NextRequest) {
 
   const posted = results.filter(r => 'posted' in r && r.posted).length
   console.log('[cron/post-replies]', JSON.stringify(results))
-  return NextResponse.json({ posted, total: reviews.length, results })
+  return NextResponse.json({ posted, total: reviews.length, results }, { status: results.some(r => 'error' in r) ? 502 : 200 })
 }

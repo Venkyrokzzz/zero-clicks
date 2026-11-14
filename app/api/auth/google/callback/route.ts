@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
+import { cookies } from 'next/headers'
 import { createHmac } from 'crypto'
 import { supabase } from '@/lib/supabase'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.0-clicks.uk'
 
-function verifyState(signedState: string): { nonce: string; userId: string; pubName: string; location: string; postCode: string; phoneNumber: string } | null {
+function verifyState(signedState: string): { nonce: string; expiresAt: number; userId: string; pubName: string; location: string; postCode: string; phoneNumber: string } | null {
   const secret = process.env.OAUTH_STATE_SECRET!
   const lastDot = signedState.lastIndexOf('.')
   if (lastDot === -1) return null
@@ -34,7 +36,10 @@ export async function GET(req: NextRequest) {
 
   // Verify HMAC-signed state (CSRF check)
   const state = verifyState(stateRaw)
-  if (!state) {
+  const session = await auth()
+  const nonce = cookies().get('zc_oauth_nonce')?.value
+  cookies().set('zc_oauth_nonce', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/api/auth/google', maxAge: 0 })
+  if (!state || !nonce || state.nonce !== nonce || state.userId !== session.userId || !Number.isFinite(state.expiresAt) || state.expiresAt < Date.now()) {
     return NextResponse.redirect(`${SITE_URL}/connect?error=invalid_state`)
   }
 

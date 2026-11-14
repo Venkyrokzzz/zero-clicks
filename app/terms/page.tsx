@@ -30,7 +30,7 @@ export default function TermsPage() {
 
   return (
     <>
-      <Navbar />
+
       <main style={{ minHeight: "100vh", background: "var(--bg)", paddingTop: "120px", paddingBottom: "100px" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto", padding: "0 24px" }}>
           <p style={{ fontSize: "11px", color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "16px" }}>
