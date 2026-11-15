@@ -469,7 +469,7 @@ export default function Dashboard() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [metrics, setMetrics] = useState<Metrics>({ totalReviews: 0, negativeCount: 0, pendingCount: 0, sentCount: 0 });
   const [loading, setLoading] = useState(true);
-  const [hasGoogle, setHasGoogle] = useState<boolean | null>(null);
+  const [googleStatus, setGoogleStatus] = useState<'loading' | 'ready' | 'select' | 'disconnected'>('loading');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
   const [filter, setFilter] = useState<"all" | "flagged" | "pending" | "approved" | "sent" | "skipped">("all");
@@ -499,8 +499,8 @@ export default function Dashboard() {
   useEffect(() => {
     fetch("/api/integrations/google")
       .then(r => r.json())
-      .then(d => setHasGoogle(!!d.connected))
-      .catch(() => setHasGoogle(false));
+      .then(d => setGoogleStatus(d.connected ? 'ready' : d.authorization ? 'select' : 'disconnected'))
+      .catch(() => setGoogleStatus('disconnected'));
   }, []);
 
   async function handleApprove(id: string, draft: string) {
@@ -659,14 +659,14 @@ export default function Dashboard() {
       {/* Banners */}
       <div style={{ padding: "0 16px", flexShrink: 0 }}>
         <TrialBanner />
-        {hasGoogle === false && (
+        {(googleStatus === 'disconnected' || googleStatus === 'select') && (
           <div style={{
             display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px",
             background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)",
             borderRadius: "10px", padding: "11px 16px", margin: "8px 0",
           }}>
             <span style={{ color: "#f59e0b", fontWeight: 600, fontSize: "13px" }}>
-              Connect your Google Business Profile to start receiving reviews.
+              {googleStatus === 'select' ? 'Choose your Google Business Profile location to start receiving reviews.' : 'Connect your Google Business Profile to start receiving reviews.'}
             </span>
             <a href="/connect" style={{
               background: "#f59e0b", color: "#0a0d14", fontWeight: 800,

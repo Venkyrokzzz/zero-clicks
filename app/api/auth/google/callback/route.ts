@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { cookies } from 'next/headers'
 import { createHmac } from 'crypto'
 import { supabase } from '@/lib/supabase'
+import { chooseMatchingLocation, listGoogleBusinessLocations } from '@/lib/googleBusiness'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.0-clicks.uk'
 
@@ -99,6 +100,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${SITE_URL}/connect?error=db_error`)
   }
 
+  // Resolve the venue directly. The prior n8n-only lookup could fail silently,
+  // leaving a user shown as connected but unable to receive reviews.
+  let selectedLocation = null
+  try {
+    const locations = await listGoogleBusinessLocations(tokens.access_token)
+    selectedLocation = chooseMatchingLocation(locations, pubName)
+    if (selectedLocation) {
+      const { error: locationError } = await supabase.from('google_connections')
+        .update({ account_id: selectedLocation.accountId, location_id: selectedLocation.locationId })
+        .eq('clerk_user_id', userId)
+      if (locationError) throw locationError
+    }
+  } catch (locationError) {
+    console.error('google location lookup error:', locationError)
+  }
+
   // Phase 2: save enriched profile fields from connect form
   if (location || postCode || phoneNumber || pubName) {
     const { error: profileError } = await supabase
@@ -139,5 +156,5 @@ export async function GET(req: NextRequest) {
     // Don't block redirect if n8n is down
   })
 
-  return NextResponse.redirect(`${SITE_URL}/connect/success`)
+  return NextResponse.redirect(`${SITE_URL}/connect/success?location=${selectedLocation ? 'ready' : 'select'}`)
 }

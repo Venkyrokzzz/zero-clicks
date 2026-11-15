@@ -26,3 +26,15 @@ assert.equal(g.googleRating('ONE_STAR'),undefined);
 assert.equal(g.googleReplyUrl('accounts/123','locations/456','accounts/123/locations/456/reviews/abc'),'https://mybusiness.googleapis.com/v4/accounts/123/locations/456/reviews/abc/reply');
 assert.throws(()=>g.googleReplyUrl('123','456',''));
 console.log('Passed: Google ratings, full resource names, reply URL and missing identifiers');
+
+const businessContext={exports:{}};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/googleBusiness.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,businessContext);
+const choose=businessContext.exports.chooseMatchingLocation;
+const locations=[
+ {accountId:'accounts/1',locationId:'locations/1',name:'The Old Fountain',address:'London'},
+ {accountId:'accounts/2',locationId:'locations/2',name:'The Pineapple',address:'London'},
+];
+assert.equal(choose([locations[0]],''),locations[0]);
+assert.equal(choose(locations,'the old fountain'),locations[0]);
+assert.equal(choose(locations,'London'),null);
+console.log('Passed: Google Business Profile location selection rules');
