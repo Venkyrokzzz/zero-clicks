@@ -506,10 +506,10 @@ export default function Dashboard() {
   async function handleApprove(id: string, draft: string) {
     const response = await fetch("/api/reviews", {
       method: "PUT", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status: "sent", draft_response: draft }),
+      body: JSON.stringify({ id, status: "approved", draft_response: draft }),
     });
     if (!response.ok) { showToast('Approval failed. Please retry.'); return; }
-    setReviews(prev => prev.map(r => r.id === id ? { ...r, status: "sent", draft_response: draft } : r));
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, status: "approved", draft_response: draft } : r));
     showToast("✓ Approved — queued for publication");
     const next = reviews.find(r => r.id !== id && r.status === "pending");
     if (next) setSelectedId(next.id);

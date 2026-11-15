@@ -69,6 +69,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}` }, { status: 400 });
     }
     update.status = status;
+    // "sent" is reserved for a reply confirmed by Google. A customer approval
+    // enters the queue as "approved" and is published by the scheduler.
     update.sent_at = status === "sent" ? new Date().toISOString() : null;
     if (draft_response !== undefined) update.draft_response = draft_response;
   }

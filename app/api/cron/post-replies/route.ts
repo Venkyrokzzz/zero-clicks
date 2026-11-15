@@ -63,11 +63,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
   }
 
-  // Fetch reviews waiting to be posted (status=sent, not yet stamped)
+  // Fetch approved replies waiting to be posted. Include legacy `sent` rows
+  // created before V1 so they are not stranded in the queue.
   const { data: reviews, error: revErr } = await supabase
     .from('reviews')
     .select('id, clerk_user_id, external_id, draft_response')
-    .eq('status', 'sent')
+    .in('status', ['approved', 'sent'])
     .is('posted_to_google_at', null)
     .limit(50)
 
@@ -133,7 +134,7 @@ export async function GET(req: NextRequest) {
     if (result.ok) {
       await supabase
         .from('reviews')
-        .update({ posted_to_google_at: new Date().toISOString() })
+        .update({ status: 'sent', sent_at: new Date().toISOString(), posted_to_google_at: new Date().toISOString() })
         .eq('id', review.id)
       results.push({ id: review.id, posted: true })
     } else {

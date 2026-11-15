@@ -206,7 +206,7 @@ export async function POST(req: NextRequest) {
     const reviewText = (safeStr(review_text, 5000) ?? '').toLowerCase()
     const hasComplaint = COMPLAINT_KEYWORDS.some(kw => reviewText.includes(kw))
     if (profile.plan === 'pro' && settings?.auto_send_positive && ratingNum >= 4 && !hasComplaint && finalStatus === 'pending') {
-      finalStatus = 'sent'
+      finalStatus = 'approved'
       autoSent = true
     }
   } catch (err) {
@@ -227,7 +227,7 @@ export async function POST(req: NextRequest) {
       draft_response:   finalDraft,
       platform:         safeStr(platform, 50) ?? 'google',
       status:           finalStatus,
-      sent_at:          autoSent ? new Date().toISOString() : null,
+      sent_at:          null,
       google_created_at: typeof google_created_at === 'string' ? google_created_at : null,
     },
     { onConflict: 'clerk_user_id,external_id', ignoreDuplicates: true }
