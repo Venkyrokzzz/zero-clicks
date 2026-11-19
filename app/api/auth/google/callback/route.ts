@@ -1,143 +1,194 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { cookies } from 'next/headers'
-import { createHmac } from 'crypto'
-import { supabase } from '@/lib/supabase'
-import { chooseMatchingLocation, listGoogleBusinessLocations } from '@/lib/googleBusiness'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.0-clicks.uk'
-
-function verifyState(signedState: string): { nonce: string; expiresAt: number; userId: string; pubName: string; location: string; postCode: string; phoneNumber: string } | null {
-  const secret = process.env.OAUTH_STATE_SECRET!
-  const lastDot = signedState.lastIndexOf('.')
-  if (lastDot === -1) return null
-
-  const payload = signedState.slice(0, lastDot)
-  const receivedHmac = signedState.slice(lastDot + 1)
-  const expectedHmac = createHmac('sha256', secret).update(payload).digest('hex')
-
-  if (receivedHmac !== expectedHmac) return null
-
-  try {
-    return JSON.parse(Buffer.from(payload, 'base64url').toString())
-  } catch {
-    return null
-  }
-}
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { supabase } from "@/lib/supabase";
+import {
+  chooseMatchingLocation,
+  listGoogleBusinessLocations,
+} from "@/lib/googleBusiness";
+import {
+  BUSINESS_SCOPE,
+  NONCE_COOKIE,
+  cookieSettings,
+  oauthConfig,
+  validGoogleState,
+} from "@/lib/googleOAuth";
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const code = searchParams.get('code')
-  const stateRaw = searchParams.get('state')
-  const error = searchParams.get('error')
-
-  if (error || !code || !stateRaw) {
-    return NextResponse.redirect(`${SITE_URL}/connect?error=access_denied`)
+  const requestUrl = new URL(req.url);
+  const config = oauthConfig();
+  const origin = config?.origin ?? requestUrl.origin;
+  const failure = (code: string) =>
+    NextResponse.redirect(new URL(`/connect?error=${code}`, origin));
+  if (!config) return failure("google_config");
+  if (requestUrl.origin !== origin) return failure("invalid_state");
+  const { searchParams } = requestUrl;
+  if (searchParams.has("error")) {
+    return failure(
+      searchParams.get("error") === "access_denied"
+        ? "access_denied"
+        : "google_consent",
+    );
   }
 
-  // Verify HMAC-signed state (CSRF check)
-  const state = verifyState(stateRaw)
-  const session = await auth()
-  const nonce = cookies().get('zc_oauth_nonce')?.value
-  cookies().set('zc_oauth_nonce', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/api/auth/google', maxAge: 0 })
-  if (!state || !nonce || state.nonce !== nonce || state.userId !== session.userId || !Number.isFinite(state.expiresAt) || state.expiresAt < Date.now()) {
-    return NextResponse.redirect(`${SITE_URL}/connect?error=invalid_state`)
+  const code = searchParams.get("code");
+  const state = searchParams.get("state");
+  const { userId } = await auth();
+  const nonce = cookies().get(NONCE_COOKIE)?.value;
+  if (!userId) return failure("session_expired");
+  if (
+    !code ||
+    !state ||
+    !nonce ||
+    !validGoogleState(state, nonce, userId, config.stateSecret)
+  ) {
+    return failure("invalid_state");
+  }
+  cookies().set(NONCE_COOKIE, "", { ...cookieSettings, maxAge: 0 });
+
+  let tokens: {
+    error?: unknown;
+    access_token?: unknown;
+    refresh_token?: unknown;
+    expires_in?: unknown;
+    scope?: unknown;
+  };
+  try {
+    const response = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        code,
+        client_id: config.clientId,
+        client_secret: config.clientSecret,
+        redirect_uri: config.redirectUri,
+        grant_type: "authorization_code",
+      }),
+      signal: AbortSignal.timeout(8_000),
+    });
+    tokens = await response.json();
+    if (!response.ok || tokens?.error) {
+      const issue = tokens?.error;
+      const rejected =
+        issue === "invalid_client" ||
+        issue === "unauthorized_client" ||
+        issue === "redirect_uri_mismatch";
+      console.warn(
+        "[google-connect] Token exchange rejected",
+        response.status,
+        rejected
+          ? "client_config"
+          : issue === "invalid_grant"
+            ? "invalid_grant"
+            : "other",
+      );
+      return failure(
+        rejected
+          ? "google_client_rejected"
+          : issue === "invalid_grant"
+            ? "google_code_expired"
+            : "google_token_exchange",
+      );
+    }
+  } catch {
+    console.warn("[google-connect] Token exchange unavailable");
+    return failure("google_token_exchange");
   }
 
-  const { userId, pubName, location, postCode, phoneNumber } = state
-
-  // Exchange code for tokens
-  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      code,
-      client_id: process.env.GOOGLE_CLIENT_ID!,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI!,
-      grant_type: 'authorization_code',
-    }),
-  })
-
-  const tokens = await tokenRes.json()
-
-  if (!tokens.refresh_token) {
-    // Google didn't return a refresh token — re-trigger OAuth with the original form data
-    // so the user gets a seamless second consent screen rather than a broken connect page.
-    const retryParams = new URLSearchParams({
-      pubName,
-      location,
-      postCode,
-      phoneNumber,
-    })
-    return NextResponse.redirect(`${SITE_URL}/api/auth/google?${retryParams.toString()}`)
+  if (
+    typeof tokens?.access_token !== "string" ||
+    !tokens.access_token ||
+    typeof tokens.expires_in !== "number" ||
+    !Number.isFinite(tokens.expires_in) ||
+    tokens.expires_in <= 0
+  ) {
+    return failure("google_token_exchange");
+  }
+  if (
+    typeof tokens.scope === "string" &&
+    !tokens.scope.split(/\s+/).includes(BUSINESS_SCOPE)
+  ) {
+    return failure("google_scope");
+  }
+  if (typeof tokens.refresh_token !== "string" || !tokens.refresh_token) {
+    return failure("google_refresh_missing");
   }
 
-  // Get Google user info (email)
-  const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-    headers: { Authorization: `Bearer ${tokens.access_token}` },
-  })
-  const googleUser = await userRes.json()
+  let googleEmail: string;
+  try {
+    const response = await fetch(
+      "https://www.googleapis.com/oauth2/v2/userinfo",
+      {
+        headers: { Authorization: `Bearer ${tokens.access_token}` },
+        signal: AbortSignal.timeout(8_000),
+      },
+    );
+    const info = await response.json();
+    if (!response.ok || typeof info?.email !== "string" || !info.email)
+      return failure("google_identity");
+    googleEmail = info.email;
+  } catch {
+    return failure("google_identity");
+  }
 
-  const expiresAt = tokens.expires_in
-    ? new Date(Date.now() + tokens.expires_in * 1000).toISOString()
-    : null
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("business_name")
+    .eq("clerk_user_id", userId)
+    .maybeSingle();
+  if (profileError) return failure("db_error");
+  if (!profile) return failure("profile_required");
 
-  // Write tokens to Supabase (primary store)
-  const { error: dbError } = await supabase.from('google_connections').upsert({
-    clerk_user_id: userId,
-    google_email: googleUser.email,
-    google_reviews_url: '',
-    refresh_token: tokens.refresh_token,
-    access_token: tokens.access_token,
-    access_token_expires_at: expiresAt,
-    scopes: tokens.scope,
-    connected_at: new Date().toISOString(),
-    account_id: null,
-    location_id: null,
-    needs_reconnect: false,
-    last_synced_at: null,
-  }, { onConflict: 'clerk_user_id' })
+  const { error: dbError } = await supabase.from("google_connections").upsert(
+    {
+      clerk_user_id: userId,
+      google_email: googleEmail,
+      google_reviews_url: "",
+      refresh_token: tokens.refresh_token,
+      access_token: tokens.access_token,
+      access_token_expires_at: new Date(
+        Date.now() + tokens.expires_in * 1000,
+      ).toISOString(),
+      scopes: typeof tokens.scope === "string" ? tokens.scope : null,
+      connected_at: new Date().toISOString(),
+      account_id: null,
+      location_id: null,
+      needs_reconnect: false,
+      last_synced_at: null,
+    },
+    { onConflict: "clerk_user_id" },
+  );
 
   if (dbError) {
-    console.error('google_connections upsert error:', dbError)
-    return NextResponse.redirect(`${SITE_URL}/connect?error=db_error`)
+    console.error("[google-connect] Could not save consent", dbError.code);
+    return failure("db_error");
   }
 
-  // Resolve the venue directly. The prior n8n-only lookup could fail silently,
-  // leaving a user shown as connected but unable to receive reviews.
-  let selectedLocation = null
+  let ready = false;
   try {
-    const locations = await listGoogleBusinessLocations(tokens.access_token)
-    selectedLocation = chooseMatchingLocation(locations, pubName)
-    if (selectedLocation) {
-      const { error: locationError } = await supabase.from('google_connections')
-        .update({ account_id: selectedLocation.accountId, location_id: selectedLocation.locationId })
-        .eq('clerk_user_id', userId)
-      if (locationError) throw locationError
+    const locations = await listGoogleBusinessLocations(tokens.access_token);
+    const selected = chooseMatchingLocation(
+      locations,
+      profile.business_name ?? "",
+    );
+    if (selected) {
+      const { data, error } = await supabase
+        .from("google_connections")
+        .update({
+          account_id: selected.accountId,
+          location_id: selected.locationId,
+        })
+        .eq("clerk_user_id", userId)
+        .eq("access_token", tokens.access_token)
+        .select("id")
+        .maybeSingle();
+      ready = !!data && !error;
     }
-  } catch (locationError) {
-    selectedLocation = null
-    console.error('google location lookup error:', locationError)
+  } catch {
+    console.warn("[google-connect] Consent saved, venue lookup needs retry");
   }
 
-  // Phase 2: save enriched profile fields from connect form
-  if (location || postCode || phoneNumber || pubName) {
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({
-        ...(pubName && { business_name: pubName }),
-        ...(location && { location }),
-        ...(postCode && { postcode: postCode }),
-        ...(phoneNumber && { phone: phoneNumber }),
-      })
-      .eq('clerk_user_id', userId)
-
-    if (profileError) {
-      console.error('profile enrich error:', profileError)
-      // Non-fatal — don't block the redirect
-    }
-  }
-
-  return NextResponse.redirect(`${SITE_URL}/connect/success?location=${selectedLocation ? 'ready' : 'select'}`)
+  return NextResponse.redirect(
+    new URL(`/connect/success?location=${ready ? "ready" : "select"}`, origin),
+  );
 }

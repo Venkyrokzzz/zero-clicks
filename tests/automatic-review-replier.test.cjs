@@ -90,6 +90,8 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
 
   const env = {
     NEXT_PUBLIC_SITE_URL: site, OAUTH_STATE_SECRET: 'fixture-state',
+    GOOGLE_CLIENT_ID: 'fixture-client', GOOGLE_CLIENT_SECRET: 'fixture-secret',
+    GOOGLE_REDIRECT_URI: site + '/api/auth/google/callback',
     CRON_SECRET: 'fixture-cron-secret',
     CLERK_WEBHOOK_SECRET: 'whsec_' + Buffer.from('fixture-clerk-signing-secret').toString('base64'),
     STRIPE_WEBHOOK_SECRET: 'whsec_fixture', STRIPE_SECRET_KEY: 'sk_test_fixture',
@@ -103,6 +105,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   let geminiUnavailable = false;
   let tokenRevoked = false;
   let temporaryTokenError = false;
+  let oauthFixture = 'ok';
   let clockOffset = 0;
   class TestDate extends Date {
     constructor(...values) { super(...(values.length ? values : [Date.now() + clockOffset])); }
@@ -156,6 +159,12 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
       return Response.json({ candidates: [{ finishReason: 'STOP', content: { parts: [{ text: geminiDraft }] } }] });
     }
     if (url.href === 'https://oauth2.googleapis.com/token') {
+      if (options.body.get('grant_type') === 'authorization_code') {
+        if (oauthFixture === 'invalid_client') return Response.json({ error: 'invalid_client' }, { status: 401 });
+        if (oauthFixture === 'invalid_grant') return Response.json({ error: 'invalid_grant' }, { status: 400 });
+        if (oauthFixture === 'no_refresh') return Response.json({ access_token: 'fake-access', expires_in: 3600 });
+        if (oauthFixture === 'no_scope') return Response.json({ access_token: 'fake-access', refresh_token: 'fake-refresh', expires_in: 3600, scope: 'email' });
+      }
       if (temporaryTokenError) return Response.json({ error: 'temporarily_unavailable' }, { status: 503 });
       if (tokenRevoked) return Response.json({ error: 'invalid_grant' }, { status: 400 });
       return Response.json({ access_token: 'fake-access', refresh_token: 'fake-refresh', expires_in: 3600 });
@@ -245,12 +254,41 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   assert.equal(profile.plan, 'founding');
   assert.equal(profile.subscription_status, 'active');
 
-  const start = await load('app/api/auth/google/route').GET(new Request(site + '/api/auth/google?pubName=Fixture%20Arms'));
-  const consent = new URL(start.headers.get('location'));
-  const callbackUrl = new URL(site + '/api/auth/google/callback');
-  callbackUrl.searchParams.set('code', 'fixture-code');
-  callbackUrl.searchParams.set('state', consent.searchParams.get('state'));
-  const callback = await load('app/api/auth/google/callback/route').GET(new Request(callbackUrl));
+  const startGoogle = load('app/api/auth/google/route').GET;
+  const finishGoogle = load('app/api/auth/google/callback/route').GET;
+  const begin = async () => new URL((await startGoogle(new Request(site + '/api/auth/google'))).headers.get('location'));
+  const makeCallback = consent => {
+    const url = new URL(site + '/api/auth/google/callback');
+    url.searchParams.set('code', 'fixture-code');
+    url.searchParams.set('state', consent.searchParams.get('state'));
+    return new Request(url);
+  };
+  const canonical = await startGoogle(new Request('https://alternate.zero-clicks.test/api/auth/google'));
+  assert.equal(canonical.headers.get('location'), site + '/api/auth/google');
+  assert.equal(nonce, '');
+  for (const [fixture, expected] of [
+    ['invalid_client', 'google_client_rejected'],
+    ['invalid_grant', 'google_code_expired'],
+    ['no_refresh', 'google_refresh_missing'],
+    ['no_scope', 'google_scope'],
+  ]) {
+    oauthFixture = fixture;
+    const denied = await finishGoogle(makeCallback(await begin()));
+    assert.equal(denied.headers.get('location'), site + '/connect?error=' + expected);
+    assert.equal(tables.google_connections.some(row => row.clerk_user_id === 'fixture'), false);
+  }
+  const movedSession = makeCallback(await begin());
+  actor = { userId: 'other' };
+  assert.equal((await finishGoogle(movedSession)).headers.get('location'), site + '/connect?error=invalid_state');
+  actor = { userId: 'fixture' };
+
+  oauthFixture = 'ok';
+  // The normal entry point stores venue details in /api/profile before OAuth.
+  profile.business_name = 'Fixture Arms';
+  const consent = await begin();
+  assert.equal(consent.searchParams.get('prompt'), 'select_account consent');
+  assert.equal(consent.searchParams.get('redirect_uri'), env.GOOGLE_REDIRECT_URI);
+  const callback = await finishGoogle(makeCallback(consent));
   assert.match(callback.headers.get('location'), /location=ready$/);
   const venue = tables.google_connections.find(row => row.clerk_user_id === 'fixture');
   assert.equal(venue.location_id, 'locations/456');

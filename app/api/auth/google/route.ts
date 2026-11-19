@@ -1,57 +1,61 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { checkRateLimit } from '@/lib/rateLimit'
-import { cookies } from 'next/headers'
-import { createHmac } from 'crypto'
-
-function signState(payload: string): string {
-  const secret = process.env.OAUTH_STATE_SECRET!
-  const hmac = createHmac('sha256', secret).update(payload).digest('hex')
-  return `${payload}.${hmac}`
-}
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { checkRateLimit } from "@/lib/rateLimit";
+import {
+  BUSINESS_SCOPE,
+  NONCE_COOKIE,
+  START_PATH,
+  STATE_LIFETIME,
+  cookieSettings,
+  oauthConfig,
+  signGoogleState,
+} from "@/lib/googleOAuth";
 
 export async function GET(req: NextRequest) {
-  const ip =
-    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
-    req.headers.get('x-real-ip') ??
-    'unknown'
-
-  const { allowed } = checkRateLimit(ip, 10)
-  if (!allowed) return NextResponse.json({ error: 'Too many requests.' }, { status: 429 })
-
-  // Must be logged in
-  const { userId } = await auth()
-  if (!userId) {
-    return NextResponse.redirect(new URL('/sign-in', req.url))
+  const config = oauthConfig();
+  if (!config)
+    return NextResponse.redirect(
+      new URL("/connect?error=google_config", req.url),
+    );
+  if (new URL(req.url).origin !== config.origin) {
+    return NextResponse.redirect(new URL(START_PATH, config.origin));
   }
 
-  const { searchParams } = new URL(req.url)
-  const pubName = searchParams.get('pubName') || ''
-  const location = searchParams.get('location') || ''
-  const postCode = searchParams.get('postCode') || ''
-  const phoneNumber = searchParams.get('phoneNumber') || ''
+  const { userId } = await auth();
+  if (!userId) {
+    const signIn = new URL("/sign-in", config.origin);
+    signIn.searchParams.set(
+      "redirect_url",
+      new URL("/connect", config.origin).href,
+    );
+    return NextResponse.redirect(signIn);
+  }
+  if (!checkRateLimit(`google-connect:${userId}`, 10).allowed) {
+    return NextResponse.redirect(
+      new URL("/connect?error=too_many_attempts", config.origin),
+    );
+  }
 
-  // HMAC-signed state: nonce + clerk userId + search terms for CSRF and magic lookup
-  const nonce = crypto.randomUUID()
-  const payload = Buffer.from(JSON.stringify({ nonce, expiresAt: Date.now() + 600000, userId, pubName, location, postCode, phoneNumber })).toString('base64url')
-  const signedState = signState(payload)
-  cookies().set('zc_oauth_nonce', nonce, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/api/auth/google', maxAge: 600 })
+  const nonce = crypto.randomUUID();
+  cookies().set(NONCE_COOKIE, nonce, {
+    ...cookieSettings,
+    maxAge: STATE_LIFETIME,
+  });
 
-  const params = new URLSearchParams({
-    client_id: process.env.GOOGLE_CLIENT_ID!,
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI!,
-    response_type: 'code',
+  const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  url.search = new URLSearchParams({
+    client_id: config.clientId,
+    redirect_uri: config.redirectUri,
+    response_type: "code",
     scope: [
-      'https://www.googleapis.com/auth/business.manage',
-      'https://www.googleapis.com/auth/userinfo.email',
-      'https://www.googleapis.com/auth/userinfo.profile',
-    ].join(' '),
-    access_type: 'offline',
-    prompt: 'consent',
-    state: signedState,
-  })
+      BUSINESS_SCOPE,
+      "https://www.googleapis.com/auth/userinfo.email",
+    ].join(" "),
+    access_type: "offline",
+    prompt: "select_account consent",
+    state: signGoogleState(nonce, userId, config.stateSecret),
+  }).toString();
 
-  return NextResponse.redirect(
-    `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
-  )
+  return NextResponse.redirect(url);
 }

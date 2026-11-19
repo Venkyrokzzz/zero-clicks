@@ -1,96 +1,178 @@
-'use client'
+"use client";
 
-import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useEffect, useState } from "react";
+import { panelRequest } from "@/components/workspace/panel-data";
+import s from "@/components/workspace/Workspace.module.css";
 
-type Location = { accountId: string; locationId: string; name: string; address: string }
+type Location = {
+  accountId: string;
+  locationId: string;
+  name: string;
+  address: string;
+};
+type State = "loading" | "connected" | "choose" | "disconnected";
 
-function SuccessContent() {
-  const searchParams = useSearchParams()
-  const pub = searchParams.get('pub') || 'your business'
-  const needsSelection = searchParams.get('location') === 'select'
-  const [locations, setLocations] = useState<Location[]>([])
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(needsSelection)
-  const [saving, setSaving] = useState<string | null>(null)
+function locationRequest<T>(data: object, signal?: AbortSignal) {
+  return panelRequest<T>("/api/integrations/google", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...(signal && { signal }),
+  });
+}
+
+export default function ConnectionStatus() {
+  const [state, setState] = useState<State>("loading");
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
-    if (!needsSelection) return
-    fetch('/api/integrations/google', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list' }),
-    })
-      .then(async response => {
-        const body = await response.json()
-        if (!response.ok) throw new Error(body.error || 'Unable to find Google Business Profile locations.')
-        setLocations(body.locations || [])
-      })
-      .catch(err => setError(err instanceof Error ? err.message : 'Unable to find Google Business Profile locations.'))
-      .finally(() => setLoading(false))
-  }, [needsSelection])
+    const controller = new AbortController();
+    const { signal } = controller;
+    async function load() {
+      setError("");
+      setState("loading");
+      setLocations([]);
+      try {
+        const connection = await panelRequest<{
+          connected: boolean;
+          authorization: boolean;
+          needs_reconnect: boolean;
+        }>("/api/integrations/google", { signal });
+        if (signal.aborted) return;
+        if (connection.connected) {
+          setState("connected");
+          return;
+        }
+        if (!connection.authorization || connection.needs_reconnect) {
+          setState("disconnected");
+          return;
+        }
+        const result = await locationRequest<{ locations: Location[] }>(
+          { action: "list" },
+          signal,
+        );
+        if (!signal.aborted) {
+          setLocations(result.locations);
+          setState("choose");
+        }
+      } catch (issue) {
+        if (signal.aborted) return;
+        setState("disconnected");
+        setError(
+          issue instanceof Error
+            ? issue.message
+            : "Could not check your connection.",
+        );
+      }
+    }
+
+    void load();
+    return () => controller.abort();
+  }, [retry]);
 
   async function choose(location: Location) {
-    setSaving(location.locationId)
-    setError('')
+    setSaving(true);
+    setError("");
     try {
-      const response = await fetch('/api/integrations/google', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accountId: location.accountId, locationId: location.locationId }),
-      })
-      const body = await response.json()
-      if (!response.ok) throw new Error(body.error || 'Unable to save this location.')
-      window.location.assign('/dashboard')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to save this location.')
-      setSaving(null)
+      await locationRequest({
+        accountId: location.accountId,
+        locationId: location.locationId,
+      });
+      setState("connected");
+    } catch (issue) {
+      setError(
+        issue instanceof Error
+          ? issue.message
+          : "Could not save this location.",
+      );
+    } finally {
+      setSaving(false);
     }
   }
 
-  const ready = !needsSelection
-  return (
-    <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
-      <div className="w-full max-w-md text-center">
-        <div className={`w-16 h-16 ${ready ? 'bg-green-500/10' : 'bg-amber-500/10'} rounded-full flex items-center justify-center mx-auto mb-6`}>
-          <svg className={`w-8 h-8 ${ready ? 'text-green-400' : 'text-amber-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={ready ? 'M5 13l4 4L19 7' : 'M12 9v4m0 4h.01M10.29 3.86l-8.3 14A2 2 0 003.72 21h16.56a2 2 0 001.73-3.14l-8.3-14a2 2 0 00-3.42 0z'} />
-          </svg>
-        </div>
-        <h1 className="text-white text-2xl font-bold mb-3">{ready ? "You're all set" : 'Choose your location'}</h1>
-        <p className="text-[#888] text-sm mb-8">
-          {ready ? <><span className="text-white font-medium">{pub}</span> is connected. New reviews will appear in your dashboard for approval.</> : 'Your Google account is authorised. Select the Business Profile you want Zero Clicks to monitor.'}
-        </p>
+  const heading =
+    state === "connected"
+      ? "Google Business Profile connected"
+      : state === "choose"
+        ? "Choose your location"
+        : state === "loading"
+          ? "Checking your Google connection"
+          : "Google connection incomplete";
 
-        {needsSelection ? (
-          <div className="bg-[#111] border border-white/10 rounded-2xl p-4 text-left space-y-3 mb-8">
-            {loading && <p className="text-[#888] text-sm">Finding your Google Business Profiles…</p>}
-            {!loading && locations.map(location => (
-              <button key={`${location.accountId}:${location.locationId}`} onClick={() => choose(location)} disabled={!!saving}
-                className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left hover:border-amber-400/50 disabled:opacity-50">
-                <span className="block text-sm font-medium text-white">{saving === location.locationId ? 'Saving…' : location.name}</span>
-                {location.address && <span className="mt-1 block text-xs text-[#888]">{location.address}</span>}
+  return (
+    <main className={s.workspace}>
+      <div className={`${s.compact} ${s.stack}`}>
+        <header className={s.header}>
+          <h1>{heading}</h1>
+        </header>
+        {state === "loading" && (
+          <p role="status" className={s.muted}>
+            Looking up your connection and available locations…
+          </p>
+        )}
+        {state === "connected" && (
+          <p className={s.muted}>
+            You can open your review inbox. Reviews will appear after Zero
+            Clicks checks your listing.
+          </p>
+        )}
+        {state === "choose" && (
+          <section
+            className={`${s.box} ${s.stack}`}
+            aria-label="Business Profiles"
+          >
+            <p className={s.muted}>
+              {locations.length
+                ? "Select the Business Profile you want Zero Clicks to monitor."
+                : "No Business Profiles are available to this Google account. Make sure it owns or manages the profile."}
+            </p>
+            {locations.map((location) => (
+              <button
+                type="button"
+                className={s.button}
+                key={`${location.accountId}:${location.locationId}`}
+                onClick={() => choose(location)}
+                disabled={saving}
+              >
+                {location.name}
+                {location.address && ` · ${location.address}`}
               </button>
             ))}
-            {!loading && !error && locations.length === 0 && <p className="text-[#888] text-sm">No accessible Google Business Profiles were found for this account.</p>}
-            {error && <p className="text-red-400 text-sm">{error}</p>}
-          </div>
-        ) : (
-          <div className="bg-[#111] border border-white/10 rounded-2xl p-6 text-left space-y-4 mb-8">
-            <h3 className="text-white font-medium text-sm">What happens next</h3>
-            <div className="space-y-3">
-              {[
-                { icon: '🔍', text: 'We check for new Google reviews on a schedule' },
-                { icon: '🤖', text: 'AI creates a draft reply for each new review' },
-                { icon: '✍️', text: 'You can edit, approve or skip every draft' },
-                { icon: '📍', text: 'Approved replies are posted back to Google' },
-              ].map(item => <div key={item.text} className="flex items-start gap-3"><span>{item.icon}</span><span className="text-[#888] text-sm">{item.text}</span></div>)}
-            </div>
-          </div>
+            {saving && (
+              <p role="status" className={s.muted}>
+                Saving your selected location…
+              </p>
+            )}
+          </section>
         )}
-        <a href="/dashboard" className="inline-block rounded-lg bg-amber-400 px-4 py-2 text-sm font-bold text-black">Open dashboard</a>
+        {error && (
+          <p role="alert" className={s.alert}>
+            {error}
+          </p>
+        )}
+        <div className={s.row}>
+          {state !== "connected" && state !== "loading" && (
+            <a href="/api/auth/google" className={s.primary}>
+              Choose a Google account
+            </a>
+          )}
+          {(error || (state === "choose" && !locations.length)) && (
+            <button
+              type="button"
+              className={s.button}
+              onClick={() => setRetry((n) => n + 1)}
+            >
+              Check again
+            </button>
+          )}
+          <a href="/dashboard" className={s.button}>
+            Open review inbox
+          </a>
+        </div>
       </div>
     </main>
-  )
-}
-
-export default function SuccessPage() {
-  return <Suspense><SuccessContent /></Suspense>
+  );
 }

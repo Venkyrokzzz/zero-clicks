@@ -202,15 +202,7 @@ export default function OnboardingPage() {
       return;
     }
 
-    // Go straight to Google OAuth — no separate connect page needed
-    const params = new URLSearchParams({
-      pubName: form.business_name,
-      location: form.location,
-      postCode: form.postcode,
-      phoneNumber: form.phone,
-      managerName: form.manager_name,
-    });
-    window.location.href = `/api/auth/google?${params.toString()}`;
+    window.location.href = "/api/auth/google";
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
