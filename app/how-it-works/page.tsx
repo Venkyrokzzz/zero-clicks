@@ -1,26 +1,8 @@
-import type { Metadata } from "next";
-import HowItWorksFullPage from "@/components/HowItWorksFullPage";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
-
+import type { Metadata } from 'next';
+import ReputationLaunch from '@/components/reputation/ReputationLaunch';
 export const metadata: Metadata = {
-  title: "How It Works — AI Review Automation for UK Pubs | Zero Clicks",
-  description:
-    "See how Zero Clicks automates your Google review replies with your approval. No tech knowledge needed. We build it free — you pay nothing until it's live.",
-  alternates: { canonical: "https://www.0-clicks.uk/how-it-works" },
-  openGraph: {
-    title: "How Zero Clicks Works — AI Review Automation for UK Pubs",
-    description: "From review to reply in under a minute. We build it free, you pay when it's live. Here's exactly how it works.",
-    url: "https://www.0-clicks.uk/how-it-works",
-  },
+  title: 'How Reputation Manager works',
+  description: 'Reputation Manager by Zero Clicks helps UK hospitality venues draft, review and approve Google review replies. Your voice. Your approval. Your reputation.',
+  alternates: { canonical: 'https://www.0-clicks.uk/how-it-works' },
 };
-
-export default function HowItWorksPage() {
-  return (
-    <>
-
-      <HowItWorksFullPage />
-      <Footer />
-    </>
-  );
-}
+export default function Page() { return <ReputationLaunch page="process"/>; }

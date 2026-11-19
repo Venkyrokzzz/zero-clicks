@@ -9,7 +9,7 @@ const data = {
       "@id": `${BASE}/#organisation`,
       name: "Zero Clicks",
       url: BASE,
-      logo: { "@type": "ImageObject", url: `${BASE}/logo.png` },
+      logo: { "@type": "ImageObject", url: `${BASE}/zero-clicks-mark.svg` },
       contactPoint: {
         "@type": "ContactPoint",
         contactType: "customer support",
@@ -26,7 +26,7 @@ const data = {
       "@id": `${BASE}/#website`,
       url: BASE,
       name: "Zero Clicks",
-      description: "AI automation for UK pubs, restaurants and hotels.",
+      description: "Reputation Manager: Google review drafts and owner-approved replies for UK hospitality.",
       publisher: { "@id": `${BASE}/#organisation` },
     },
   ],

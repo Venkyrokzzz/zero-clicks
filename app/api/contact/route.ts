@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Length limits ─────────────────────────────────────────────────
-  if (name.length > 100 || email.length > 254 || message.length > 5000 || (company && company.length > 200)) {
+  if (name.length > 100 || email.length > 254 || message.length > 5000 || (company && company.length > 200) || (budget && budget.length > 100)) {
     return NextResponse.json({ error: "Input exceeds maximum length." }, { status: 400 });
   }
 
@@ -62,12 +62,13 @@ export async function POST(req: NextRequest) {
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
+      signal: AbortSignal.timeout(8_000),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
-        from: "Zero Clicks Contact <onboarding@resend.dev>",
+        from: process.env.RESEND_FROM_EMAIL || "Zero Clicks Contact <onboarding@resend.dev>",
         to: ["zeroclicks.hq@gmail.com"],
         reply_to: email,
         subject: `New enquiry from ${name} — Zero Clicks`,
@@ -89,12 +90,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to send. Please try again." }, { status: 502 });
     }
 
+    const accepted = await res.json().catch(() => null);
+    if (typeof accepted?.id !== "string" || !accepted.id) {
+      return NextResponse.json({ error: "Email acceptance could not be confirmed. Please email zeroclicks.hq@gmail.com directly." }, { status: 502 });
+    }
+
     return NextResponse.json(
       { success: true },
       { headers: { "X-RateLimit-Remaining": String(remaining) } }
     );
   } catch (err) {
     console.error("[contact] Network error:", err);
-    return NextResponse.json({ error: "Network error. Please try again." }, { status: 503 });
+    return NextResponse.json({ error: "Delivery could not be confirmed. Please email zeroclicks.hq@gmail.com directly." }, { status: 503 });
   }
 }

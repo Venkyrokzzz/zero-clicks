@@ -70,7 +70,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Logo */}
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Zero Clicks" style={{ width: 24, height: 24, borderRadius: 6 }} />
+          <img src="/zero-clicks-mark.svg" alt="Zero Clicks" style={{ width: 24, height: 24, borderRadius: 6 }} />
           <span style={{ color: "#fff", fontWeight: 700, fontSize: "15px", letterSpacing: "0.01em" }}>Zero Clicks</span>
         </Link>
 

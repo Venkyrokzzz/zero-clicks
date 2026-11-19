@@ -1,0 +1,249 @@
+.deskBrand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.16em;
+}
+.deskBrand img {
+  width: 0.98em;
+  height: 0.98em;
+  flex: none;
+}
+.folio {
+  --sheet: #faf8f0;
+  --crease: #d9dbc9;
+  --edge: #a4ab97;
+  position: relative;
+  isolation: isolate;
+  background: #cbd2bb;
+  border-color: var(--edge);
+  border-radius: 12px 12px 7px 7px;
+  box-shadow:
+    9px 11px 0 #dbe0cf,
+    14px 16px 0 #e6e7d9;
+}
+.cover {
+  padding: 19px 17px 0;
+  border: 0;
+  border-radius: 11px 11px 0 0;
+  background: transparent;
+}
+.cover h2 {
+  padding: 0 6px;
+  font-size: clamp(29px, 3.2vw, 46px);
+  margin-bottom: 17px;
+}
+.scenarios {
+  display: grid;
+  grid-template-columns: 0.8fr 1.25fr 1fr 1.05fr;
+  gap: 4px;
+}
+.scenarios button {
+  color: #334030;
+  background: #e8ebdf;
+  padding: 9px 4px;
+  min-height: 49px;
+  border: 1px solid #acb49e;
+  border-bottom: 3px solid transparent;
+  border-radius: 7px 7px 0 0;
+  font-size: clamp(12px, 1.1vw, 16px);
+  font-weight: 600;
+  line-height: 1.2;
+  transition:
+    background-color 0.16s,
+    border-color 0.16s;
+}
+.scenarios button:hover {
+  background: #f2f0e6;
+}
+.scenarios button[aria-pressed="true"] {
+  background: var(--sheet);
+  color: #252b25;
+  border-bottom-color: #b93824;
+}
+.perspective {
+  perspective: 1250px;
+}
+.sheet {
+  position: relative;
+  background: var(--sheet);
+  min-width: 0;
+  padding: 24px 28px 23px;
+  border-radius: 5px 0 6px 6px;
+  box-shadow:
+    inset 0 1px var(--edge),
+    0 3px 8px #282b2312;
+}
+.sheet::before {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  width: 26px;
+  height: 26px;
+  background: var(--crease);
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  border-bottom: 1px solid #a4ab97;
+  pointer-events: none;
+}
+.sheet::after {
+  position: absolute;
+  content: "";
+  top: 13px;
+  bottom: 13px;
+  left: 11px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--crease);
+  pointer-events: none;
+}
+.example blockquote {
+  font:
+    400 clamp(17px, 1.6vw, 23px) / 1.4 Georgia,
+    serif;
+  margin: 5px 0 6px;
+}
+.rating {
+  color: #925707;
+  font-size: 19px;
+  letter-spacing: 2px;
+}
+.emptyStars {
+  color: #6c7565;
+}
+.folio .hint {
+  color: #50594b;
+  margin-top: 7px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.hint:empty {
+  display: none;
+}
+.form label,
+.replyHead label {
+  color: #252b25;
+  font:
+    600 19px / 1.25 Georgia,
+    serif;
+}
+.folio textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  color: #252b25;
+  background: #fffdf7;
+  border: 1px solid #a8ad9e;
+  border-radius: 4px;
+  resize: vertical;
+  padding: 10px 12px;
+  font-size: 16px;
+  line-height: 1.48;
+}
+.form textarea {
+  min-height: 99px;
+  margin-top: 8px;
+}
+.formControls {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.formControls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+.formControls select {
+  min-height: 44px;
+  border: 1px solid #a4ab97;
+  border-radius: 4px;
+  padding: 0 7px;
+  background: #fffdf7;
+  color: #252b25;
+  font:
+    500 15px system-ui,
+    sans-serif;
+}
+.formControls button {
+  padding: 10px 14px;
+  font-size: 15px;
+}
+.reply {
+  background: #eeebdf;
+  border: 1px solid #d5d6c7;
+  border-radius: 5px;
+  padding: 13px;
+  margin-top: 16px;
+}
+.replyHead,
+.replyActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+.replyHead {
+  margin-bottom: 8px;
+}
+.replyHead span,
+.replyActions span {
+  font-size: 12px;
+  color: #50594b;
+}
+.reply textarea {
+  min-height: 105px;
+}
+.replyActions {
+  margin-top: 9px;
+}
+.approve {
+  border: 1px solid #89927c;
+  border-radius: 4px;
+  background: #f9f7ef;
+  color: #334030;
+  padding: 8px 10px;
+  min-height: 44px;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+.approve:hover:enabled {
+  background: #e1e5d4;
+}
+.folio .error {
+  font-size: 14px;
+  color: #9a3020;
+  margin-top: 9px;
+}
+.note {
+  background: transparent;
+  border: 0;
+  padding: 11px 16px;
+  font-size: 12px;
+}
+@media (max-width: 650px) {
+  .folio {
+    box-shadow:
+      6px 7px #dbe0cf,
+      10px 11px #e6e7d9;
+  }
+  .cover {
+    padding: 16px 8px 0;
+  }
+  .sheet {
+    padding: 20px 15px 15px;
+  }
+  .sheet::after {
+    left: 5px;
+  }
+  .reply {
+    padding: 10px;
+  }
+  .reply textarea {
+    min-height: 135px;
+  }
+}

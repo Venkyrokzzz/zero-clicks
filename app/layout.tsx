@@ -27,38 +27,38 @@ const BASE = "https://www.0-clicks.uk";
 export const metadata: Metadata = {
   metadataBase: new URL(BASE),
   title: {
-    default: "Zero Clicks — AI Automation for UK Pubs & Restaurants",
+    default: "Zero Clicks — Reputation Manager",
     template: "%s | Zero Clicks",
   },
   description:
-    "Zero Clicks automates the daily grind for UK pubs, restaurants and hotels — Google review drafts in your voice, with guided onboarding and approval before publication.",
+    "Reputation Manager by Zero Clicks helps UK pubs and restaurants draft, review and approve Google review replies. Your voice. Your approval. Your reputation.",
   keywords: [
     "AI automation UK hospitality",
     "pub review automation",
-    "restaurant email automation",
+    "Reputation Manager",
     "Google review replies UK",
-    "n8n automation agency UK",
+    "Google review management",
     "hospitality AI tools",
     "pub management software",
   ],
   alternates: { canonical: BASE },
   openGraph: {
-    title: "Zero Clicks — AI Automation for UK Pubs & Restaurants",
-    description: "Reviews replied to in under 4 minutes. Inbox handled. Google presence kept fresh — all automated. UK hospitality only. Live in 48 hrs.",
+    title: "Zero Clicks — Reputation Manager",
+    description: "Google review replies, drafted for your venue. Read, refine and approve. Get back to your guests.",
     url: BASE,
     siteName: "Zero Clicks",
     locale: "en_GB",
     type: "website",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Zero Clicks — AI Automation for UK Hospitality" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Zero Clicks — Reputation Manager" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zero Clicks — AI Automation for UK Pubs & Restaurants",
-    description: "Reviews replied to in under 4 minutes. Inbox handled. Nothing dropped. UK hospitality only.",
+    title: "Zero Clicks — Reputation Manager",
+    description: "Google review replies for UK hospitality, with owner approval before publication.",
     images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },
-  icons: { icon: "/logo.png", apple: "/logo.png" },
+  icons: { icon: { url: "/zero-clicks-mark.svg", type: "image/svg+xml" }, apple: "/zero-clicks-apple.png" },
 };
 
 const ANTI_FLASH = `(function(){try{var s=localStorage.getItem('zc-theme');document.documentElement.setAttribute('data-theme',s==='light'?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;

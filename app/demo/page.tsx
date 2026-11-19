@@ -1,28 +1,8 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import CursorGlow from "@/components/CursorGlow";
-import ScrollProgress from "@/components/ScrollProgress";
-import DemoHero from "@/components/DemoHero";
-import DemoCommandCentre from "@/components/DemoCommandCentre";
-import DemoCTA from "@/components/DemoCTA";
-import { Metadata } from "next";
-
+import type { Metadata } from 'next';
+import ReputationLaunch from '@/components/reputation/ReputationLaunch';
 export const metadata: Metadata = {
-  title: "Live Demo — Zero Clicks",
-  description:
-    "Watch the AI handle real pub complaints, bad reviews, and missed bookings — exactly like a human would. The Red Lion, Shoreditch.",
+  title: 'Try Reputation Manager',
+  description: 'Reputation Manager by Zero Clicks helps UK hospitality venues draft, review and approve Google review replies. Your voice. Your approval. Your reputation.',
+  alternates: { canonical: 'https://www.0-clicks.uk/demo' },
 };
-
-export default function DemoPage() {
-  return (
-    <main>
-      <CursorGlow />
-      <ScrollProgress />
-
-      <DemoHero />
-      <DemoCommandCentre />
-      <DemoCTA />
-      <Footer />
-    </main>
-  );
-}
+export default function Page() { return <ReputationLaunch page="demo"/>; }

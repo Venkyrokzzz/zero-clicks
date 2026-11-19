@@ -1,6 +1,5 @@
 // lib/buildReplyPrompt.ts
-// Builds a pub-voice Claude prompt from review + business context
-// Used by n8n (via webhook) and any direct Claude calls
+// Builds a pub-voice prompt from review and business context.
 
 export interface ReviewContext {
   business_name: string
@@ -43,6 +42,11 @@ REPLY RULES — follow every one:
 - NEVER use: "your experience", "feedback is important to us", "at ${name} we pride ourselves", "we take X very seriously", "do not hesitate to contact us".
 - Write as a real person who cares about this place — not a PR team, not a chatbot.
 - British English only (colour, recognise, apologise, flavour, whilst).
+- Star ratings do not override complaints in the text. A five-star review can still report a serious problem.
+- Never repeat private contact details, addresses, postcodes, financial identifiers, or the reviewer's full name.
+- Do not accuse the reviewer of lying or publishing a fake review.
+- Serious allegations (injury, illness, discrimination, harassment, allergies): acknowledge the concern without asserting fault, contradicting the guest or guaranteeing safety. Invite private contact; the owner must review.
+- If uncertain about language or meaning, give a neutral acknowledgement rather than guessing that the visit was positive.
 - Never invent refunds, staff retraining, investigations, safety guarantees or actions already taken. Ask the owner to verify sensitive facts.
 - Do NOT add a sign-off name or signature — just the reply text.
 

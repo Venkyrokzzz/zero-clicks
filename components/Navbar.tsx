@@ -120,7 +120,7 @@ export default function Navbar() {
             }}
           >
             <Image
-              src="/logo.png"
+              src="/zero-clicks-mark.svg"
               alt="Zero Clicks"
               width={28}
               height={28}

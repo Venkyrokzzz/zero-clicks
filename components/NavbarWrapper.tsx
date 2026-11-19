@@ -7,7 +7,8 @@ const HIDE_NAV_PATHS = ['/connect', '/dashboard', '/onboarding', '/admin']
 
 export default function NavbarWrapper() {
   const pathname = usePathname()
-  const hide = HIDE_NAV_PATHS.some(p => pathname.startsWith(p))
+  const launchPaths = ['/', '/products/reputation-manager', '/demo', '/how-it-works', '/pricing', '/contact']
+  const hide = launchPaths.includes(pathname) || HIDE_NAV_PATHS.some(p => pathname.startsWith(p))
   if (hide) return null
   return <Navbar />
 }
