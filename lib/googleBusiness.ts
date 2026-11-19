@@ -8,11 +8,11 @@ export type GoogleBusinessLocation = {
 type GoogleAccount = { name?: string }
 type GoogleLocation = {
   name?: string
-  locationName?: string
-  address?: { addressLines?: string[]; locality?: string; postalCode?: string }
+  title?: string
+  storefrontAddress?: { addressLines?: string[]; locality?: string; postalCode?: string }
 }
 
-function displayAddress(address?: GoogleLocation['address']) {
+function displayAddress(address?: GoogleLocation['storefrontAddress']) {
   return [address?.addressLines?.join(', '), address?.locality, address?.postalCode]
     .filter(Boolean)
     .join(', ')
@@ -20,13 +20,13 @@ function displayAddress(address?: GoogleLocation['address']) {
 
 export async function listGoogleBusinessLocations(accessToken: string): Promise<GoogleBusinessLocation[]> {
   const headers = { Authorization: `Bearer ${accessToken}` }
-  const accountsResponse = await fetch('https://mybusiness.googleapis.com/v4/accounts', { headers })
+  const accountsResponse = await fetch('https://mybusinessaccountmanagement.googleapis.com/v1/accounts', { headers })
   if (!accountsResponse.ok) throw new Error(`Google account lookup failed (${accountsResponse.status})`)
 
   const { accounts = [] } = await accountsResponse.json() as { accounts?: GoogleAccount[] }
   const locations = await Promise.all(accounts.flatMap(async account => {
-    if (!account.name) return []
-    const response = await fetch(`https://mybusiness.googleapis.com/v4/${account.name}/locations?pageSize=100`, { headers })
+    if (!account.name || !/^accounts\/[\w-]+$/.test(account.name)) return []
+    const response = await fetch(`https://mybusinessbusinessinformation.googleapis.com/v1/${account.name}/locations?pageSize=100&readMask=name,title,storefrontAddress`, { headers })
     if (!response.ok) throw new Error(`Google location lookup failed (${response.status})`)
     const body = await response.json() as { locations?: GoogleLocation[] }
     return (body.locations ?? []).flatMap(location => {
@@ -36,8 +36,8 @@ export async function listGoogleBusinessLocations(accessToken: string): Promise<
       return [{
         accountId: `accounts/${accountId}`,
         locationId: `locations/${locationId}`,
-        name: location.locationName || 'Unnamed Google Business Profile',
-        address: displayAddress(location.address),
+        name: location.title || 'Unnamed Google Business Profile',
+        address: displayAddress(location.storefrontAddress),
       }]
     })
   }))

@@ -64,22 +64,28 @@ export async function PATCH(req: NextRequest) {
 
   if (!review_id) return NextResponse.json({ error: 'Missing review_id' }, { status: 400 })
 
-  const VALID_STATUSES = ['pending', 'approved', 'sent', 'skipped']
+  const VALID_STATUSES = ['pending', 'skipped']
   const update: Record<string, unknown> = {}
   if (status !== undefined) {
     if (!VALID_STATUSES.includes(status)) {
-      return NextResponse.json({ error: `Invalid status` }, { status: 400 })
+      return NextResponse.json({ error: 'Only the owner can approve a reply. Publication is recorded by the publisher.' }, { status: 400 })
     }
     update.status = status
-    if (status === 'sent') update.sent_at = new Date().toISOString()
   }
-  if (draft_response !== undefined) update.draft_response = String(draft_response).slice(0, 5000)
+  if (draft_response !== undefined) {
+    if (typeof draft_response !== 'string' || Buffer.byteLength(draft_response, 'utf8') > 4096) {
+      return NextResponse.json({ error: 'Invalid draft text.' }, { status: 400 })
+    }
+    update.draft_response = draft_response
+  }
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
   }
 
-  const { error } = await supabase.from('reviews').update(update).eq('id', review_id)
+  const { data, error } = await supabase.from('reviews').update(update).eq('id', review_id)
+    .in('status', ['pending', 'skipped']).is('posted_to_google_at', null).select('id').maybeSingle()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!data) return NextResponse.json({ error: 'This review can no longer be edited.' }, { status: 409 })
   return NextResponse.json({ success: true })
 }

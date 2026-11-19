@@ -5,24 +5,33 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
+concurrency:
+  group: review-loop-production
+  cancel-in-progress: false
+
 jobs:
   review-loop:
     runs-on: ubuntu-latest
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      LEGACY_WEBHOOK_TOKEN: ${{ secrets.N8N_WEBHOOK_TOKEN }}
     steps:
-      - name: Poll for new reviews
+      - name: Import reviews and publish approved replies
         run: |
-          STATUS=$(curl -s -o /tmp/poll.json -w "%{http_code}" \
-            -X GET "https://www.0-clicks.uk/api/cron/poll-reviews" \
-            -H "x-zeroclicks-token: ${{ secrets.N8N_WEBHOOK_TOKEN }}")
-          echo "poll-reviews HTTP $STATUS"
-          cat /tmp/poll.json
-          [ "$STATUS" = "200" ] || exit 1
+          if [[ -n "$CRON_SECRET" ]]; then
+            auth_header="Authorization: Bearer $CRON_SECRET"
+          elif [[ -n "$LEGACY_WEBHOOK_TOKEN" ]]; then
+            auth_header="x-zeroclicks-token: $LEGACY_WEBHOOK_TOKEN"
+          else
+            echo "::error::Set the CRON_SECRET repository secret."
+            exit 1
+          fi
 
-      - name: Post approved replies to Google
-        run: |
-          STATUS=$(curl -s -o /tmp/replies.json -w "%{http_code}" \
-            -X GET "https://www.0-clicks.uk/api/cron/post-replies" \
-            -H "x-zeroclicks-token: ${{ secrets.N8N_WEBHOOK_TOKEN }}")
-          echo "post-replies HTTP $STATUS"
-          cat /tmp/replies.json
-          [ "$STATUS" = "200" ] || exit 1
+          failed=0
+          for endpoint in poll-reviews post-replies; do
+            status=$(curl -sS --connect-timeout 10 --max-time 290 -o /dev/null -w "%{http_code}" \
+              -H "$auth_header" "https://www.0-clicks.uk/api/cron/$endpoint") || status=000
+            echo "$endpoint HTTP $status"
+            [[ "$status" = "200" ]] || failed=1
+          done
+          exit "$failed"

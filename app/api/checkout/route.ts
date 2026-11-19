@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabase } from "@/lib/supabase";
+import { createCustomerPortal } from "@/lib/stripe-portal";
 import { FOUNDING_OPEN } from "@/lib/foundingConfig";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
 
     const subscriptions = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 100 });
     if (subscriptions.data.some(s => !['canceled', 'incomplete_expired'].includes(s.status))) {
-      const portal = await stripe.billingPortal.sessions.create({ customer: customerId, return_url: `${baseUrl}/dashboard/billing` });
+      const portal = await createCustomerPortal(stripe, customerId);
       return NextResponse.json({ url: portal.url });
     }
     const openSessions = await stripe.checkout.sessions.list({ customer: customerId, status: 'open', limit: 100 });

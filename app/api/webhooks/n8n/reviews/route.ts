@@ -1,26 +1,10 @@
-import { hasServiceAccess } from '@/lib/entitlements';
-// app/api/webhooks/n8n/reviews/route.ts
-// n8n POSTs here when a new Google review is detected
-// Stores the review in Supabase against the correct clerk_user_id
-//
-// Guards:
-//   1. Shared-secret auth (x-zeroclicks-token header)
-//   2. Payload size limit (32 KB)
-//   3. Input validation (types, enums, ranges)
-//   4. User existence check (no orphan reviews)
-//   5. Trial/paused check (don't process paused accounts)
-//   6. Idempotent upsert on (clerk_user_id, external_id)
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
-import { supabase } from '@/lib/supabase'
-import { buildSystemPrompt, buildUserMessage } from '@/lib/buildReplyPrompt'
+import { processReview } from '@/lib/processReview'
 import { verifyToken } from '@/lib/verifyToken'
 
-const MAX_PAYLOAD_BYTES = 32 * 1024 // 32 KB
-const VALID_SENTIMENTS = new Set(['POSITIVE', 'NEUTRAL', 'NEGATIVE'])
-const VALID_PLATFORMS  = new Set(['google', 'tripadvisor', 'facebook'])
-const VALID_STATUSES   = new Set(['pending', 'approved', 'sent', 'skipped'])
+const MAX_PAYLOAD_BYTES = 32 * 1024
 
+// Compatibility endpoint for existing webhook clients.
 export async function POST(req: NextRequest) {
   // ── 1. Shared-secret auth ─────────────────────────────────────────────────
   const token = req.headers.get('x-zeroclicks-token')
@@ -42,202 +26,15 @@ export async function POST(req: NextRequest) {
     if (raw.length > MAX_PAYLOAD_BYTES) {
       return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
     }
-    body = JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return NextResponse.json({ error: 'Expected a JSON object' }, { status: 400 })
+    }
+    body = parsed
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const {
-    clerk_user_id,
-    external_id,
-    reviewer_name,
-    rating,
-    sentiment,
-    review_text,
-    summary,
-    draft_response,
-    platform,
-    status,
-    google_created_at,
-  } = body as Record<string, unknown>
-
-  // Required
-  if (typeof clerk_user_id !== 'string' || !clerk_user_id.trim()) {
-    return NextResponse.json({ error: 'Missing or invalid clerk_user_id' }, { status: 400 })
-  }
-
-  // Rating: 1–5 integer if present
-  if (rating !== undefined && rating !== null) {
-    const r = Number(rating)
-    if (!Number.isInteger(r) || r < 1 || r > 5) {
-      return NextResponse.json({ error: 'rating must be integer 1–5' }, { status: 400 })
-    }
-  }
-
-  // Sentiment enum if present
-  if (sentiment !== undefined && sentiment !== null) {
-    if (typeof sentiment !== 'string' || !VALID_SENTIMENTS.has(sentiment)) {
-      return NextResponse.json(
-        { error: 'sentiment must be one of: POSITIVE, NEUTRAL, NEGATIVE' },
-        { status: 400 }
-      )
-    }
-  }
-
-  // Platform enum if present
-  if (platform !== undefined && platform !== null) {
-    if (typeof platform !== 'string' || !VALID_PLATFORMS.has(platform)) {
-      return NextResponse.json(
-        { error: 'platform must be one of: google, tripadvisor, facebook' },
-        { status: 400 }
-      )
-    }
-  }
-
-  // Status enum if present
-  if (status !== undefined && status !== null) {
-    if (typeof status !== 'string' || !VALID_STATUSES.has(status)) {
-      return NextResponse.json(
-        { error: 'status must be one of: pending, approved, sent, skipped' },
-        { status: 400 }
-      )
-    }
-  }
-
-  // String fields: cap length to avoid runaway inserts
-  const safeStr = (val: unknown, max = 5000): string | null => {
-    if (val === undefined || val === null) return null
-    if (typeof val !== 'string') return null
-    return val.slice(0, max)
-  }
-
-  // ── 4. User existence + trial/paused check ────────────────────────────────
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('clerk_user_id, trial_paused, trial_ends_at, plan, subscription_status')
-    .eq('clerk_user_id', clerk_user_id)
-    .single()
-
-  if (!profile) {
-    console.warn('[n8n/reviews] Unknown clerk_user_id:', clerk_user_id)
-    return NextResponse.json({ error: 'Unknown user' }, { status: 404 })
-  }
-
-  if (!hasServiceAccess(profile)) return NextResponse.json({ error: 'Subscription inactive', skipped: true }, { status: 200 });
-
-  if (typeof external_id !== 'string' || !external_id.trim()) {
-    return NextResponse.json({ error: 'external_id is required' }, { status: 400 })
-  }
-  const { data: existing, error: lookupError } = await supabase.from('reviews')
-    .select('id').eq('clerk_user_id', clerk_user_id).eq('external_id', external_id).maybeSingle()
-  if (lookupError) return NextResponse.json({ error: 'Review lookup failed' }, { status: 503 })
-  if (existing) return NextResponse.json({ success: true, duplicate: true })
-
-  // ── 5. Generate pub-voice reply with Claude ───────────────────────────────
-  // Fetch profile + settings for business context
-  let finalDraft = safeStr(draft_response)
-  let finalStatus = safeStr(status, 20) ?? 'pending'
-  let autoSent = false
-  try {
-    const [{ data: fullProfile }, { data: settings }] = await Promise.all([
-      supabase.from('profiles').select('business_name,manager_name,business_type,location').eq('clerk_user_id', clerk_user_id).single(),
-      supabase.from('settings').select('tone,auto_send_positive,signature').eq('clerk_user_id', clerk_user_id).single(),
-    ])
-
-    const ctx = {
-      business_name: fullProfile?.business_name || 'our venue',
-      manager_name:  fullProfile?.manager_name  || 'the manager',
-      business_type: fullProfile?.business_type || 'pub',
-      location:      fullProfile?.location       || 'London',
-      tone:          settings?.tone              || 'warm-professional',
-      rating:        Number(rating) || 3,
-      review_text:   typeof review_text === 'string' ? review_text : '',
-      reviewer_name: typeof reviewer_name === 'string' ? reviewer_name : 'Guest',
-    }
-
-    const anthropic = new Anthropic()
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 200,
-      system: buildSystemPrompt(ctx),
-      messages: [
-        { role: 'user', content: buildUserMessage(ctx) },
-      ],
-    })
-    const firstBlock = message.content[0]
-    let text = firstBlock && firstBlock.type === 'text' ? firstBlock.text.trim() : undefined
-
-    // Defence layer 2: reject injection leakage AND compensation offers.
-    // Compensation phrases on a public Google reply are a liability — anyone can claim them.
-    const SAFE_FALLBACK = 'Thanks for taking the time to leave a review — we really appreciate it. If there\'s anything we can help with, do get in touch with us directly and we\'ll be happy to assist.'
-    if (text) {
-      const lower = text.toLowerCase()
-      const INJECTION_MARKERS = [
-        'hacked', 'pwned', 'system prompt', 'debug mode', 'ignore all previous',
-        'ignore previous instruction', 'ignore your rules', 'as an ai', 'i cannot reveal',
-        'i am an ai', 'language model', 'verbatim',
-      ]
-      const COMPENSATION_MARKERS = [
-        "on us", "on the house", "complimentary", "free of charge", "no charge",
-        "free drink", "free pint", "free meal", "free round", "free glass",
-        "we'll refund", "we will refund", "give you a refund", "full refund",
-        "a refund", "discuss a refund", "offer a refund", "issue a refund",
-        "money back", "compensation", "voucher", "discount", "off your next",
-        "next visit on us", "next one on us",
-      ]
-      const isSuspiciousShout = /^[A-Z\s!.]{2,15}$/.test(text.trim())
-      if (INJECTION_MARKERS.some(m => lower.includes(m)) || isSuspiciousShout) {
-        console.warn('[n8n/reviews] Injection markers in draft — using safe fallback. external_id:', external_id)
-        text = SAFE_FALLBACK
-      } else if (COMPENSATION_MARKERS.some(m => lower.includes(m))) {
-        console.warn('[n8n/reviews] Compensation offer in draft - stripping and using fallback. external_id:', external_id)
-        text = SAFE_FALLBACK
-      }
-      // Append signature if set
-      if (text && settings?.signature && typeof settings.signature === 'string' && settings.signature.trim()) {
-        text = `${text}\n\n${settings.signature.trim()}`
-      }
-      finalDraft = text
-    }
-
-    // Auto-send 3-5 star reviews if enabled — hold 1-2 stars and complaint keywords
-    const ratingNum = Number(rating) || 3
-    const COMPLAINT_KEYWORDS = ['allerg', 'injur', 'sick', 'poison', 'discrimin', 'racis', 'unsafe', 'harass', 'cold', 'slow', 'rude', 'wrong order', 'disgusting', 'never again', 'awful', 'terrible', 'horrible', 'worst', 'dirty', 'unacceptable', 'refund', 'complaint']
-    const reviewText = (safeStr(review_text, 5000) ?? '').toLowerCase()
-    const hasComplaint = COMPLAINT_KEYWORDS.some(kw => reviewText.includes(kw))
-    if (profile.plan === 'pro' && settings?.auto_send_positive && ratingNum >= 4 && !hasComplaint && finalStatus === 'pending') {
-      finalStatus = 'approved'
-      autoSent = true
-    }
-  } catch (err) {
-    console.error('[n8n/reviews] Claude draft failed, using fallback:', err)
-    // Don't block the save — just keep whatever draft n8n sent
-  }
-
-  // ── 7. Upsert review — idempotent on (clerk_user_id, external_id) ─────────
-  const { error: upsertError } = await supabase.from('reviews').upsert(
-    {
-      clerk_user_id,
-      external_id:      safeStr(external_id, 500),
-      reviewer_name:    safeStr(reviewer_name, 200) ?? 'Anonymous',
-      rating:           rating !== undefined && rating !== null ? Number(rating) : null,
-      sentiment:        safeStr(sentiment, 20),
-      review_text:      safeStr(review_text),
-      summary:          safeStr(summary, 1000),
-      draft_response:   finalDraft,
-      platform:         safeStr(platform, 50) ?? 'google',
-      status:           finalStatus,
-      sent_at:          null,
-      google_created_at: typeof google_created_at === 'string' ? google_created_at : null,
-    },
-    { onConflict: 'clerk_user_id,external_id', ignoreDuplicates: true }
-  )
-
-  if (upsertError) {
-    console.error('[n8n/reviews] Upsert error:', upsertError)
-    return NextResponse.json({ error: upsertError.message }, { status: 500 })
-  }
-
-  console.log('[n8n/reviews] Review saved for', clerk_user_id, '| external_id:', external_id, '| auto_sent:', autoSent)
-  return NextResponse.json({ success: true, auto_sent: autoSent })
+  const outcome = await processReview(body, { legacy: true })
+  return NextResponse.json(outcome.data, { status: outcome.status })
 }

@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     totalReviews: reviews.length,
     negativeCount: reviews.filter((r) => r.sentiment === "NEGATIVE").length,
     pendingCount: reviews.filter((r) => r.status === "pending").length,
-    sentCount: reviews.filter((r) => r.status === "sent").length,
+    sentCount: reviews.filter((r) => r.status === "sent" && r.posted_to_google_at && r.google_reply_state !== "rejected").length,
   };
 
   return NextResponse.json({ reviews, metrics });
@@ -47,7 +47,10 @@ export async function PUT(request: NextRequest) {
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
   if (!(await serviceAccess(userId))) return NextResponse.json({ error: 'Subscription inactive' }, { status: 403 });
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ error: "Invalid review update." }, { status: 400 });
+  }
   const { id, status, draft_response } = body;
 
   if (!id || typeof id !== "string" || id.trim() === "") {
@@ -55,33 +58,44 @@ export async function PUT(request: NextRequest) {
   }
 
   const update: Record<string, unknown> = {};
+  if (draft_response !== undefined && (typeof draft_response !== "string" || Buffer.byteLength(draft_response, 'utf8') > 4096)) {
+    return NextResponse.json({ error: "Your reply is too long for Google." }, { status: 400 });
+  }
+  if (status === "approved" && !draft_response?.trim()) {
+    return NextResponse.json({ error: "Enter a reply before approving." }, { status: 400 });
+  }
 
   // Draft-only save (no status change)
   if (draft_response !== undefined && status === undefined) {
-    if (typeof draft_response !== "string") {
-      return NextResponse.json({ error: "draft_response must be a string" }, { status: 400 });
-    }
     update.draft_response = draft_response;
   } else {
     // Status update (optionally with draft)
-    const VALID_STATUSES = ["pending", "approved", "sent", "skipped"];
+    const VALID_STATUSES = ["pending", "approved", "skipped"];
     if (!status || !VALID_STATUSES.includes(status)) {
       return NextResponse.json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}` }, { status: 400 });
     }
     update.status = status;
     // "sent" is reserved for a reply confirmed by Google. A customer approval
     // enters the queue as "approved" and is published by the scheduler.
-    update.sent_at = status === "sent" ? new Date().toISOString() : null;
+    update.sent_at = null;
     if (draft_response !== undefined) update.draft_response = draft_response;
   }
 
-  const { error } = await supabase
+  const query = supabase
     .from("reviews")
     .update(update)
     .eq("id", id)
-    .eq("clerk_user_id", userId);
+    .eq("clerk_user_id", userId)
+    .in("status", ["pending", "skipped"])
+    .is("posted_to_google_at", null);
+  if (status === "approved") query.eq('platform', 'google').not('google_review_resource', 'is', null);
+
+  const { data, error } = await query
+    .select("id")
+    .maybeSingle();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!data) return NextResponse.json({ error: "This review is already queued, no longer editable, or needs a verified Google import." }, { status: 409 });
 
   return NextResponse.json({ success: true });
 }

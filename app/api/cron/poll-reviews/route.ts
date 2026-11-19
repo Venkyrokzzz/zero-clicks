@@ -1,31 +1,15 @@
-import { googleRating, googleReviewsUrl } from '@/lib/googleReviews';
-// app/api/cron/poll-reviews/route.ts
-// Replaces the n8n Review Poller workflow.
-// Called every 30 min by n8n (or Vercel cron on Pro).
-// For each connected client: refresh OAuth token, fetch Google reviews, forward new ones to the reviews webhook.
+import { googleRating, googleReviewsUrl, googleReviewResource, googleReplyState } from '@/lib/googleReviews'
+import { processReview } from '@/lib/processReview'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { verifyToken } from '@/lib/verifyToken'
+import { getGoogleAccess, recordGoogleAuthFailure, GOOGLE_CONNECTION_FIELDS } from '@/lib/googleAccess'
+import { serviceAccess } from '@/lib/requireService'
 
 function toSentiment(rating: number) {
   if (rating >= 4) return 'POSITIVE'
   if (rating === 3) return 'NEUTRAL'
   return 'NEGATIVE'
-}
-
-async function refreshToken(refreshToken: string) {
-  const res = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id:     process.env.GOOGLE_CLIENT_ID!,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-      refresh_token: refreshToken,
-      grant_type:    'refresh_token',
-    }),
-  })
-  if (!res.ok) return null
-  return res.json() as Promise<{ access_token: string; expires_in: number }>
 }
 
 export async function GET(req: NextRequest) {
@@ -40,99 +24,91 @@ export async function GET(req: NextRequest) {
   }
 
   // Fetch all clients with a connected Google account
-  const { data: connections, error: connErr } = await supabase
+  const customer = new URL(req.url).searchParams.get('customer')
+  const query = supabase
     .from('google_connections')
-    .select('clerk_user_id, account_id, location_id, access_token, refresh_token, access_token_expires_at')
+    .select(GOOGLE_CONNECTION_FIELDS)
     .not('account_id', 'is', null)
     .not('location_id', 'is', null)
     .not('refresh_token', 'is', null)
 
+  const { data: connections, error: connErr } = await (customer ? query.eq('clerk_user_id', customer) : query)
   if (connErr) return NextResponse.json({ error: connErr.message }, { status: 500 })
   if (!connections?.length) return NextResponse.json({ processed: 0, message: 'No connected clients' })
 
-  const siteBase = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.0-clicks.uk'
   const results = []
 
   for (const conn of connections) {
     try {
-      // Refresh access token if it expires within 5 minutes
-      let accessToken = conn.access_token
-      const expiresAt = conn.access_token_expires_at ? new Date(conn.access_token_expires_at) : new Date(0)
-      if (expiresAt.getTime() - Date.now() < 5 * 60 * 1000) {
-        const refreshed = await refreshToken(conn.refresh_token)
-        if (!refreshed) {
-          results.push({ clerk_user_id: conn.clerk_user_id, error: 'Token refresh failed' })
-          continue
-        }
-        accessToken = refreshed.access_token
-        const newExpiry = new Date(Date.now() + refreshed.expires_in * 1000).toISOString()
-        await supabase.from('google_connections')
-          .update({ access_token: accessToken, access_token_expires_at: newExpiry })
-          .eq('clerk_user_id', conn.clerk_user_id)
-      }
+      if (!(await serviceAccess(conn.clerk_user_id))) continue
+      const access = await getGoogleAccess(conn)
+      if (!access.token) throw new Error('Reconnect Google to resume review sync')
 
-      // Fetch latest 50 reviews from Google Business Profile
-      const accountId  = conn.account_id.replace('accounts/', '')
-      const locationId = conn.location_id.replace('locations/', '')
-      const parent     = `accounts/${accountId}/locations/${locationId}`
-
-      const reviewsRes = await fetch(
-        `${googleReviewsUrl(conn.account_id, conn.location_id)}?pageSize=50&orderBy=updateTime+desc`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      )
-
-      if (!reviewsRes.ok) {
-        const body = await reviewsRes.text()
-        results.push({ clerk_user_id: conn.clerk_user_id, error: `Google ${reviewsRes.status}: ${body.slice(0, 120)}` })
-        continue
-      }
-
-      const { reviews = [] } = await reviewsRes.json()
       let newCount = 0
+      let fetched = 0
+      let pageToken = ''
+      const seenTokens = new Set<string>()
+      do {
+        const params = new URLSearchParams({ pageSize: '50', orderBy: 'updateTime desc' })
+        if (pageToken) params.set('pageToken', pageToken)
+        const reviewsRes = await fetch(
+          `${googleReviewsUrl(conn.account_id, conn.location_id)}?${params}`,
+          { headers: { Authorization: `Bearer ${access.token}` }, signal: AbortSignal.timeout(8_000) }
+        )
+        if (!reviewsRes.ok) {
+          await recordGoogleAuthFailure(conn, access.token, reviewsRes.status)
+          throw new Error(`Google ${reviewsRes.status}: Review sync failed`)
+        }
+        const { reviews = [], nextPageToken } = await reviewsRes.json()
+        fetched += reviews.length
 
-      for (const review of reviews) {
-        const external_id = review.reviewId ?? review.name
-        if (!external_id) continue
+        for (const review of reviews) {
+          const external_id = review.reviewId ?? review.name
+          if (!external_id) continue
+          const resource = googleReviewResource(conn.account_id, conn.location_id, review.name ?? external_id)
+          if (!resource || resource.split('/').pop() !== external_id.split('/').pop()) continue
 
-        // Skip reviews that already have a reply posted — nothing to do
-        if (review.reviewReply?.comment) continue
+          // Only reconcile our own submitted text on the original venue.
+          if (review.reviewReply?.comment) {
+            const state = googleReplyState(review.reviewReply.reviewReplyState)
+            if (state !== 'unknown') {
+              const { error } = await supabase.from('reviews').update({ google_reply_state: state })
+                .eq('clerk_user_id', conn.clerk_user_id).eq('google_review_resource', resource)
+                .eq('status', 'sent').eq('draft_response', review.reviewReply.comment)
+                .not('posted_to_google_at', 'is', null)
+              if (error) throw new Error('Could not record Google reply moderation')
+            }
+            continue
+          }
 
-        // Dedup: skip if already in DB
-        const { data: existing } = await supabase
-          .from('reviews')
-          .select('id')
-          .eq('clerk_user_id', conn.clerk_user_id)
-          .eq('external_id', external_id)
-          .maybeSingle()
+          const rating = googleRating(review.starRating)
+          if (!rating) continue
 
-        if (existing) continue
-
-        const rating = googleRating(review.starRating)
-        if (!rating) continue
-
-        // Forward to reviews webhook — reuses all existing AI draft, injection filter, auto-send logic
-        const ingestion = await fetch(`${siteBase}/api/webhooks/n8n/reviews`, {
-          method: 'POST',
-          headers: {
-            'Content-Type':       'application/json',
-            'x-zeroclicks-token': process.env.N8N_WEBHOOK_TOKEN!,
-          },
-          body: JSON.stringify({
+          const outcome = await processReview({
             clerk_user_id: conn.clerk_user_id,
             external_id,
-            reviewer_name:     review.reviewer?.displayName ?? 'Guest',
+            reviewer_name: review.reviewer?.displayName ?? 'Guest',
             rating,
-            sentiment:         toSentiment(rating),
-            review_text:       review.comment ?? '',
-            platform:          'google',
+            sentiment: toSentiment(rating),
+            review_text: review.comment ?? '',
+            platform: 'google',
             google_created_at: review.createTime ?? null,
-          }),
-        })
-        if (!ingestion.ok) throw new Error(`Review ingestion failed: ${ingestion.status}`)
-        newCount++
-      }
+          }, { googleResource: resource })
+          if (outcome.status >= 400) throw new Error(`Review ingestion failed: ${outcome.status}`)
+          if ('skipped' in outcome.data) throw new Error('Review sync paused by service limits')
+          if (!('duplicate' in outcome.data) || !outcome.data.duplicate) newCount++
+        }
 
-      results.push({ clerk_user_id: conn.clerk_user_id, new_reviews: newCount, fetched: reviews.length })
+        pageToken = nextPageToken ?? ''
+        if (pageToken && seenTokens.has(pageToken)) throw new Error('Google repeated a review page token')
+        if (pageToken) seenTokens.add(pageToken)
+      } while (pageToken)
+
+      const { error: syncError } = await supabase.from('google_connections')
+        .update({ last_synced_at: new Date().toISOString() })
+        .eq('clerk_user_id', conn.clerk_user_id).eq('account_id', conn.account_id).eq('location_id', conn.location_id)
+      if (syncError) throw new Error('Could not record the last successful sync')
+      results.push({ clerk_user_id: conn.clerk_user_id, new_reviews: newCount, fetched })
     } catch (err: unknown) {
       results.push({ clerk_user_id: conn.clerk_user_id, error: err instanceof Error ? err.message : String(err) })
     }

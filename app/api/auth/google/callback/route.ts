@@ -87,12 +87,16 @@ export async function GET(req: NextRequest) {
   const { error: dbError } = await supabase.from('google_connections').upsert({
     clerk_user_id: userId,
     google_email: googleUser.email,
-    google_reviews_url: '', // Will be populated by Magic Lookup in n8n
+    google_reviews_url: '',
     refresh_token: tokens.refresh_token,
     access_token: tokens.access_token,
     access_token_expires_at: expiresAt,
     scopes: tokens.scope,
     connected_at: new Date().toISOString(),
+    account_id: null,
+    location_id: null,
+    needs_reconnect: false,
+    last_synced_at: null,
   }, { onConflict: 'clerk_user_id' })
 
   if (dbError) {
@@ -113,6 +117,7 @@ export async function GET(req: NextRequest) {
       if (locationError) throw locationError
     }
   } catch (locationError) {
+    selectedLocation = null
     console.error('google location lookup error:', locationError)
   }
 
@@ -133,28 +138,6 @@ export async function GET(req: NextRequest) {
       // Non-fatal — don't block the redirect
     }
   }
-
-  // Dual-write to n8n webhook (migration safety — keep until n8n cutover)
-  await fetch(process.env.N8N_TOKEN_WEBHOOK!, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-zeroclicks-token': process.env.N8N_WEBHOOK_TOKEN!,
-    },
-    body: JSON.stringify({
-      clerk_user_id: userId,
-      pubName,
-      location,
-      postCode,
-      phoneNumber,
-      email: googleUser.email,
-      refreshToken: tokens.refresh_token,
-      accessToken: tokens.access_token,
-      connectedAt: new Date().toISOString(),
-    }),
-  }).catch(() => {
-    // Don't block redirect if n8n is down
-  })
 
   return NextResponse.redirect(`${SITE_URL}/connect/success?location=${selectedLocation ? 'ready' : 'select'}`)
 }

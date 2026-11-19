@@ -3,25 +3,8 @@ import { serviceAccess } from '@/lib/requireService';
 // Regenerates the AI draft for an existing review using current settings
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { supabase } from '@/lib/supabase'
-import { buildSystemPrompt, buildUserMessage } from '@/lib/buildReplyPrompt'
-
-const SAFE_FALLBACK = "Thanks for taking the time to leave a review — we really appreciate it. If there's anything we can help with, do get in touch with us directly and we'll be happy to assist."
-
-const INJECTION_MARKERS = [
-  'hacked', 'pwned', 'system prompt', 'debug mode', 'ignore all previous',
-  'ignore previous instruction', 'ignore your rules', 'as an ai', 'i cannot reveal',
-  'i am an ai', 'language model', 'verbatim',
-]
-const COMPENSATION_MARKERS = [
-  "on us", "on the house", "complimentary", "free of charge", "no charge",
-  "free drink", "free pint", "free meal", "free round", "free glass",
-  "we'll refund", "we will refund", "give you a refund", "full refund",
-  "a refund", "discuss a refund", "offer a refund", "issue a refund",
-  "money back", "compensation", "voucher", "discount", "off your next",
-  "next visit on us", "next one on us",
-]
+import { generateReviewDraft } from '@/lib/generateReviewDraft'
 
 export async function POST(req: Request) {
   const { userId } = await auth()
@@ -37,6 +20,7 @@ export async function POST(req: Request) {
     .select('id, reviewer_name, rating, review_text, clerk_user_id')
     .eq('id', id)
     .eq('clerk_user_id', userId)
+    .eq('status', 'pending')
     .single()
 
   if (!review) return NextResponse.json({ error: 'Review not found' }, { status: 404 })
@@ -58,37 +42,21 @@ export async function POST(req: Request) {
     reviewer_name: review.reviewer_name    || 'Guest',
   }
 
-  const anthropic = new Anthropic()
-  const message = await anthropic.messages.create({
-    model: 'claude-haiku-4-5',
-    max_tokens: 200,
-    system: buildSystemPrompt(ctx),
-    messages: [{ role: 'user', content: buildUserMessage(ctx) }],
-  })
-
-  const firstBlock = message.content[0]
-  let text = firstBlock && firstBlock.type === 'text' ? firstBlock.text.trim() : SAFE_FALLBACK
-
-  // Safety checks
-  const lower = text.toLowerCase()
-  const isSuspiciousShout = /^[A-Z\s!.]{2,15}$/.test(text.trim())
-  if (INJECTION_MARKERS.some(m => lower.includes(m)) || isSuspiciousShout) {
-    text = SAFE_FALLBACK
-  } else if (COMPENSATION_MARKERS.some(m => lower.includes(m))) {
-    text = SAFE_FALLBACK
-  }
-
-  // Append signature
-  if (settings?.signature && typeof settings.signature === 'string' && settings.signature.trim()) {
-    text = `${text}\n\n${settings.signature.trim()}`
-  }
+  const { text } = await generateReviewDraft(ctx, settings?.signature)
 
   // Persist updated draft
-  await supabase
+  const { data: updated, error: saveError } = await supabase
     .from('reviews')
     .update({ draft_response: text })
     .eq('id', id)
     .eq('clerk_user_id', userId)
+    .eq('status', 'pending')
+    .is('posted_to_google_at', null)
+    .select('id')
+    .maybeSingle()
+
+  if (saveError) return NextResponse.json({ error: 'Unable to save the draft.' }, { status: 500 })
+  if (!updated) return NextResponse.json({ error: 'This review is no longer editable.' }, { status: 409 })
 
   return NextResponse.json({ draft: text })
 }
