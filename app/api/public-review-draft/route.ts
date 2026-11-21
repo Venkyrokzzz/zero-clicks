@@ -80,6 +80,8 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     reply: result.text,
+    disposition: result.disposition,
+    reason: result.reason,
     source: result.provider === "gemini" ? "ai" : "template",
   });
 }

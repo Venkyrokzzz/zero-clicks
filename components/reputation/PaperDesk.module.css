@@ -247,3 +247,55 @@
     min-height: 135px;
   }
 }
+
+.previewCue {
+  position: relative;
+  color: inherit;
+  padding-bottom: 2px;
+  background: linear-gradient(transparent, transparent), linear-gradient(#9b3628, #9b3628) left bottom / 100% 2px no-repeat;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  animation: ink-start 420ms ease-out both;
+}
+@keyframes ink-start {
+  from { background-size: 100% 100%, 0 2px; }
+  to { background-size: 100% 100%, 100% 2px; }
+}
+.previewDecision {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 14px;
+  padding: 10px 14px;
+  border: 1px solid #aab19b;
+  border-radius: 6px;
+  background: #e7eade;
+  color: #263425;
+}
+.previewDecision[data-manager="true"] {
+  background: #f5e3d9;
+  border-color: #c4907f;
+  color: #752d21;
+}
+.previewDecision svg {
+  flex: none;
+  color: inherit;
+}
+.previewDecision path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  animation: ink-trace 560ms 100ms ease-out both;
+}
+.previewDecision strong { font-size: 15px; }
+.previewDecision p { margin-top: 2px; font-size: 13px; }
+@keyframes ink-trace {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .previewCue, .previewDecision path { animation: none; }
+}

@@ -1,0 +1,78 @@
+.scene {
+  width: calc(100% - 80px);
+  max-width: 1408px;
+  margin: 0 auto 64px;
+  color: var(--ink);
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  margin-bottom: 16px;
+}
+.scene button {
+  border: 1px solid #87907e;
+  background: #faf8f0;
+  color: #2d392d;
+  padding: 10px 14px;
+  min-height: 44px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.scene button:hover,
+.scene button[aria-pressed="true"] { background: #dce2cf; }
+.frame {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #e8dfcc;
+  border: 1px solid #a39170;
+  border-radius: 8px;
+}
+.owner {
+  display: block;
+  width: 100%;
+  height: clamp(320px, 43vw, 615px);
+  object-fit: cover;
+  object-position: 43% 52%;
+  transition: transform 1500ms ease-out;
+}
+.owner[data-playing="true"] { transform: scale(1.035); }
+.card {
+  position: absolute;
+  right: clamp(15px, 5vw, 75px);
+  bottom: clamp(15px, 6vw, 85px);
+  width: min(340px, 38%);
+  padding: 18px 20px 22px;
+  color: #273a2a;
+  background: #fcfaf2;
+  border: 1px solid #8d967f;
+  border-top: 4px solid #9b3628;
+  border-radius: 5px;
+  box-shadow: 0 8px 24px #28251b36;
+  transform-origin: left bottom;
+  animation: note-arrive 420ms cubic-bezier(.2,.72,.25,1) both;
+}
+.card[data-step="2"] { border-top-color: #58734d; }
+.card strong {
+  display: block;
+  font: 600 clamp(20px, 2.4vw, 30px) Georgia, serif;
+  margin-bottom: 6px;
+}
+.card p { font-size: 16px; line-height: 1.45; }
+.steps { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+@keyframes note-arrive {
+  from { opacity: 0; transform: perspective(650px) rotateX(-16deg) translateY(12px); }
+  to { opacity: 1; transform: perspective(650px) rotateX(0) translateY(0); }
+}
+@media (max-width: 720px) {
+  .scene { width: calc(100% - 40px); }
+  .owner { height: auto; aspect-ratio: 5 / 3; }
+  .card { position: relative; width: auto; right: auto; bottom: auto; margin: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .owner[data-playing="true"] { transform: none; }
+  .card { animation: none; }
+}

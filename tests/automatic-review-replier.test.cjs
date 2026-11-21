@@ -115,7 +115,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   let incomingGoogleReply;
   let actor = { userId: 'fixture' };
   let googleRejects = true;
-  const draft = 'Thanks for the lovely rating. We’re glad you enjoyed your visit and hope to welcome you back soon.';
+  const draft = 'Really glad you enjoyed the food. Thanks for coming in!';
   const geminiDraft = 'Glad you enjoyed the food at the Fixture Arms. Hope to see you again soon!';
   const mocks = {
     crypto,
@@ -156,7 +156,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
       assert.match(JSON.parse(options.body).contents[0].parts[0].text, /Great food/);
       await new Promise(resolve => setImmediate(resolve));
       if (geminiUnavailable) return Response.json({}, { status: 429 });
-      return Response.json({ candidates: [{ finishReason: 'STOP', content: { parts: [{ text: geminiDraft }] } }] });
+      return Response.json({ candidates: [{ finishReason: 'STOP', content: { parts: [{ text: JSON.stringify({ reply: geminiDraft, assessment: 'routine_praise' }) }] } }] });
     }
     if (url.href === 'https://oauth2.googleapis.com/token') {
       if (options.body.get('grant_type') === 'authorization_code') {

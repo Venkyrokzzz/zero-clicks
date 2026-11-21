@@ -6,7 +6,12 @@ import { scenarios } from "./scenarios";
 import s from "./ReputationLaunch.module.css";
 import p from "./PaperDesk.module.css";
 
-type Draft = { reply: string; source: "sample" | "ai" | "template" };
+type Draft = { reply: string; source: "sample" | "ai" | "template"; disposition?: "routine_praise" | "approval" | "manager"; reason?: string };
+const sampleDecisions = [
+  { disposition: "routine_praise", reason: "Straightforward praise", cue: "Lovely Sunday roast" },
+  { disposition: "approval", reason: "The guest enjoyed the food but waited nearly an hour", cue: "waited nearly an hour" },
+  { disposition: "manager", reason: "The review describes how the team handled a complaint", cue: "made things worse" },
+] as const;
 const CUSTOM = scenarios.length;
 const options = [...scenarios.map(({ label }) => label), "Your review"];
 
@@ -30,7 +35,11 @@ export default function ReviewDesk() {
     : {
         reply: sampleEdits[selected] ?? sample.draft,
         source: "sample",
+        ...sampleDecisions[selected],
       };
+
+  const cue = !isCustom ? sampleDecisions[selected].cue : null;
+  const cueStart = cue ? sample.review.indexOf(cue) : -1;
 
   function select(index: number) {
     if (index === selected) return;
@@ -73,7 +82,7 @@ export default function ReviewDesk() {
             : "We couldn’t draft that reply. Please try again.",
         );
       }
-      setCustomDraft({ reply: result.reply, source: result.source });
+      setCustomDraft({ reply: result.reply, source: result.source, disposition: result.disposition, reason: result.reason });
       setFold((current) => current + 1);
     } catch (failure) {
       setError(
@@ -125,9 +134,9 @@ export default function ReviewDesk() {
           initial={
             reduceMotion
               ? false
-              : { rotateY: direction * -14, x: direction * 8 }
+              : { rotateY: direction * -19, x: direction * 10, opacity: 0.7 }
           }
-          animate={{ rotateY: 0, x: 0 }}
+          animate={{ rotateY: 0, x: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 230, damping: 27 }}
         >
           {isCustom ? (
@@ -205,8 +214,38 @@ export default function ReviewDesk() {
                   </span>
                 </span>
               </span>
-              <blockquote>{sample.review}</blockquote>
+              <blockquote>
+                {cue && cueStart >= 0 ? (
+                  <>
+                    {sample.review.slice(0, cueStart)}
+                    <mark className={p.previewCue}>{cue}</mark>
+                    {sample.review.slice(cueStart + cue.length)}
+                  </>
+                ) : sample.review}
+              </blockquote>
               <p className={p.hint}>Sample review · The Willow Arms</p>
+            </div>
+          )}
+          {draft?.disposition && (
+            <div
+              key={"decision-" + (isCustom ? fold : selected)}
+              role="status"
+              className={p.previewDecision}
+              data-manager={draft.disposition === "manager"}
+            >
+              <svg viewBox="0 0 36 32" width="36" height="32" aria-hidden="true">
+                <path pathLength="1" d="M5 5 Q7 22 30 21 M24 14 L31 21 L24 27" />
+              </svg>
+              <div>
+                <strong>
+                  {draft.disposition === "manager"
+                    ? "Needs manager attention"
+                    : draft.disposition === "routine_praise"
+                      ? "Autopilot preview"
+                      : "Needs approval"}
+                </strong>
+                {draft.reason && <p>{draft.reason}</p>}
+              </div>
             </div>
           )}
           {draft && (
@@ -215,10 +254,10 @@ export default function ReviewDesk() {
               className={p.reply}
               style={{ transformOrigin: "top center" }}
               initial={
-                reduceMotion || !isCustom ? false : { rotateX: -19, y: -5 }
+                reduceMotion ? false : { rotateX: -12, y: 4, opacity: 0 }
               }
-              animate={{ rotateX: 0, y: 0 }}
-              transition={{ type: "spring", stiffness: 205, damping: 24 }}
+              animate={{ rotateX: 0, y: 0, opacity: 1 }}
+              transition={{ duration: 0.32, delay: 0.1, ease: "easeOut" }}
             >
               <div className={p.replyHead}>
                 <label htmlFor="reply-draft">Reply draft</label>

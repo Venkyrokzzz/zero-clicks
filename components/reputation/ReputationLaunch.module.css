@@ -1115,3 +1115,83 @@
 .descriptor span {
   white-space: nowrap;
 }
+
+/* Page motion runs on arrival, while the header and navigation stay steady. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.site) { scroll-behavior: smooth; }
+  .pageMotion { animation: page-arrive 360ms cubic-bezier(.2,.72,.25,1) both; }
+  .processMotion li { animation: step-arrive 340ms cubic-bezier(.2,.72,.25,1) both; }
+  .processMotion li:nth-child(2) { animation-delay: 65ms; }
+  .processMotion li:nth-child(3) { animation-delay: 130ms; }
+  .processMotion li:nth-child(4) { animation-delay: 195ms; }
+  .mobileNav[open] nav {
+    transform-origin: top center;
+    animation: menu-arrive 240ms cubic-bezier(.2,.72,.25,1) both;
+  }
+}
+.navigation a,
+.mobileNav nav a {
+  position: relative;
+}
+.navigation a::after,
+.mobileNav nav a::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -6px;
+  height: 2px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.mobileNav nav a::after { inset: auto 12px 6px; }
+.navigation a:hover::after,
+.navigation a:focus-visible::after,
+.mobileNav nav a:focus-visible::after,
+.site nav a[aria-current="page"]::after { transform: scaleX(1); }
+.navigation a:hover { text-decoration: none; }
+.site nav a[aria-current="page"] { color: var(--red); }
+@media (prefers-reduced-motion: no-preference) {
+  .navigation a::after,
+  .mobileNav nav a::after { transition: transform 220ms ease-out; }
+}
+@keyframes page-arrive {
+  from { opacity: .55; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes step-arrive {
+  from { opacity: .35; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes menu-arrive {
+  from { opacity: 0; transform: translateY(-8px) scaleY(.94); }
+  to { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+.checkout { margin-top: 24px; }
+.checkoutButtons, .checkoutLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.checkoutButtons .primary, .checkoutSecondary {
+  min-height: 44px;
+  padding: 11px 16px;
+  font-size: 15px;
+}
+.checkoutSecondary {
+  color: var(--paper);
+  background: transparent;
+  border: 1px solid #c2c8b7;
+  border-radius: 4px;
+}
+.checkoutSecondary:hover:not(:disabled) { background: #ffffff17; }
+.checkoutStatus:not(:empty) { margin: 12px 0; font-size: 15px; }
+.checkoutStatus a, .pricingContact {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.checkoutLinks { margin-top: 6px; }
+.pricingContact { display: inline-block; margin-top: 14px; }
+.foundingTerms { margin-top: 8px !important; }

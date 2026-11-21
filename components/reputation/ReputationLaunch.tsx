@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { FOUNDING_OPEN, FOUNDING_TOTAL } from "@/lib/foundingConfig";
 import ReviewDesk from "./ReviewDesk";
+import PricingCheckout from "./PricingCheckout";
+import OwnerWalkthrough from "./OwnerWalkthrough";
 import VenueEnquiry from "./VenueEnquiry";
 import s from "./ReputationLaunch.module.css";
 import paper from "./PaperDesk.module.css";
@@ -8,45 +10,47 @@ import paper from "./PaperDesk.module.css";
 type Page = "home" | "product" | "demo" | "pricing" | "process" | "contact";
 const enquiry = "/contact?service=Reputation%20Manager";
 
-function Header() {
+const mainLinks = [
+  { page: "product", href: "/products/reputation-manager", label: "Reputation Manager" },
+  { page: "process", href: "/how-it-works", label: "How it works" },
+  { page: "demo", href: "/demo", label: "Try the demo" },
+  { page: "pricing", href: "/pricing", label: "Pricing" },
+] as const;
+
+function Header({ page }: { page: Page }) {
+  const links = mainLinks.map((link) => (
+    <Link
+      key={link.page}
+      href={link.href}
+      aria-current={page === link.page ? "page" : undefined}
+    >
+      {link.label}
+    </Link>
+  ));
+
   return (
     <header className={s.header}>
       <Link
         href="/"
-        className={`${s.wordmark} ${paper.deskBrand}`}
+        className={s.wordmark + " " + paper.deskBrand}
         aria-label="Zero Clicks home"
+        aria-current={page === "home" ? "page" : undefined}
       >
         <img src="/zero-clicks-mark.svg" alt="" width={48} height={48} />
         zero clicks
       </Link>
-      <nav className={s.navigation} aria-label="Main navigation">
-        <Link href="/products/reputation-manager">Reputation Manager</Link>
-        <Link href="/how-it-works">How it works</Link>
-        <Link href="/pricing">Pricing</Link>
-      </nav>
-      <Link href="/sign-in" className={s.login}>
-        Log in
-      </Link>
+      <nav className={s.navigation} aria-label="Main navigation">{links}</nav>
+      <Link href="/sign-in" className={s.login}>Log in</Link>
       <details className={s.mobileNav}>
         <summary>
           Menu
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            aria-hidden="true"
-          >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <path d="M4 8h16M4 16h16" />
           </svg>
         </summary>
         <nav aria-label="Mobile navigation">
-          <Link href="/products/reputation-manager">Reputation Manager</Link>
-          <Link href="/how-it-works">How it works</Link>
-          <Link href="/pricing">Pricing</Link>
-          <Link href={enquiry}>Contact</Link>
+          {links}
+          <Link href={enquiry} aria-current={page === "contact" ? "page" : undefined}>Contact</Link>
         </nav>
       </details>
     </header>
@@ -68,9 +72,9 @@ function Footer() {
     </footer>
   );
 }
-export function Process() {
+export function Process({ animate = false }: { animate?: boolean }) {
   return (
-    <section id="how-it-works" className={s.process}>
+    <section id="how-it-works" className={animate ? s.process + " " + s.processMotion : s.process}>
       <h2>From a guest’s words to your next reply.</h2>
       <ol>
         {[
@@ -79,12 +83,16 @@ export function Process() {
             "Link the Google Business Profile you manage.",
           ],
           [
-            "Make the reply yours",
-            "Read the draft, edit the wording, and approve.",
+            "Get a reply in your voice",
+            "Zero Clicks drafts a reply using the guest’s comments and your saved tone.",
+          ],
+          [
+            "Handle the exceptions",
+            "The duty manager sees sensitive reviews with a reason and an editable draft.",
           ],
           [
             "Follow it through",
-            "See what is queued, accepted, or needs attention.",
+            "See when a reply is queued, submitted, or held by Google.",
           ],
         ].map(([title, body], i) => (
           <li key={title}>
@@ -108,9 +116,8 @@ export function Pricing() {
         <p className={s.pricingDescription}>
           Google review drafts, owner approval, and guided onboarding.
         </p>
-        <Link className={s.primary} href={enquiry}>
-          Discuss your venue
-        </Link>
+        <PricingCheckout foundingOpen={FOUNDING_OPEN} />
+        <Link className={s.pricingContact} href={enquiry}>Discuss your venue</Link>
       </div>
       <div className={s.priceDetails}>
         <p className={s.price}>
@@ -122,11 +129,14 @@ export function Pricing() {
             : "Standard plan · £499 one-time setup"}
         </p>
         {FOUNDING_OPEN && (
-          <div className={s.standardPrice}>
-            Standard plan £55 / month
-            <br />
-            £499 one-time setup
-          </div>
+          <>
+            <p className={s.foundingTerms}>No setup fee. Pay after the first successful Google reply and guided setup.</p>
+            <div className={s.standardPrice}>
+              Standard plan £55 / month
+              <br />
+              £499 one-time setup
+            </div>
+          </>
         )}
       </div>
     </section>
@@ -140,7 +150,7 @@ export function FAQ() {
         {[
           [
             "Will replies go out without me?",
-            "No. In v1, you approve the exact reply before it is queued for publication.",
+            "You approve the reply before it’s queued for Google. The demo shows how reviews are sorted for approval or manager attention.",
           ],
           [
             "Does this demo connect to Google?",
@@ -180,8 +190,8 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
       <a href="#main-content" className={s.skip}>
         Skip to content
       </a>
-      <Header />
-      <main id="main-content">
+      <Header key={page} page={page} />
+      <main key={page} id="main-content" className={s.pageMotion}>
         {(full || page === "demo") && (
           <>
             <section className={s.hero}>
@@ -210,6 +220,7 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
               </div>
               <ReviewDesk />
             </section>
+            {page === "demo" && <OwnerWalkthrough />}
             {full && (
               <div className={s.principles}>
                 <p>Your voice.</p>
@@ -232,14 +243,13 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
             </Link>
           </section>
         )}
-        {(full || page === "process") && <Process />}
+        {(full || page === "process") && <Process animate={page === "process"} />}
         {page === "pricing" && (
           <section className={s.pageIntro}>
             <p className={s.productLabel}>Reputation Manager</p>
             <h1>A clear plan for your venue.</h1>
             <p>
-              Start with a conversation. We’ll check the fit and walk through
-              the first reply together.
+              Choose your plan and continue to Stripe. We can also walk you through the first reply.
             </p>
           </section>
         )}

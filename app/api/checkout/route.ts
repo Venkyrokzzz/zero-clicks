@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
-  const plan = body?.plan;
+  const plan = typeof body?.plan === "string" ? body.plan : "";
 
   if (!plan || !Object.prototype.hasOwnProperty.call(PRICE_IDS, plan) || plan === "setup_fee") {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
@@ -60,16 +60,18 @@ export async function POST(req: NextRequest) {
 
   try {
     const { data: profile, error: profileError } = await supabase.from('profiles').select('trial_ends_at,plan').eq('clerk_user_id', userId).single();
-    if (profileError || !profile) return NextResponse.json({ error: 'Complete onboarding first' }, { status: 409 });
+    if (profileError || !profile) return NextResponse.json({ error: 'Finish setting up your venue before starting checkout.', code: 'ONBOARDING_REQUIRED' }, { status: 409 });
     if (profile.plan === 'trial' && profile.trial_ends_at && new Date(profile.trial_ends_at).getTime() > Date.now()) {
-      return NextResponse.json({ url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard` });
+      return NextResponse.json({ kind: 'trial_active', url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard` });
     }
     if (plan === 'founding') {
       const { count, error } = await supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('clerk_user_id', userId).not('posted_to_google_at', 'is', null);
-      if (error || !count) return NextResponse.json({ error: 'Contact us to finish your founding-member setup before payment' }, { status: 409 });
+      if (error) return NextResponse.json({ error: 'Could not check founding plan eligibility. Please try again.' }, { status: 503 });
+      if (!count) return NextResponse.json({ error: 'Founding members pay after their first successful Google reply. Finish guided setup to continue.', code: 'FIRST_REPLY_REQUIRED' }, { status: 409 });
     }
     const customerId = await getOrCreateStripeCustomer(userId, email, name);
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!baseUrl) throw new Error('Site URL is missing');
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
       { price: PRICE_IDS[plan as keyof typeof PRICE_IDS], quantity: 1 },
@@ -78,26 +80,33 @@ export async function POST(req: NextRequest) {
     const subscriptions = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 100 });
     if (subscriptions.data.some(s => !['canceled', 'incomplete_expired'].includes(s.status))) {
       const portal = await createCustomerPortal(stripe, customerId);
-      return NextResponse.json({ url: portal.url });
+      return NextResponse.json({ kind: 'portal', url: portal.url });
     }
     const openSessions = await stripe.checkout.sessions.list({ customer: customerId, status: 'open', limit: 100 });
     const existing = openSessions.data.find(s => s.mode === 'subscription');
-    if (existing?.url) return NextResponse.json({ url: existing.url });
+    if (existing?.url) {
+      if (existing.metadata?.plan !== plan) {
+        return NextResponse.json({ error: 'A checkout is already open for a different plan. Return to that checkout or contact us to change plans.', code: 'OTHER_CHECKOUT_OPEN' }, { status: 409 });
+      }
+      return NextResponse.json({ kind: 'checkout', url: existing.url });
+    }
     if (PLANS_WITH_SETUP.includes(plan)) {
       lineItems.push({ price: PRICE_IDS.setup_fee, quantity: 1 });
     }
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
+      integration_identifier: "zero-clicks-pricing-nqlaxtpk",
       customer: customerId,
       line_items: lineItems,
       subscription_data: { metadata: { clerk_user_id: userId, plan } },
       success_url: `${baseUrl}/dashboard?checkout=success`,
-      cancel_url: `${baseUrl}/#pricing`,
+      cancel_url: `${baseUrl}/pricing#pricing`,
       metadata: { clerk_user_id: userId, plan },
     }, { idempotencyKey: `checkout-${userId}-${plan}-${Math.floor(Date.now() / 1800000)}` });
 
-    return NextResponse.json({ url: session.url });
+    if (!session.url) throw new Error('Checkout session missing a hosted URL');
+    return NextResponse.json({ kind: 'checkout', url: session.url });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[checkout] Error:", message);

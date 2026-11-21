@@ -4,7 +4,7 @@ export const scenarios = [
     rating: 5,
     review: "Lovely Sunday roast. The team made us feel right at home.",
     draft:
-      "Thanks for joining us for Sunday lunch. We’re glad you loved the roast and that the team made you feel right at home. We’d love to see you again.",
+      "Glad you felt at home with us on Sunday. It’s lovely to hear you enjoyed the roast.",
   },
   {
     label: "Mixed feedback",
@@ -12,14 +12,14 @@ export const scenarios = [
     review:
       "Great atmosphere and friendly service. We liked the food, but waited nearly an hour for it.",
     draft:
-      "We’re glad you enjoyed the food and the atmosphere, and we’re sorry you waited so long. Thanks for telling us. If you’d like to share more about your visit, please get in touch with the venue directly.",
+      "I’m glad you liked the food, but an hour is too long to wait. I’m sorry we kept you.",
   },
   {
     label: "Complaint",
-    rating: 1,
+    rating: 5,
     review:
-      "We booked for a birthday but our table wasn’t ready. Nobody could tell us how long the wait would be.",
+      "Staff were rude and made things worse. Nobody apologised.",
     draft:
-      "We’re sorry your birthday visit started with a wait and that we couldn’t give you a clear update. Please get in touch with the venue directly if you’re happy to talk about what happened.",
+      "I’m sorry about how our team spoke to you and that we made things worse. You should have had an apology at the time. If you’d like to talk it through, please ask for the duty manager.",
   },
 ] as const;
