@@ -55,8 +55,8 @@ export default function ReviewProgress({ review, publishingEnabled = false }: { 
         <summary>How the reply is prepared</summary>
         <p className={s.muted}>
           Zero Clicks checks the connected Google listing for new reviews.
-          Five-star reviews get a default thank-you. For one to four stars,
-          the draft uses the guest’s feedback when available. You can edit or copy any draft.
+          Straightforward five-star reviews get a default thank-you. Other drafts use the guest’s feedback when available.
+          Complaints can need manager review at any rating. You can edit or copy any draft.
         </p>
         <p className={s.muted}>
           {publishingEnabled

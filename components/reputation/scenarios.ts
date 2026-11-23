@@ -9,11 +9,11 @@ export const scenarios = [
   },
   {
     label: "Mixed feedback",
-    rating: 3,
+    rating: 4,
     review:
-      "Great atmosphere and friendly service. We liked the food, but waited nearly an hour for it.",
+      "Lovely Sunday roast, but we waited 40 minutes for it.",
     draft:
-      "I’m glad you liked the food, but an hour is too long to wait. I’m sorry we kept you.",
+      "Glad you enjoyed the roast. I’m sorry you had to wait 40 minutes.",
   },
   {
     label: "Complaint",
@@ -21,6 +21,6 @@ export const scenarios = [
     review:
       "Staff were rude and made things worse. Nobody apologised.",
     draft:
-      "I’m sorry about how our team spoke to you and that we made things worse. You should have had an apology at the time. If you’d like to talk it through, please ask for the duty manager.",
+      "I’m sorry about how our team spoke to you and that things got worse. You should have had an apology at the time. If you’d like to talk it through, please ask for the duty manager privately.",
   },
 ] as const;

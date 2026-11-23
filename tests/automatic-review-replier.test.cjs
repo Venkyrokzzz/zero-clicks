@@ -610,5 +610,21 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   }
   assert.equal((await draftReply({ ...sampleContext, rating: 5, review_text: '' })).text, draft);
   assert.equal((await draftReply({ ...sampleContext, rating: 5, review_text: 'Lovely roast.' })).text, draft);
+  const classifyReview = load('lib/reviewDisposition').classifyReview;
+  for (const [rating, review_text, expectedDisposition, expectedWording] of [
+    [5, "Lovely roast. Can't wait to come back.", 'routine_praise', /Thanks for the five stars/],
+    [4, 'Lovely Sunday roast, but we waited 40 minutes for it.', 'approval', /enjoyed the roast.*wait 40 minutes/],
+    [4, 'Great fish and chips, but our drinks arrived after our mains.', 'approval', /fish and chips.*wait so long for your drinks/],
+    [3, "We booked a table but it wasn’t ready.", 'approval', /couldn’t get you seated as booked/],
+    [2, 'Nobody could tell me if the gravy contained dairy.', 'manager', /couldn’t get a clear answer.*privately/],
+    [1, 'They served us the wrong order.', 'approval', /served the wrong order/],
+    [5, 'The staff were rude and made things worse. Nobody apologised.', 'manager', /things got worse.*apology.*privately/],
+  ]) {
+    const outcome = await draftReply({ ...sampleContext, rating, review_text });
+    assert.equal(outcome.disposition, expectedDisposition, review_text);
+    assert.equal(classifyReview(rating, review_text).disposition, expectedDisposition);
+    assert.match(outcome.text, expectedWording, review_text);
+  }
+
 
 });

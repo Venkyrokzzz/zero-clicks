@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { classifyReview } from "@/lib/reviewDisposition";
 import { TrialBanner } from "@/components/TrialBanner";
 import ReviewProgress from "@/components/workspace/ReviewProgress";
 import {
@@ -20,6 +21,10 @@ type Review = ReviewEvidence & {
   sentiment?: string;
   escalation_reason?: string | null;
 };
+function draftDecision(review: Review) {
+  return classifyReview(review.rating, review.review_text ?? "");
+}
+
 type Connection = {
   connected: boolean;
   needs_reconnect: boolean;
@@ -37,6 +42,7 @@ function ReviewEditor({
   publishingEnabled: boolean;
 }) {
   const [draft, setDraft] = useState(review.draft_response ?? "");
+  const decision = draftDecision(review);
   const [busy, setBusy] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -116,8 +122,11 @@ function ReviewEditor({
         {review.review_text ||
           "This guest left a star rating without a comment."}
       </blockquote>
-      {review.escalation_reason && (
-        <p className={s.alert}>{review.escalation_reason}</p>
+      {(review.escalation_reason || (review.status === "pending" && decision.disposition !== "routine_praise")) && (
+        <p className={s.alert}>
+          {decision.disposition === "manager" && <strong>Manager review. </strong>}
+          {review.escalation_reason || decision.reason}
+        </p>
       )}
       <div className={s.stack}>
         <label htmlFor="workspace-reply">Reply draft</label>
@@ -243,8 +252,10 @@ export default function Inbox() {
     (r) =>
       (filter === "all" ||
         (filter === "flagged"
-          ? r.rating <= 2 && r.status === "pending"
-          : r.status === filter)) &&
+          ? r.status === "pending" && draftDecision(r).disposition !== "routine_praise"
+          : filter === "routine"
+            ? r.status === "pending" && draftDecision(r).disposition === "routine_praise"
+            : r.status === filter)) &&
       (!search.trim() ||
         `${r.reviewer_name} ${r.review_text ?? ""}`
           .toLowerCase()
@@ -342,8 +353,9 @@ export default function Inbox() {
               }}
             >
               <option value="all">All reviews</option>
-              <option value="flagged">Low rating</option>
-              <option value="pending">Needs action</option>
+              <option value="flagged">Needs attention</option>
+              <option value="routine">Routine drafts</option>
+              <option value="pending">All open drafts</option>
               <option value="approved">{publishingEnabled ? "Queued" : "Previously approved drafts"}</option>
               <option value="sent">Recorded replies</option>
               <option value="skipped">Skipped</option>
@@ -376,6 +388,9 @@ export default function Inbox() {
                       <span className={s.muted}>
                         {review.rating}/5 stars ·{" "}
                         {formatDate(review.created_at)}
+                        {review.status === "pending" && draftDecision(review).disposition === "manager"
+                          ? " · Manager review"
+                          : ""}
                       </span>
                     </button>
                   </li>

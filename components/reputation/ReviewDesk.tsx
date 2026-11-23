@@ -9,7 +9,7 @@ import p from "./PaperDesk.module.css";
 type Draft = { reply: string; source: "sample" | "ai" | "template"; disposition?: "routine_praise" | "approval" | "manager"; reason?: string };
 const sampleDecisions = [
   { disposition: "routine_praise", reason: "Straightforward praise", cue: "Lovely Sunday roast" },
-  { disposition: "approval", reason: "The guest enjoyed the food but waited nearly an hour", cue: "waited nearly an hour" },
+  { disposition: "approval", reason: "The guest enjoyed the roast but reported a wait", cue: "waited 40 minutes" },
   { disposition: "manager", reason: "The review describes how the team handled a complaint", cue: "made things worse" },
 ] as const;
 const CUSTOM = scenarios.length;
@@ -23,10 +23,11 @@ export default function ReviewDesk() {
   const [sampleEdits, setSampleEdits] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [approved, setApproved] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [fold, setFold] = useState(0);
   const [direction, setDirection] = useState(1);
   const busy = useRef(false);
+  const replyField = useRef<HTMLTextAreaElement>(null);
   const reduceMotion = useReducedMotion();
   const isCustom = selected === CUSTOM;
   const sample = scenarios[selected];
@@ -45,11 +46,20 @@ export default function ReviewDesk() {
     if (index === selected) return;
     setDirection(index > selected ? 1 : -1);
     setSelected(index);
-    setApproved(false);
+    setCopied(false);
+  }
+
+  async function copyDraft(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+    } catch {
+      replyField.current?.select();
+    }
   }
 
   function edit(text: string) {
-    setApproved(false);
+    setCopied(false);
     if (isCustom && customDraft)
       setCustomDraft({ ...customDraft, reply: text });
     if (!isCustom)
@@ -61,7 +71,7 @@ export default function ReviewDesk() {
     if (busy.current) return;
     busy.current = true;
     setLoading(true);
-    setApproved(false);
+    setCopied(false);
     setError("");
     try {
       const response = await fetch("/api/public-review-draft", {
@@ -158,7 +168,7 @@ export default function ReviewDesk() {
                   setReview(event.target.value);
                   setCustomDraft(undefined);
                   setError("");
-                  setApproved(false);
+                  setCopied(false);
                 }}
               />
               <div className={p.formControls}>
@@ -172,7 +182,7 @@ export default function ReviewDesk() {
                       setRating(Number(event.target.value));
                       setCustomDraft(undefined);
                       setError("");
-                      setApproved(false);
+                      setCopied(false);
                     }}
                   >
                     {[5, 4, 3, 2, 1].map((value) => (
@@ -242,7 +252,7 @@ export default function ReviewDesk() {
                     ? "Needs manager attention"
                     : draft.disposition === "routine_praise"
                       ? "Routine praise"
-                      : "Needs approval"}
+                      : "Needs attention"}
                 </strong>
                 {draft.reason && <p>{draft.reason}</p>}
               </div>
@@ -270,6 +280,7 @@ export default function ReviewDesk() {
                 </span>
               </div>
               <textarea
+                ref={replyField}
                 id="reply-draft"
                 value={draft.reply}
                 maxLength={4096}
@@ -278,18 +289,18 @@ export default function ReviewDesk() {
                 aria-describedby="demo-disclaimer"
               />
               <div className={p.replyActions}>
-                {approved ? (
-                  <span role="status">Approved in the demo.</span>
+                {copied ? (
+                  <span role="status">Draft copied.</span>
                 ) : (
-                  <span>Review and edit before approving.</span>
+                  <span>Edit or copy your private draft.</span>
                 )}
                 <button
                   type="button"
                   className={p.approve}
-                  disabled={!draft.reply.trim() || loading || approved}
-                  onClick={() => setApproved(true)}
+                  disabled={!draft.reply.trim() || loading || copied}
+                  onClick={() => void copyDraft(draft.reply)}
                 >
-                  {approved ? "Approved" : "Approve demo reply"}
+                  {copied ? "Copied" : "Copy draft"}
                 </button>
               </div>
             </motion.div>

@@ -80,7 +80,7 @@ function Footer() {
 const steps = [
   ["Connect your venue", "Link the Google Business Profile you manage."],
   ["Check your drafts", "Read the guest’s review, then edit the draft to sound like your team."],
-  ["Approve your reply", "Approve the wording, then track the reply as it’s queued and sent to Google."],
+  ["Keep the final word", "Edit or copy your draft in the owner inbox. The pilot saves replies privately."],
 ] as const;
 
 function StepIcon({ index }: { index: number }) {
@@ -99,7 +99,8 @@ function StepIcon({ index }: { index: number }) {
 export function Process({ animate = false }: { animate?: boolean }) {
   return (
     <section id="how-it-works" className={`${e.process} ${animate ? s.processMotion : ""}`}>
-      <h2>From review to reply</h2>
+      <h2>From review to draft</h2>
+      {!animate && <Link className={e.underlined} href="/how-it-works#owner-walkthrough">Watch how drafts work</Link>}
       <ol>
         {steps.map(([title, body], index) => (
           <li key={title}>
@@ -118,7 +119,7 @@ function ProductHero() {
     <section className={e.hero} aria-labelledby="product-heading">
       <div className={e.heroCopy}>
         <h1 id="product-heading">Good service deserves a good reply.</h1>
-        <p>Draft and approve Google review replies for your pub or restaurant.</p>
+        <p>Get private drafts for Google reviews at your pub or restaurant.</p>
         <div className={e.heroActions}>
           <a className={s.primary} href="#walkthrough">Try a review <span aria-hidden="true">→</span></a>
           <Link className={e.underlined} href="/start">Connect Google</Link>
@@ -148,7 +149,7 @@ function DemoSection({ standalone }: { standalone: boolean }) {
       <div className={e.demoInner}>
         <div className={e.demoIntro}>
           <Heading id="demo-heading">Try it with a review</Heading>
-          <p>Choose a sample or paste a public review. Edit the draft and try the approval step.</p>
+          <p>Choose a sample or paste a public review. Try editing and copying a private draft.</p>
         </div>
         <ReviewDesk />
       </div>
@@ -162,7 +163,7 @@ export function Pricing() {
       <div>
         <h2>A clear plan for your venue</h2>
         <p className={s.pricingDescription}>
-          Google review drafts, owner approval, and guided onboarding.
+          Google review drafts, an owner inbox, and guided onboarding.
         </p>
         <PricingCheckout foundingOpen={FOUNDING_OPEN} />
         <Link className={s.pricingContact} href={enquiry}>Discuss your venue</Link>
@@ -198,7 +199,7 @@ export function FAQ() {
         {[
           [
             "Will replies go out without me?",
-            "You approve the reply before it’s queued for Google. The demo shows how reviews are sorted for approval or manager attention.",
+            "The pilot saves drafts in your owner inbox. You can edit or copy them, and anything that needs a closer look is flagged.",
           ],
           [
             "Does this demo connect to Google?",
@@ -248,8 +249,7 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
           <section className={s.pageIntro}>
             <h1>You keep the final word.</h1>
             <p>
-              From connecting your venue to approving a reply, here’s how the
-              workflow fits around your day.
+              See how a Google review becomes a private draft in your owner inbox.
             </p>
             <div className={e.heroActions}>
               <Link href="/demo" className={s.primary}>Try a review</Link>
@@ -257,6 +257,7 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
             </div>
           </section>
         )}
+        {page === "process" && <OwnerWalkthrough />}
         {page === "process" && <Process animate />}
         {page === "pricing" && (
           <section className={s.pageIntro}>

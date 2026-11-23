@@ -2,7 +2,8 @@ import 'server-only'
 import { randomUUID } from 'node:crypto'
 import { supabase } from '@/lib/supabase'
 import { hasServiceAccess } from '@/lib/entitlements'
-import { generateReviewDraft, hasReviewComplaint } from '@/lib/generateReviewDraft'
+import { generateReviewDraft } from '@/lib/generateReviewDraft'
+import { hasReviewComplaint } from '@/lib/reviewDisposition'
 import { reviewPublishingEnabled } from '@/lib/reviewPublishing'
 
 const VALID_SENTIMENTS = new Set(['POSITIVE', 'NEUTRAL', 'NEGATIVE'])
