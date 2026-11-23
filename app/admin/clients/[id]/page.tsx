@@ -72,7 +72,6 @@ function ClientSettings({ id, client }: { id: string; client: ClientRecord }) {
           location: fields.location,
           phone: fields.phone,
           tone: fields.tone,
-          auto_send_positive: fields.legacy_auto_send === "on",
         }),
       });
       venueSaved = true;
@@ -184,20 +183,6 @@ function ClientSettings({ id, client }: { id: string; client: ClientRecord }) {
       <p className={s.muted}>
         Pausing access here leaves the Stripe subscription in place.
       </p>
-      <details className={s.flow}>
-        <summary>Legacy review integration</summary>
-        <label className={s.row}>
-          <input
-            type="checkbox"
-            name="legacy_auto_send"
-            defaultChecked={!!settings?.auto_send_positive}
-          />{" "}
-          Allow eligible positive replies through the legacy Pro integration
-        </label>
-        <p className={s.muted}>
-          Reputation Manager v1 still requires owner approval.
-        </p>
-      </details>
       <label className={s.stack}>
         Internal notes
         <textarea name="notes" defaultValue={profile.notes ?? ""} />

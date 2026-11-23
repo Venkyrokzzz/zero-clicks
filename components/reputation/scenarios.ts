@@ -1,10 +1,11 @@
+import { FIVE_STAR_REPLY } from "@/lib/reviewDraftDefaults";
+
 export const scenarios = [
   {
     label: "Praise",
     rating: 5,
     review: "Lovely Sunday roast. The team made us feel right at home.",
-    draft:
-      "Glad you felt at home with us on Sunday. It’s lovely to hear you enjoyed the roast.",
+    draft: FIVE_STAR_REPLY,
   },
   {
     label: "Mixed feedback",
@@ -16,7 +17,7 @@ export const scenarios = [
   },
   {
     label: "Complaint",
-    rating: 5,
+    rating: 1,
     review:
       "Staff were rude and made things worse. Nobody apologised.",
     draft:

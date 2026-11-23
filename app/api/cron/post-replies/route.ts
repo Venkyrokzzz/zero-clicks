@@ -5,6 +5,7 @@ import { getGoogleAccess, recordGoogleAuthFailure, GOOGLE_CONNECTION_FIELDS } fr
 import { serviceAccess } from '@/lib/requireService'
 import { supabase } from '@/lib/supabase'
 import { verifyToken } from '@/lib/verifyToken'
+import { reviewPublishingEnabled } from '@/lib/reviewPublishing'
 
 type ApprovedReply = {
   clerk_user_id: string
@@ -82,6 +83,10 @@ export async function GET(req: NextRequest) {
   if (!verifyToken(bearer, process.env.CRON_SECRET)
       && !verifyToken(req.headers.get('x-zeroclicks-token'), process.env.N8N_WEBHOOK_TOKEN)) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
+  }
+
+  if (!reviewPublishingEnabled()) {
+    return NextResponse.json({ posted: 0, skipped: 'draft_only' })
   }
 
   const startedAt = Date.now()

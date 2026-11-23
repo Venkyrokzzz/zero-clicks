@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { supabase } from "@/lib/supabase";
+import { reviewPublishingEnabled } from "@/lib/reviewPublishing";
 
 export async function GET(request: NextRequest) {
   const ip =
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
     sentCount: reviews.filter((r) => r.status === "sent" && r.posted_to_google_at && r.google_reply_state !== "rejected").length,
   };
 
-  return NextResponse.json({ reviews, metrics });
+  return NextResponse.json({ reviews, metrics, publishingEnabled: reviewPublishingEnabled() });
 }
 
 export async function PUT(request: NextRequest) {
@@ -52,6 +53,10 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid review update." }, { status: 400 });
   }
   const { id, status, draft_response } = body;
+  const publishingEnabled = reviewPublishingEnabled();
+  if (status === "approved" && !publishingEnabled) {
+    return NextResponse.json({ error: "This pilot prepares drafts for copying. Google publishing is off." }, { status: 409 });
+  }
 
   if (!id || typeof id !== "string" || id.trim() === "") {
     return NextResponse.json({ error: "Invalid or missing review id" }, { status: 400 });
@@ -86,7 +91,7 @@ export async function PUT(request: NextRequest) {
     .update(update)
     .eq("id", id)
     .eq("clerk_user_id", userId)
-    .in("status", ["pending", "skipped"])
+    .in("status", publishingEnabled ? ["pending", "skipped"] : ["pending", "skipped", "approved"])
     .is("posted_to_google_at", null);
   if (status === "approved") query.eq('platform', 'google').not('google_review_resource', 'is', null);
 
@@ -95,7 +100,7 @@ export async function PUT(request: NextRequest) {
     .maybeSingle();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  if (!data) return NextResponse.json({ error: "This review is already queued, no longer editable, or needs a verified Google import." }, { status: 409 });
+  if (!data) return NextResponse.json({ error: "This review is no longer editable or needs a verified Google import." }, { status: 409 });
 
   return NextResponse.json({ success: true });
 }

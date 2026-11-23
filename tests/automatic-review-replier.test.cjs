@@ -93,6 +93,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
     GOOGLE_CLIENT_ID: 'fixture-client', GOOGLE_CLIENT_SECRET: 'fixture-secret',
     GOOGLE_REDIRECT_URI: site + '/api/auth/google/callback',
     CRON_SECRET: 'fixture-cron-secret', ZERO_CLICKS_OWNER_CLERK_ID: 'admin',
+    GOOGLE_REVIEW_PUBLISHING_ENABLED: 'true',
     CLERK_WEBHOOK_SECRET: 'whsec_' + Buffer.from('fixture-clerk-signing-secret').toString('base64'),
     STRIPE_WEBHOOK_SECRET: 'whsec_fixture', STRIPE_SECRET_KEY: 'sk_test_fixture',
   };
@@ -115,7 +116,8 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   let incomingGoogleReply;
   let actor = { userId: 'fixture' };
   let googleRejects = true;
-  const draft = 'Really glad you enjoyed the food. Thanks for coming in!';
+  const draft = 'Thanks for the five stars! We’re glad you stopped by and hope to see you again soon.';
+  const fourStarFallback = 'Really glad you enjoyed the food. Thanks for coming in!';
   const geminiDraft = 'Glad you enjoyed the food at the Fixture Arms. Hope to see you again soon!';
   const mocks = {
     crypto,
@@ -191,7 +193,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
       assert.equal(options.headers.Authorization, 'Bearer fake-access');
       return Response.json({ reviews: [{
         name: 'accounts/123/locations/456/reviews/' + incomingReviewId, reviewId: incomingReviewId,
-        starRating: 'FIVE', comment: 'Great food', reviewer: { displayName: 'Test guest' },
+        starRating: incomingReviewId === 'r1' ? 'FIVE' : 'FOUR', comment: 'Great food', reviewer: { displayName: 'Test guest' },
         reviewReply: incomingGoogleReply,
       }] });
     }
@@ -445,13 +447,26 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   assert.equal((await (await regenerate()).json()).draft, draft);
   env.GEMINI_API_KEY = 'fixture-gemini-key';
   env.GEMINI_REVIEW_MODEL = 'fixture-gemini';
+  assert.equal((await (await regenerate()).json()).draft, draft);
+  assert.equal(draftCalls, 0, 'five-star defaults never call the AI provider');
+  tables.reviews[0].rating = 4;
   assert.equal((await (await regenerate()).json()).draft, geminiDraft);
   geminiUnavailable = true;
-  assert.equal((await (await regenerate()).json()).draft, draft);
+  assert.equal((await (await regenerate()).json()).draft, fourStarFallback);
+  tables.reviews[0].rating = 5;
   assert.equal(draftCalls, 2);
   assert.equal((await update('sent', draft)).status, 400);
   assert.equal((await update('approved', '   ')).status, 400);
   const approvedReply = 'Thanks for stopping by the Fixture Arms. Glad you enjoyed the food! — The team';
+  delete env.GOOGLE_REVIEW_PUBLISHING_ENABLED;
+  assert.equal((await update('approved', approvedReply)).status, 409);
+  assert.equal((await (await reviews.GET(new Request(site))).json()).publishingEnabled, false);
+  tables.reviews[0].status = 'approved';
+  assert.equal((await (await cron('post-replies')).json()).skipped, 'draft_only');
+  assert.equal(attempts, 0, 'the pilot cannot publish old queued replies');
+  assert.equal((await update(undefined, approvedReply)).status, 200);
+  tables.reviews[0].status = 'pending';
+  env.GOOGLE_REVIEW_PUBLISHING_ENABLED = 'true';
   assert.equal((await update('approved', approvedReply)).status, 200);
   assert.equal((await update('approved', 'Changed after approval')).status, 409);
   assert.equal((await (await reviews.GET(new Request(site))).json()).reviews[0].status, 'approved');
@@ -562,5 +577,22 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
     method: 'POST', body: signup,
   }))).status, 200);
   assert.equal(profile.plan, 'founding');
+
+  delete env.GEMINI_API_KEY;
+  delete env.GEMINI_REVIEW_MODEL;
+  const draftReply = load('lib/generateReviewDraft').generateReviewDraft;
+  const sampleContext = { business_name: 'Fixture Arms', manager_name: 'Manager',
+    business_type: 'pub', location: 'Bath', tone: 'warm-professional', reviewer_name: 'Guest' };
+  for (const [rating, review_text, expected] of [
+    [1, 'A member of staff was rude.', /way you were treated/],
+    [2, 'The mains arrived cold.', /food was cold/],
+    [3, 'We waited 40 minutes.', /wait 40 minutes/],
+    [4, 'Great food.', /enjoyed the food/],
+  ]) {
+    assert.match((await draftReply({ ...sampleContext, rating, review_text })).text, expected);
+    assert.ok((await draftReply({ ...sampleContext, rating, review_text: '' })).text.trim());
+  }
+  assert.equal((await draftReply({ ...sampleContext, rating: 5, review_text: '' })).text, draft);
+  assert.equal((await draftReply({ ...sampleContext, rating: 5, review_text: 'Lovely roast.' })).text, draft);
 
 });

@@ -1,4 +1,5 @@
 import 'server-only'
+import { FIVE_STAR_REPLY } from '@/lib/reviewDraftDefaults'
 import { buildSystemPrompt, buildUserMessage, type ReviewContext } from '@/lib/buildReplyPrompt'
 
 const SERIOUS = /allerg|anaphyla|poison|food\s*safety|made me sick|got sick|fell ill|injur|discrimin|racis|harass|unsafe|assault|threat|spik(?:e[ds]?|ing)|hospital|glass in|\b(?:raw|undercooked)\s+(?:chicken|poultry|pork|burger)\b|\b(?:chicken|poultry|pork|burger)\s+(?:was|were|came out)\s+(?:raw|undercooked)\b|cross.contaminat/i
@@ -86,20 +87,20 @@ function reviewDecision(ctx: ReviewContext, assessment?: unknown): { disposition
   if (BILL.test(text)) return { disposition: 'approval', reason: 'The guest raised a billing issue.' }
   if (WAIT.test(text)) return { disposition: 'approval', reason: 'The guest reported a wait.' }
   if (COLD_FOOD.test(text)) return { disposition: 'approval', reason: 'The guest reported cold food.' }
-  if (ctx.rating !== 5) return { disposition: 'approval', reason: 'Only new five-star praise qualifies for automatic publishing.' }
+  if (ctx.rating !== 5) return { disposition: 'approval', reason: 'Check that the reply addresses the guest’s feedback.' }
   if (hasReviewComplaint(text) || unsafeReply(text, ctx)) return { disposition: 'approval', reason: 'The text may include a complaint or details that need checking.' }
-  if (assessment !== 'routine_praise') return { disposition: 'approval', reason: 'A validated draft for straightforward praise is required for autopilot.' }
-  return { disposition: 'routine_praise', reason: 'Five-star praise with a validated draft.' }
+  return { disposition: 'routine_praise', reason: 'Five-star review with the default thank-you draft.' }
 }
 
 export async function generateReviewDraft(ctx: ReviewContext, signature?: string | null) {
   const key = process.env.GEMINI_API_KEY
   const model = process.env.GEMINI_REVIEW_MODEL
-  let text = templateReply(ctx)
+  const defaultText = ctx.rating === 5 ? FIVE_STAR_REPLY : templateReply(ctx)
+  let text = defaultText
   let provider: 'template' | 'gemini' = 'template'
   let assessment: unknown
 
-  if (key && model) {
+  if (ctx.rating !== 5 && key && model && ctx.review_text.trim()) {
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
@@ -155,7 +156,7 @@ export async function generateReviewDraft(ctx: ReviewContext, signature?: string
   const signoff = signature?.trim()
   const signedDraft = signoff ? `${text}\n\n${signoff}` : text
   if (Buffer.byteLength(signedDraft, 'utf8') > 4096 || (signoff && unsafeReply(signoff, ctx))) {
-    return { text: templateReply(ctx), provider: 'template' as const, ...reviewDecision(ctx, assessment === 'manager' ? assessment : undefined) }
+    return { text: defaultText, provider: 'template' as const, ...reviewDecision(ctx, assessment === 'manager' ? assessment : undefined) }
   }
   return { text: signedDraft, provider, ...reviewDecision(ctx, provider === 'gemini' || assessment === 'manager' ? assessment : undefined) }
 }

@@ -38,7 +38,7 @@ export function statusLabel(value?: string | null) {
   return value.charAt(0).toUpperCase() + value.slice(1).replaceAll("_", " ");
 }
 
-export function reviewLabel(value: ReviewEvidence) {
+export function reviewLabel(value: ReviewEvidence, publishingEnabled = false) {
   if (value.google_reply_state === "rejected") return "Rejected by Google";
   if (value.publication_blocked) return "Needs attention";
   if (value.posted_to_google_at) {
@@ -47,9 +47,9 @@ export function reviewLabel(value: ReviewEvidence) {
     return "Accepted by Google";
   }
   if (value.status === "sent") return "Publication unverified";
-  if (value.status === "approved") return "Queued";
+  if (value.status === "approved") return publishingEnabled ? "Queued" : "Draft ready";
   if (value.status === "skipped") return "Skipped";
-  return value.draft_response?.trim() ? "Needs approval" : "Needs draft";
+  return value.draft_response?.trim() ? (publishingEnabled ? "Needs approval" : "Draft ready") : "Needs draft";
 }
 
 export function formatDate(value?: number | string | null) {

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
 import { isWorkspaceOwner } from "@/lib/workspaceAccess";
+import { reviewPublishingEnabled } from "@/lib/reviewPublishing";
 
 async function requireAdmin() {
   const { userId } = await auth();
@@ -29,6 +30,8 @@ export async function PATCH(req: NextRequest) {
 
   const settingsUpdate: Record<string, unknown> = {}
   if (tone              !== undefined) settingsUpdate.tone              = String(tone).slice(0, 50)
+  if (Boolean(auto_send_positive) && !reviewPublishingEnabled())
+    return NextResponse.json({ error: 'Publishing is off during the draft pilot.' }, { status: 409 })
   if (auto_send_positive !== undefined) settingsUpdate.auto_send_positive = Boolean(auto_send_positive)
 
   if (Object.keys(profileUpdate).length === 0 && Object.keys(settingsUpdate).length === 0) {

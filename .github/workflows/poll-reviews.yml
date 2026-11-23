@@ -16,7 +16,7 @@ jobs:
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
       LEGACY_WEBHOOK_TOKEN: ${{ secrets.N8N_WEBHOOK_TOKEN }}
     steps:
-      - name: Import reviews and publish approved replies
+      - name: Import Google reviews and prepare drafts
         run: |
           if [[ -n "$CRON_SECRET" ]]; then
             auth_header="Authorization: Bearer $CRON_SECRET"
@@ -27,11 +27,7 @@ jobs:
             exit 1
           fi
 
-          failed=0
-          for endpoint in poll-reviews post-replies; do
-            status=$(curl -sS --connect-timeout 10 --max-time 290 -o /dev/null -w "%{http_code}" \
-              -H "$auth_header" "https://www.0-clicks.uk/api/cron/$endpoint") || status=000
-            echo "$endpoint HTTP $status"
-            [[ "$status" = "200" ]] || failed=1
-          done
-          exit "$failed"
+          status=$(curl -sS --connect-timeout 10 --max-time 290 -o /dev/null -w "%{http_code}" \
+            -H "$auth_header" "https://www.0-clicks.uk/api/cron/poll-reviews") || status=000
+          echo "poll-reviews HTTP $status"
+          [[ "$status" = "200" ]]

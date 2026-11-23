@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { FIVE_STAR_REPLY } from "@/lib/reviewDraftDefaults";
 import s from "./OwnerWalkthrough.module.css";
 
 const steps = [
   { label: "Review arrives", text: "Lovely Sunday roast. The team made us feel right at home." },
-  { label: "A draft is ready", text: "Glad you felt at home with us on Sunday. It’s lovely to hear you enjoyed the roast." },
-  { label: "Owner approves", text: "The owner checks the wording, then queues the reply for Google." },
+  { label: "A draft is ready", text: FIVE_STAR_REPLY },
+  { label: "Owner checks the draft", text: "The owner checks the wording and can edit or copy it." },
 ] as const;
 
 export default function OwnerWalkthrough() {

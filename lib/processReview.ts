@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { supabase } from '@/lib/supabase'
 import { hasServiceAccess } from '@/lib/entitlements'
 import { generateReviewDraft, hasReviewComplaint } from '@/lib/generateReviewDraft'
+import { reviewPublishingEnabled } from '@/lib/reviewPublishing'
 
 const VALID_SENTIMENTS = new Set(['POSITIVE', 'NEUTRAL', 'NEGATIVE'])
 const VALID_PLATFORMS = new Set(['google', 'tripadvisor', 'facebook'])
@@ -143,8 +144,9 @@ export async function processReview(body: Record<string, unknown>, { legacy = fa
 
   // Generate a draft using the customer's reply settings.
   // Fetch profile + settings for business context
-  let finalDraft = legacy ? safeStr(draft_response) : null
-  let finalStatus = legacy ? (safeStr(status, 20) ?? 'pending') : 'pending'
+  const legacyPublishing = legacy && reviewPublishingEnabled()
+  let finalDraft = legacyPublishing ? safeStr(draft_response) : null
+  let finalStatus = legacyPublishing ? (safeStr(status, 20) ?? 'pending') : 'pending'
   let autoSent = false
   try {
     const [{ data: fullProfile }, { data: settings }] = await Promise.all([
@@ -169,7 +171,7 @@ export async function processReview(body: Record<string, unknown>, { legacy = fa
     // Preserve the legacy Pro setting for existing webhook callers. V1 waits for owner approval.
     const ratingNum = Number(rating) || 3
     const hasComplaint = hasReviewComplaint(safeStr(review_text, 5000) ?? '')
-    if (legacy && generated.provider === 'gemini' && profile.plan === 'pro' && settings?.auto_send_positive && ratingNum >= 4 && !hasComplaint && finalStatus === 'pending' && finalDraft?.trim()) {
+    if (legacyPublishing && generated.provider === 'gemini' && profile.plan === 'pro' && settings?.auto_send_positive && ratingNum >= 4 && !hasComplaint && finalStatus === 'pending' && finalDraft?.trim()) {
       finalStatus = 'approved'
       autoSent = true
     }

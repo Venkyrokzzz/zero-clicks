@@ -25,7 +25,7 @@ function fixture(inactive=0,active=1){
  class Clock extends Date{constructor(...a){super(...(a.length?a:[Date.now()+offset]))}static now(){return Date.now()+offset}}
  const cache={};function load(file){if(cache[file])return cache[file];const exports={};cache[file]=exports;
  vm.runInNewContext(ts.transpileModule(fs.readFileSync(root+'/'+file+'.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{
- exports,Buffer,AbortSignal,URL,URLSearchParams,Date:Clock,process:{env:{CRON_SECRET:'fake-cron'}},
+ exports,Buffer,AbortSignal,URL,URLSearchParams,Date:Clock,process:{env:{CRON_SECRET:'fake-cron',GOOGLE_REVIEW_PUBLISHING_ENABLED:'true'}},
  fetch:async(input,opt={})=>{assert.ok(input.startsWith('https://mybusiness.googleapis.com/v4/'));const resource=input.split('/v4/')[1].replace(/\/reply$/,'');if(opt.method==='PUT'){assert.equal(replies.has(resource),false,'duplicate write');writes++;const reply={comment:JSON.parse(opt.body).comment,reviewReplyState:'PENDING'};replies.set(resource,reply);return Response.json(reply)}return Response.json({name:resource,reviewReply:replies.get(resource)})},
  require(id){if(id==='next/server')return {NextResponse:Response};if(id==='server-only')return {};if(id==='crypto'||id==='node:crypto')return crypto;if(id==='@/lib/supabase'||id==='./supabase')return {supabase};if(id.startsWith('@/'))return load(id.slice(2));if(id.startsWith('./'))return load(path.posix.join(path.posix.dirname(file),id));throw Error(id)}
  });return exports}

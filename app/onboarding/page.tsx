@@ -100,18 +100,18 @@ function BeerMug({ fillProgress }: { fillProgress: number }) {
 const STATS = [
   {
     icon: "🕐",
-    value: "8 seconds",
-    label: "Average reply time vs 3.2 day industry average",
+    value: "Five stars",
+    label: "A thank-you draft ready to check",
   },
   {
     icon: "🤖",
-    value: "Fully automated",
-    label: "Reviews detected, drafted and posted while you sleep",
+    value: "One to four stars",
+    label: "A draft based on the guest’s feedback",
   },
   {
     icon: "📈",
-    value: "15% more visibility",
-    label: "Review signals drive Google local SEO ranking",
+    value: "Your inbox",
+    label: "Edit and copy drafts when you’re ready",
   },
 ];
 

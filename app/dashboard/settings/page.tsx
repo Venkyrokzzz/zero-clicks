@@ -11,7 +11,6 @@ const TONES = [
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
     tone: 'warm-professional',
-    auto_send_positive: false,
     flag_negative: true,
     signature: '',
   })
@@ -31,7 +30,7 @@ export default function SettingsPage() {
     await fetch('/api/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settings),
+      body: JSON.stringify({ tone: settings.tone, flag_negative: settings.flag_negative, signature: settings.signature }),
     })
     setSaving(false)
     setSaved(true)
@@ -43,7 +42,7 @@ export default function SettingsPage() {
   return (
     <PageShell>
       <h1 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '8px' }}>Settings</h1>
-      <p style={{ color: '#a1a1aa', marginBottom: '36px' }}>Control how Zero Clicks replies on your behalf.</p>
+      <p style={{ color: '#a1a1aa', marginBottom: '36px' }}>Set the tone and signature for your reply drafts.</p>
 
       {/* Tone */}
       <Section title="Reply tone">
@@ -71,12 +70,6 @@ export default function SettingsPage() {
 
       {/* Toggles */}
       <Section title="Behaviour">
-        <Toggle
-          label="Auto-send suitable 4-5 star replies"
-          desc="3, 4 and 5-star reviews are sent automatically. 1-2 stars and complaints always held for your approval."
-          checked={settings.auto_send_positive}
-          onChange={v => setSettings(s => ({ ...s, auto_send_positive: v }))}
-        />
         <Toggle
           label="Flag negative reviews"
           desc="1 and 2-star reviews appear at the top with a red badge."

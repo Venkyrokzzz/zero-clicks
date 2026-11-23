@@ -83,16 +83,16 @@ export function Process({ animate = false }: { animate?: boolean }) {
             "Link the Google Business Profile you manage.",
           ],
           [
-            "Get a reply in your voice",
-            "Zero Clicks drafts a reply using the guest’s comments and your saved tone.",
+            "Get a draft for every rating",
+            "Five stars get a default thank-you. One to four stars get a reply based on the guest’s comments when available.",
           ],
           [
             "Handle the exceptions",
             "The duty manager sees sensitive reviews with a reason and an editable draft.",
           ],
           [
-            "Follow it through",
-            "See when a reply is queued, submitted, or held by Google.",
+            "Review and copy",
+            "Edit and copy a draft from your inbox. The pilot keeps replies private.",
           ],
         ].map(([title, body], i) => (
           <li key={title}>
@@ -114,7 +114,7 @@ export function Pricing() {
         <p className={s.productLabel}>Reputation Manager</p>
         <h2>One venue. A little less on your plate.</h2>
         <p className={s.pricingDescription}>
-          Google review drafts, owner approval, and guided onboarding.
+          Google review drafts, editing and copying, and guided onboarding.
         </p>
         <PricingCheckout foundingOpen={FOUNDING_OPEN} />
         <Link className={s.pricingContact} href={enquiry}>Discuss your venue</Link>
@@ -149,8 +149,8 @@ export function FAQ() {
       <div>
         {[
           [
-            "Will replies go out without me?",
-            "You approve the reply before it’s queued for Google. The demo shows how reviews are sorted for approval or manager attention.",
+            "Where do the replies go?",
+            "Drafts are saved in your private inbox. You can edit and copy them. Google publishing is off during the pilot.",
           ],
           [
             "Does this demo connect to Google?",
@@ -207,7 +207,7 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
                 <p className={s.intro}>
                   {page === "demo"
                     ? "Choose a sample or paste a review. Draft a reply, edit it and try approving it."
-                    : "Google review replies, drafted for UK pubs and restaurants. Read, refine and approve. Get back to your guests."}
+                    : "Google review replies, drafted for UK pubs and restaurants. Five stars get a default thank-you. One to four stars get a draft based on the guest’s feedback."}
                 </p>
                 <div className={s.heroActions}>
                   <a className={s.primary} href="#walkthrough">
@@ -224,7 +224,7 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
             {full && (
               <div className={s.principles}>
                 <p>Your voice.</p>
-                <p>Your approval.</p>
+                <p>Your final edit.</p>
                 <p>Your reputation.</p>
               </div>
             )}
@@ -235,7 +235,7 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
             <p className={s.productLabel}>Reputation Manager</p>
             <h1>You keep the final word.</h1>
             <p>
-              From connecting your venue to approving a reply, here’s how the
+              From connecting your venue to editing a draft, here’s how the
               workflow fits around your day.
             </p>
             <Link href="/demo" className={s.primary}>

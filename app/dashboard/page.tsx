@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TrialBanner } from "@/components/TrialBanner";
 import ReviewProgress from "@/components/workspace/ReviewProgress";
 import {
@@ -30,18 +30,34 @@ type Connection = {
 function ReviewEditor({
   review,
   onChanged,
+  publishingEnabled,
 }: {
   review: Review;
   onChanged: () => void;
+  publishingEnabled: boolean;
 }) {
   const [draft, setDraft] = useState(review.draft_response ?? "");
   const [busy, setBusy] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const replyField = useRef<HTMLTextAreaElement>(null);
   const editable =
-    (review.status === "pending" || review.status === "skipped") &&
+    (review.status === "pending" || review.status === "skipped" ||
+      (!publishingEnabled && review.status === "approved")) &&
     !review.posted_to_google_at;
   const oversized = new TextEncoder().encode(draft).length > 4096;
+  async function copyDraft() {
+    setError("");
+    try {
+      await navigator.clipboard.writeText(draft.trim());
+      setNotice("Draft copied.");
+    } catch {
+      replyField.current?.focus();
+      replyField.current?.select();
+      setNotice("Copy the selected text using your device’s copy command.");
+    }
+  }
+
   async function act(action: "save" | "approve" | "skip" | "regenerate") {
     setBusy(action);
     setError("");
@@ -68,7 +84,7 @@ function ReviewEditor({
       if (typeof data.draft === "string") setDraft(data.draft);
       if (action === "save") setNotice("Draft saved.");
       if (action === "regenerate")
-        setNotice("New draft saved. Read it before approving.");
+        setNotice("New draft saved.");
       onChanged();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save that change.");
@@ -82,14 +98,14 @@ function ReviewEditor({
       className={`${s.box} ${s.stack} ${s.detail}`}
       aria-label="Selected review"
     >
-      <ReviewProgress review={review} />
+      <ReviewProgress review={review} publishingEnabled={publishingEnabled} />
       <div>
         <div className={s.row}>
           <h2>{review.reviewer_name || "Google guest"}</h2>
           <span
             className={`${s.status} ${review.google_reply_state === "rejected" || review.publication_blocked ? s.warn : ""}`}
           >
-            {reviewLabel(review)}
+            {reviewLabel(review, publishingEnabled)}
           </span>
         </div>
         <p className={s.muted}>
@@ -107,6 +123,7 @@ function ReviewEditor({
         <label htmlFor="workspace-reply">Reply draft</label>
         <textarea
           id="workspace-reply"
+          ref={replyField}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           readOnly={!editable || !!busy}
@@ -120,13 +137,15 @@ function ReviewEditor({
       )}
       {editable && (
         <div className={s.row}>
-          <button
-            className={s.primary}
-            onClick={() => act("approve")}
-            disabled={!!busy || !draft.trim() || oversized}
-          >
-            {busy === "approve" ? "Approving…" : "Approve and queue"}
-          </button>
+          {publishingEnabled ? (
+            <button className={s.primary} onClick={() => act("approve")} disabled={!!busy || !draft.trim() || oversized}>
+              {busy === "approve" ? "Approving…" : "Approve and queue"}
+            </button>
+          ) : (
+            <button className={s.primary} onClick={copyDraft} disabled={!!busy || !draft.trim() || oversized}>
+              Copy draft
+            </button>
+          )}
           <button
             className={s.button}
             onClick={() => act("save")}
@@ -176,6 +195,7 @@ function ReviewEditor({
 
 export default function Inbox() {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [publishingEnabled, setPublishingEnabled] = useState(false);
   const [connection, setConnection] = useState<Connection>();
   const [connectionError, setConnectionError] = useState(false);
   const [selected, setSelected] = useState<string>();
@@ -189,8 +209,9 @@ export default function Inbox() {
     setLoading(true);
     setError("");
     try {
-      const data = await panelRequest<{ reviews: Review[] }>("/api/reviews");
+      const data = await panelRequest<{ reviews: Review[]; publishingEnabled?: boolean }>("/api/reviews");
       setReviews(data.reviews);
+      setPublishingEnabled(data.publishingEnabled === true);
       setSelected((current) =>
         data.reviews.some((r) => r.id === current)
           ? current
@@ -259,6 +280,7 @@ export default function Inbox() {
           </div>
         </header>
         <TrialBanner />
+        {!publishingEnabled && <p className={s.notice}>Draft pilot · Replies stay in Zero Clicks until you copy them.</p>}
         {connectionError && (
           <p className={s.alert}>
             Could not read your Google connection. Select Refresh to retry.
@@ -322,7 +344,7 @@ export default function Inbox() {
               <option value="all">All reviews</option>
               <option value="flagged">Low rating</option>
               <option value="pending">Needs action</option>
-              <option value="approved">Queued</option>
+              <option value="approved">{publishingEnabled ? "Queued" : "Previously approved drafts"}</option>
               <option value="sent">Recorded replies</option>
               <option value="skipped">Skipped</option>
             </select>
@@ -348,7 +370,7 @@ export default function Inbox() {
                         <span
                           className={`${s.status} ${review.google_reply_state === "rejected" || review.publication_blocked ? s.warn : ""}`}
                         >
-                          {reviewLabel(review)}
+                          {reviewLabel(review, publishingEnabled)}
                         </span>
                       </span>
                       <span className={s.muted}>
@@ -381,6 +403,7 @@ export default function Inbox() {
                 key={active.id}
                 review={active}
                 onChanged={refresh}
+                publishingEnabled={publishingEnabled}
               />
             </div>
           )}

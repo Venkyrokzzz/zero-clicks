@@ -1,7 +1,7 @@
 import { formatDate, reviewLabel, type ReviewEvidence } from "./panel-data";
 import s from "./Workspace.module.css";
 
-export default function ReviewProgress({ review }: { review: ReviewEvidence }) {
+export default function ReviewProgress({ review, publishingEnabled = false }: { review: ReviewEvidence; publishingEnabled?: boolean }) {
   const steps = [
     {
       label: "Imported",
@@ -13,7 +13,7 @@ export default function ReviewProgress({ review }: { review: ReviewEvidence }) {
       detail: review.draft_response?.trim() ? "Text saved" : "No draft saved",
       done: !!review.draft_response?.trim(),
     },
-    {
+    ...(publishingEnabled ? [{
       label: "Approval",
       detail:
         review.status === "skipped"
@@ -24,15 +24,15 @@ export default function ReviewProgress({ review }: { review: ReviewEvidence }) {
               ? "Reply recorded"
               : "Waiting on owner",
       done: review.status === "approved",
-    },
+    }] : []),
     {
       label: "Google",
       detail:
         review.posted_to_google_at ||
         review.status === "sent" ||
         review.publication_blocked
-          ? reviewLabel(review)
-          : "Waiting for submission",
+          ? reviewLabel(review, publishingEnabled)
+          : publishingEnabled ? "Waiting for submission" : "Draft only",
       done:
         !!review.posted_to_google_at &&
         review.google_reply_state !== "rejected",
@@ -55,14 +55,13 @@ export default function ReviewProgress({ review }: { review: ReviewEvidence }) {
         <summary>How the reply is prepared</summary>
         <p className={s.muted}>
           Zero Clicks checks the connected Google listing for new reviews.
-          Drafting can use the review text, star rating, venue details, and your
-          saved tone. If the AI draft is unavailable, a template can be offered
-          for your approval. You can edit the wording or write it yourself.
+          Five-star reviews get a default thank-you. For one to four stars,
+          the draft uses the guest’s feedback when available. You can edit or copy any draft.
         </p>
         <p className={s.muted}>
-          Approving a reply queues that exact text. The publisher checks for an
-          existing reply before sending. A recorded submission and Google’s
-          moderation status are shown separately.
+          {publishingEnabled
+            ? "Approving queues the exact reply text. Google submissions and moderation appear separately."
+            : "Publishing is off during the pilot. Drafts are saved in your inbox."}
         </p>
       </details>
     </>
