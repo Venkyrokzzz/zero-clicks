@@ -12,7 +12,7 @@ type ClerkUserEvent = {
   type: string;
   data: {
     id: string;
-    email_addresses: { email_address: string }[];
+    email_addresses: { id?: string; email_address: string }[];
     primary_email_address_id?: string;
   };
 };
@@ -75,7 +75,7 @@ async function handleUserCreated(data: ClerkUserEvent["data"]) {
 
   // Prefer primary email; fall back to first in list
   const email =
-    email_addresses.find(e => e.email_address === primary_email_address_id)
+    email_addresses.find(e => e.id && e.id === primary_email_address_id)
       ?.email_address ??
     email_addresses[0]?.email_address ??
     "";
@@ -93,7 +93,7 @@ async function handleUserCreated(data: ClerkUserEvent["data"]) {
       plan: "trial",
       updated_at: new Date().toISOString(),
     },
-    { onConflict: "clerk_user_id" }
+    { onConflict: "clerk_user_id", ignoreDuplicates: true }
   );
 
   if (profileError) {
@@ -109,7 +109,7 @@ async function handleUserCreated(data: ClerkUserEvent["data"]) {
       auto_send_positive: false,
       flag_negative: true,
     },
-    { onConflict: "clerk_user_id" }
+    { onConflict: "clerk_user_id", ignoreDuplicates: true }
   );
 
   if (settingsError) {

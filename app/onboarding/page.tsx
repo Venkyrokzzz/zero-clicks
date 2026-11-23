@@ -190,19 +190,21 @@ export default function OnboardingPage() {
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-
-    if (!res.ok) {
-      setError("Something went wrong. Please try again.");
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const result = await res.json().catch(() => null);
+      if (!res.ok || result?.success !== true) {
+        throw new Error(result?.error || "Could not save your venue details. Please try again.");
+      }
+      window.location.href = "/api/auth/google";
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "Could not save your venue details. Please try again.");
       setLoading(false);
-      return;
     }
-
-    window.location.href = "/api/auth/google";
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────

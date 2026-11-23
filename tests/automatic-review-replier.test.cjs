@@ -142,7 +142,13 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
         return { data: [{ status: 'active', metadata: { clerk_user_id: 'fixture', plan: 'founding' }, items: { data: [{ current_period_end: 1800000000 }] } }] };
       } };
     } },
-    '@clerk/nextjs/server': { auth: async () => actor },
+    '@clerk/nextjs/server': {
+      auth: async () => actor,
+      currentUser: async () => ({
+        id: actor.userId, createdAt: Date.now() - 86400000,
+        primaryEmailAddress: { emailAddress: 'venue-owner@example.test' },
+      }),
+    },
     '@/lib/supabase': { supabase },
     '@/lib/rateLimit': { checkRateLimit: () => ({ allowed: true }) },
   };
@@ -500,4 +506,31 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   assert.match(second.publication_message, /Already replied on Google/);
   assert.equal(attempts, 2);
   assert.equal((await cron('post-replies')).status, 200);
+  // Venue setup can recover when Clerk's signup event has not created a profile.
+  actor = { userId: 'missing-profile' };
+  const saveProfile = load('app/api/profile/route').PUT;
+  const venueDetails = { business_name: 'New Test Venue', phone: '00000000000' };
+  const saveVenue = values => saveProfile(new Request(site + '/api/profile', {
+    method: 'PUT', body: JSON.stringify(values),
+  }));
+  assert.equal((await saveVenue(venueDetails)).status, 200);
+  const recovered = tables.profiles.find(row => row.clerk_user_id === actor.userId);
+  assert.equal(recovered.email, 'venue-owner@example.test');
+  assert.equal(recovered.business_name, venueDetails.business_name);
+  assert.equal(recovered.plan, 'trial');
+  const recoveredSettings = tables.settings.find(row => row.clerk_user_id === actor.userId);
+  assert.equal(recoveredSettings.auto_send_positive, false);
+  recovered.plan = 'founding';
+  recoveredSettings.tone = 'casual';
+  assert.equal((await saveVenue({ business_name: 'Renamed Test Venue' })).status, 200);
+  assert.equal(recovered.business_name, 'Renamed Test Venue');
+  assert.equal(recovered.plan, 'founding');
+  assert.equal(recoveredSettings.tone, 'casual');
+
+  // A delayed duplicate signup event must preserve billing and settings.
+  assert.equal((await load('app/api/webhooks/clerk/route').POST(new Request(site, {
+    method: 'POST', body: signup,
+  }))).status, 200);
+  assert.equal(profile.plan, 'founding');
+
 });
