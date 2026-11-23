@@ -92,7 +92,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
     NEXT_PUBLIC_SITE_URL: site, OAUTH_STATE_SECRET: 'fixture-state',
     GOOGLE_CLIENT_ID: 'fixture-client', GOOGLE_CLIENT_SECRET: 'fixture-secret',
     GOOGLE_REDIRECT_URI: site + '/api/auth/google/callback',
-    CRON_SECRET: 'fixture-cron-secret',
+    CRON_SECRET: 'fixture-cron-secret', ZERO_CLICKS_OWNER_CLERK_ID: 'admin',
     CLERK_WEBHOOK_SECRET: 'whsec_' + Buffer.from('fixture-clerk-signing-secret').toString('base64'),
     STRIPE_WEBHOOK_SECRET: 'whsec_fixture', STRIPE_SECRET_KEY: 'sk_test_fixture',
   };
@@ -144,6 +144,11 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
     } },
     '@clerk/nextjs/server': {
       auth: async () => actor,
+      clerkMiddleware: handler => handler,
+      createRouteMatcher: patterns => request => patterns.some(pattern => {
+        const route = request.nextUrl.pathname;
+        return pattern.endsWith('(.*)') ? route.startsWith(pattern.slice(0, -4)) : route === pattern;
+      }),
       currentUser: async () => ({
         id: actor.userId, createdAt: Date.now() - 86400000,
         primaryEmailAddress: { emailAddress: 'venue-owner@example.test' },
@@ -357,13 +362,38 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   const adminClients = load('app/api/admin/clients/route');
   const adminReviews = load('app/api/admin/client/reviews/route');
   const adminRequest = { nextUrl: new URL(site + '/api/admin/client/reviews?id=fixture') };
+  const workspace = load('lib/workspaceAccess');
+  const middleware = load('middleware').default;
+  const runMiddleware = path => middleware(
+    Object.assign(async () => actor, { protect: async () => assert.ok(actor.userId) }),
+    { url: site + path, nextUrl: new URL(site + path), headers: new Headers() },
+  );
+  actor = { userId: 'admin' };
+  assert.equal((await runMiddleware('/sign-in')).headers.get('location'), site + '/admin');
+  assert.equal(await runMiddleware('/admin'), undefined);
+  actor = { userId: 'fixture', sessionClaims: { metadata: { role: 'admin' } } };
+  assert.equal((await runMiddleware('/sign-in')).headers.get('location'), site + '/dashboard');
+  assert.equal((await runMiddleware('/admin')).headers.get('location'), site + '/dashboard');
+  assert.equal((await runMiddleware('/sign-in?redirect_url=%2Fconnect')).headers.get('location'), site + '/connect');
+  assert.equal((await runMiddleware('/sign-in?redirect_url=https%3A%2F%2Fother.test')).headers.get('location'), site + '/dashboard');
+  assert.equal(workspace.workspaceHome('admin'), '/admin');
+  assert.equal(workspace.workspaceHome('fixture'), '/dashboard');
+  delete env.ZERO_CLICKS_OWNER_CLERK_ID;
+  assert.equal(workspace.isWorkspaceOwner('admin'), false);
+  env.ZERO_CLICKS_OWNER_CLERK_ID = 'admin';
+
+  // A stale Clerk admin claim cannot grant a different user access.
+  actor = { userId: 'fixture', sessionClaims: { metadata: { role: 'admin' } } };
   assert.equal((await adminClients.GET()).status, 403);
   assert.equal((await adminReviews.GET(adminRequest)).status, 403);
-  actor = { userId: 'admin', sessionClaims: { metadata: { role: 'admin' } } };
-
-  // Same subscription, two roles. Only the owner can mint their portal URL.
   const billing = load('app/api/billing/route');
   const billingRequest = (suffix = '') => ({ nextUrl: new URL(site + '/api/billing' + suffix) });
+  assert.equal((await billing.GET(billingRequest('?client=other'))).status, 403);
+  actor = { userId: 'admin' };
+  assert.equal(workspace.isWorkspaceOwner(actor.userId), true);
+  assert.equal((await adminReviews.GET(adminRequest)).status, 200);
+
+  // A portal URL can only be minted by the signed-in billing customer.
   actor = {};
   assert.equal((await billing.GET(billingRequest())).status, 401);
   assert.equal((await billing.POST(billingRequest())).status, 401);
@@ -379,7 +409,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   assert.equal(own.subscription.periodEnd, 1800000000);
   assert.equal(own.dashboardUrl, undefined);
   assert.match((await (await billing.POST(billingRequest())).json()).url, /^https:\/\/billing\.stripe\.com/);
-  actor = { userId: 'admin', sessionClaims: { metadata: { role: 'admin' } } };
+  actor = { userId: 'admin' };
   assert.match((await (await billing.GET(billingRequest('?client=fixture'))).json()).dashboardUrl, /test\/customers\/cus_fixture$/);
   assert.equal((await billing.POST(billingRequest('?client=fixture'))).status, 403);
 
@@ -425,7 +455,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   assert.equal((await update('approved', approvedReply)).status, 200);
   assert.equal((await update('approved', 'Changed after approval')).status, 409);
   assert.equal((await (await reviews.GET(new Request(site))).json()).reviews[0].status, 'approved');
-  actor = { userId: 'admin', sessionClaims: { metadata: { role: 'admin' } } };
+  actor = { userId: 'admin' };
   assert.equal((await adminEdit({ draft_response: 'Edited after approval' })).status, 409);
   actor = { userId: 'fixture' };
   const originalLocation = venue.location_id;
@@ -473,7 +503,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   const published = await (await reviews.GET(new Request(site))).json();
   assert.equal(published.metrics.sentCount, 1);
   assert.ok(published.reviews[0].posted_to_google_at);
-  actor = { userId: 'admin', sessionClaims: { metadata: { role: 'admin' } } };
+  actor = { userId: 'admin' };
   assert.equal((await (await adminReviews.GET(adminRequest)).json()).reviews[0].status, 'sent');
   assert.equal((await cron('post-replies')).status, 200);
   assert.equal(attempts, 2);

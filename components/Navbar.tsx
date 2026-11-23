@@ -249,7 +249,7 @@ export default function Navbar() {
             <ThemeToggle />
             {isSignedIn ? (
               <Link
-                href="/dashboard"
+                href="/workspace"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -448,7 +448,7 @@ export default function Navbar() {
                 style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "32px" }}
               >
                 <Link
-                  href={isSignedIn ? "/dashboard" : "/sign-in"}
+                  href={isSignedIn ? "/workspace" : "/sign-in"}
                   onClick={() => setMobileOpen(false)}
                   style={{
                     display: "flex",

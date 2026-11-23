@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { createCustomerPortal } from "@/lib/stripe-portal";
 import { hasServiceAccess } from "@/lib/entitlements";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { isWorkspaceOwner } from "@/lib/workspaceAccess";
 
 export const dynamic = "force-dynamic";
 
@@ -35,11 +36,10 @@ function stripeClient() {
 }
 
 export async function GET(request: NextRequest) {
-  const { userId, sessionClaims } = await auth();
+  const { userId } = await auth();
   if (!userId) return reply({ error: "Sign in to view billing." }, 401);
   const client = request.nextUrl.searchParams.get("client");
-  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role;
-  if (client !== null && role !== "admin")
+  if (client !== null && !isWorkspaceOwner(userId))
     return reply({ error: "Admins only." }, 403);
   if (client !== null && (!client || client.length > 128))
     return reply({ error: "Invalid client." }, 400);

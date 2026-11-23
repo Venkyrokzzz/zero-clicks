@@ -4,15 +4,17 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isWorkspaceOwner, workspaceHome } from "@/lib/workspaceAccess";
 
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
   "/onboarding(.*)",
   "/connect(.*)",
   "/admin(.*)",
+  "/workspace",
 ]);
 
-const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+const isAuthEntry = createRouteMatcher(["/sign-in", "/sign-up"]);
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
 
@@ -29,23 +31,31 @@ export default clerkMiddleware(
       await auth.protect();
     }
 
-    // Admin routes: require role === 'admin' in Clerk publicMetadata
     if (isAdminRoute(req)) {
-      const { sessionClaims } = await auth();
-      const role = (sessionClaims?.metadata as Record<string, string> | undefined)?.role;
-      if (role !== 'admin') {
-        return NextResponse.redirect(new URL('/dashboard', req.url));
+      const { userId } = await auth();
+      if (!isWorkspaceOwner(userId)) {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
       }
     }
 
-    // Smart post-login routing: after sign-in/sign-up, send admin to /admin, clients to /dashboard
-    if (isAuthRoute(req)) {
-      const { sessionClaims, userId } = await auth();
-      if (userId) {
-        const role = (sessionClaims?.metadata as Record<string, string> | undefined)?.role;
-        const dest = role === 'admin' ? '/admin' : '/dashboard';
-        return NextResponse.redirect(new URL(dest, req.url));
+    if (isAuthEntry(req)) {
+      const { userId } = await auth();
+      if (!userId) return;
+      const requested = req.nextUrl.searchParams.get("redirect_url");
+      if (requested) {
+        try {
+          const destination = new URL(requested, req.url);
+          if (
+            destination.origin === req.nextUrl.origin &&
+            /^\/(dashboard|connect|onboarding)(?:\/|$)/.test(destination.pathname)
+          ) {
+            return NextResponse.redirect(destination);
+          }
+        } catch {
+          // Ignore malformed or external destinations.
+        }
       }
+      return NextResponse.redirect(new URL(workspaceHome(userId), req.url));
     }
   },
   { contentSecurityPolicy: {} }

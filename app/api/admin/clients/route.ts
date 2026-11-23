@@ -2,11 +2,11 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { isWorkspaceOwner } from "@/lib/workspaceAccess";
 
 export async function GET() {
-  const { userId, sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role;
-  if (!userId || role !== "admin")
+  const { userId } = await auth();
+  if (!userId || !isWorkspaceOwner(userId))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   if (!checkRateLimit(`admin:clients:${userId}`, 30).allowed)
     return NextResponse.json({ error: "Try again later." }, { status: 429 });

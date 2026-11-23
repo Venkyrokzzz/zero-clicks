@@ -1,11 +1,18 @@
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { isWorkspaceOwner } from "@/lib/workspaceAccess";
 import s from "@/components/workspace/Workspace.module.css";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+  if (!isWorkspaceOwner(userId)) redirect("/dashboard");
+
   return (
     <div>
       <header className={s.workspaceNav}>

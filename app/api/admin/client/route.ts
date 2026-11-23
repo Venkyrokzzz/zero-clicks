@@ -3,12 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
+import { isWorkspaceOwner } from "@/lib/workspaceAccess";
+
 async function requireAdmin() {
-  const { userId, sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as Record<string, string> | undefined)
-    ?.role;
-  if (!userId || role !== "admin") return false;
-  return true;
+  const { userId } = await auth();
+  return isWorkspaceOwner(userId);
 }
 
 // GET /api/admin/client?id=clerk_user_id — fetch one client's full profile
