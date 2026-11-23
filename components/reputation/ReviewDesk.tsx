@@ -241,7 +241,7 @@ export default function ReviewDesk() {
                   {draft.disposition === "manager"
                     ? "Needs manager attention"
                     : draft.disposition === "routine_praise"
-                      ? "Default five-star draft"
+                      ? "Routine praise"
                       : "Needs approval"}
                 </strong>
                 {draft.reason && <p>{draft.reason}</p>}

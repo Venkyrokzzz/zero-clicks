@@ -1195,3 +1195,47 @@
 .checkoutLinks { margin-top: 6px; }
 .pricingContact { display: inline-block; margin-top: 14px; }
 .foundingTerms { margin-top: 8px !important; }
+
+.site .primary {
+  background: var(--accent, var(--red));
+  border-color: var(--accent, var(--red));
+  color: var(--ink) !important;
+  padding: 12px 18px;
+  border-radius: 7px;
+  font-weight: 700;
+}
+.site .primary:hover:not(:disabled) {
+  background: #c7d44e;
+  border-color: #c7d44e;
+}
+.site .header .wordmark,
+.site .footer .wordmark {
+  font-family: var(--font-display, Arial), Arial, sans-serif;
+  font-size: clamp(23px, 2.3vw, 33px);
+  font-weight: 750;
+}
+.site .navigation,
+.site .login {
+  font-size: 15px;
+}
+.site .navigation {
+  gap: clamp(15px, 3vw, 40px);
+}
+.site .navigation a {
+  font-size: inherit;
+}
+.site .checkoutSecondary {
+  border-color: var(--line);
+  color: var(--ink);
+}
+.site .checkoutSecondary:hover:not(:disabled) {
+  background: #eae1d5;
+}
+.site .pricingDescription,
+.site .priceDetails,
+.site .standardPrice,
+.site .foundingTerms,
+.site .checkoutStatus,
+.site .pricingContact {
+  color: var(--ink);
+}

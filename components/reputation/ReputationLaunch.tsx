@@ -1,17 +1,18 @@
 import Link from "next/link";
+import Image from "next/image";
 import { FOUNDING_OPEN, FOUNDING_TOTAL } from "@/lib/foundingConfig";
 import ReviewDesk from "./ReviewDesk";
 import PricingCheckout from "./PricingCheckout";
 import OwnerWalkthrough from "./OwnerWalkthrough";
 import VenueEnquiry from "./VenueEnquiry";
 import s from "./ReputationLaunch.module.css";
+import e from "./Editorial.module.css";
 import paper from "./PaperDesk.module.css";
 
 type Page = "home" | "product" | "demo" | "pricing" | "process" | "contact";
 const enquiry = "/contact?service=Reputation%20Manager";
 
 const mainLinks = [
-  { page: "product", href: "/products/reputation-manager", label: "Reputation Manager" },
   { page: "process", href: "/how-it-works", label: "How it works" },
   { page: "demo", href: "/demo", label: "Try the demo" },
   { page: "pricing", href: "/pricing", label: "Pricing" },
@@ -29,7 +30,7 @@ function Header({ page }: { page: Page }) {
   ));
 
   return (
-    <header className={s.header}>
+    <header className={`${s.header} ${e.header}`}>
       <Link
         href="/"
         className={s.wordmark + " " + paper.deskBrand}
@@ -40,7 +41,10 @@ function Header({ page }: { page: Page }) {
         zero clicks
       </Link>
       <nav className={s.navigation} aria-label="Main navigation">{links}</nav>
-      <Link href="/sign-in" className={s.login}>Log in</Link>
+      <div className={e.headerActions}>
+        <Link href="/sign-in" className={s.login}>Log in</Link>
+        <Link href="/start" className={e.connect}>Connect Google</Link>
+      </div>
       <details className={s.mobileNav}>
         <summary>
           Menu
@@ -50,6 +54,7 @@ function Header({ page }: { page: Page }) {
         </summary>
         <nav aria-label="Mobile navigation">
           {links}
+          <Link href="/start">Connect Google</Link>
           <Link href={enquiry} aria-current={page === "contact" ? "page" : undefined}>Contact</Link>
         </nav>
       </details>
@@ -58,7 +63,7 @@ function Header({ page }: { page: Page }) {
 }
 function Footer() {
   return (
-    <footer className={s.footer}>
+    <footer className={`${s.footer} ${e.footer}`}>
       <Link href="/" className={`${s.wordmark} ${paper.deskBrand}`}>
         <img src="/zero-clicks-mark.svg" alt="" width={48} height={48} />
         zero clicks
@@ -68,53 +73,96 @@ function Footer() {
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>
       </nav>
-      <p>Less screen. More floor.</p>
+      <p>Google review replies for UK pubs and restaurants.</p>
     </footer>
   );
 }
+const steps = [
+  ["Connect your venue", "Link the Google Business Profile you manage."],
+  ["Check your drafts", "Read the guest’s review, then edit the draft to sound like your team."],
+  ["Approve your reply", "Approve the wording, then track the reply as it’s queued and sent to Google."],
+] as const;
+
+function StepIcon({ index }: { index: number }) {
+  const paths = [
+    "M9 15l6-6M7.2 16.8l-1.1 1.1a3.5 3.5 0 0 1-5-5l4-4a3.5 3.5 0 0 1 5 0M17 7l1-1a3.5 3.5 0 0 1 5 5l-4 4a3.5 3.5 0 0 1-5 0",
+    "M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 5h6m-6 4h6m-6 4h4",
+    "M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM7.5 12l3 3 6-6",
+  ];
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round">
+      <path d={paths[index]} />
+    </svg>
+  );
+}
+
 export function Process({ animate = false }: { animate?: boolean }) {
   return (
-    <section id="how-it-works" className={animate ? s.process + " " + s.processMotion : s.process}>
-      <h2>From a guest’s words to your next reply.</h2>
+    <section id="how-it-works" className={`${e.process} ${animate ? s.processMotion : ""}`}>
+      <h2>From review to reply</h2>
       <ol>
-        {[
-          [
-            "Connect your venue",
-            "Link the Google Business Profile you manage.",
-          ],
-          [
-            "Get a draft for every rating",
-            "Five stars get a default thank-you. One to four stars get a reply based on the guest’s comments when available.",
-          ],
-          [
-            "Handle the exceptions",
-            "The duty manager sees sensitive reviews with a reason and an editable draft.",
-          ],
-          [
-            "Review and copy",
-            "Edit and copy a draft from your inbox. The pilot keeps replies private.",
-          ],
-        ].map(([title, body], i) => (
+        {steps.map(([title, body], index) => (
           <li key={title}>
-            <span className={s.stepNumber}>0{i + 1}</span>
-            <div>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </div>
+            <StepIcon index={index} />
+            <h3>{title}</h3>
+            <p>{body}</p>
           </li>
         ))}
       </ol>
     </section>
   );
 }
+
+function ProductHero() {
+  return (
+    <section className={e.hero} aria-labelledby="product-heading">
+      <div className={e.heroCopy}>
+        <h1 id="product-heading">Good service deserves a good reply.</h1>
+        <p>Draft and approve Google review replies for your pub or restaurant.</p>
+        <div className={e.heroActions}>
+          <a className={s.primary} href="#walkthrough">Try a review <span aria-hidden="true">→</span></a>
+          <Link className={e.underlined} href="/start">Connect Google</Link>
+        </div>
+      </div>
+      <figure className={e.heroPhoto}>
+        <Image
+          src="/hospitality-review-hero.jpg"
+          alt="A pub manager checking her phone at the bar after service"
+          fill
+          priority
+          sizes="(max-width: 760px) 100vw, 55vw"
+        />
+        <figcaption className={e.reviewSlip}>
+          <span>Sample review</span>
+          <q>Lovely Sunday roast. We’ll be back.</q>
+        </figcaption>
+      </figure>
+    </section>
+  );
+}
+
+function DemoSection({ standalone }: { standalone: boolean }) {
+  const Heading = standalone ? "h1" : "h2";
+  return (
+    <section className={e.demoBand} aria-labelledby="demo-heading">
+      <div className={e.demoInner}>
+        <div className={e.demoIntro}>
+          <Heading id="demo-heading">Try it with a review</Heading>
+          <p>Choose a sample or paste a public review. Edit the draft and try the approval step.</p>
+        </div>
+        <ReviewDesk />
+      </div>
+    </section>
+  );
+}
+
 export function Pricing() {
   return (
-    <section id="pricing" className={s.pricing}>
+    <section id="pricing" className={`${s.pricing} ${e.pricing}`}>
       <div>
-        <p className={s.productLabel}>Reputation Manager</p>
-        <h2>One venue. A little less on your plate.</h2>
+        <h2>A clear plan for your venue</h2>
         <p className={s.pricingDescription}>
-          Google review drafts, editing and copying, and guided onboarding.
+          Google review drafts, owner approval, and guided onboarding.
         </p>
         <PricingCheckout foundingOpen={FOUNDING_OPEN} />
         <Link className={s.pricingContact} href={enquiry}>Discuss your venue</Link>
@@ -144,13 +192,13 @@ export function Pricing() {
 }
 export function FAQ() {
   return (
-    <section className={s.faq}>
-      <h2>A few good questions.</h2>
+    <section className={`${s.faq} ${e.faq}`}>
+      <h2>FAQs</h2>
       <div>
         {[
           [
-            "Where do the replies go?",
-            "Drafts are saved in your private inbox. You can edit and copy them. Google publishing is off during the pilot.",
+            "Will replies go out without me?",
+            "You approve the reply before it’s queued for Google. The demo shows how reviews are sorted for approval or manager attention.",
           ],
           [
             "Does this demo connect to Google?",
@@ -158,7 +206,7 @@ export function FAQ() {
           ],
           [
             "What do I need to get started?",
-            "A Google Business Profile you are authorised to manage. We’ll discuss your venue, confirm the connection and walk through the first reply together.",
+            "A Google Business Profile you own or manage. Connect it from Zero Clicks using the Google account that has access to the venue.",
           ],
         ].map(([q, a], i) => (
           <details key={q} open={i === 0}>
@@ -186,67 +234,32 @@ export function FAQ() {
 export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
   const full = page === "home" || page === "product";
   return (
-    <div className={s.site}>
+    <div className={`${s.site} ${e.site}`}>
       <a href="#main-content" className={s.skip}>
         Skip to content
       </a>
       <Header key={page} page={page} />
       <main key={page} id="main-content" className={s.pageMotion}>
-        {(full || page === "demo") && (
-          <>
-            <section className={s.hero}>
-              <div className={s.heroCopy}>
-                <h1>
-                  {page === "demo"
-                    ? "A thoughtful reply starts here."
-                    : "Good hospitality deserves a thoughtful reply."}
-                </h1>
-                <p className={s.descriptor}>
-                  Reputation Manager by <span>Zero Clicks</span>
-                </p>
-                <p className={s.intro}>
-                  {page === "demo"
-                    ? "Choose a sample or paste a review. Draft a reply, edit it and try approving it."
-                    : "Google review replies, drafted for UK pubs and restaurants. Five stars get a default thank-you. One to four stars get a draft based on the guest’s feedback."}
-                </p>
-                <div className={s.heroActions}>
-                  <a className={s.primary} href="#walkthrough">
-                    Try the walkthrough
-                  </a>
-                  <Link className={s.textLink} href={enquiry}>
-                    Discuss your venue
-                  </Link>
-                </div>
-              </div>
-              <ReviewDesk />
-            </section>
-            {page === "demo" && <OwnerWalkthrough />}
-            {full && (
-              <div className={s.principles}>
-                <p>Your voice.</p>
-                <p>Your final edit.</p>
-                <p>Your reputation.</p>
-              </div>
-            )}
-          </>
-        )}
+        {full && <ProductHero />}
+        {full && <Process />}
+        {(full || page === "demo") && <DemoSection standalone={page === "demo"} />}
+        {page === "demo" && <OwnerWalkthrough />}
         {page === "process" && (
           <section className={s.pageIntro}>
-            <p className={s.productLabel}>Reputation Manager</p>
             <h1>You keep the final word.</h1>
             <p>
-              From connecting your venue to editing a draft, here’s how the
+              From connecting your venue to approving a reply, here’s how the
               workflow fits around your day.
             </p>
-            <Link href="/demo" className={s.primary}>
-              Try the walkthrough
-            </Link>
+            <div className={e.heroActions}>
+              <Link href="/demo" className={s.primary}>Try a review</Link>
+              <Link href="/start" className={e.underlined}>Connect Google</Link>
+            </div>
           </section>
         )}
-        {(full || page === "process") && <Process animate={page === "process"} />}
+        {page === "process" && <Process animate />}
         {page === "pricing" && (
           <section className={s.pageIntro}>
-            <p className={s.productLabel}>Reputation Manager</p>
             <h1>A clear plan for your venue.</h1>
             <p>
               Choose your plan and continue to Stripe. We can also walk you through the first reply.

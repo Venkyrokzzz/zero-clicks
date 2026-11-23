@@ -123,6 +123,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
     crypto,
     'server-only': {},
     'next/server': { NextResponse: Response },
+    'next/navigation': { redirect: destination => { throw new Error(destination); } },
     'next/headers': {
       headers: () => clerkHeaders,
       cookies: () => ({ set: (_, value) => { nonce = value; }, get: () => ({ value: nonce }) }),
@@ -267,6 +268,18 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   assert.equal(profile.plan, 'founding');
   assert.equal(profile.subscription_status, 'active');
 
+  const startSetup = load('app/start/page').default;
+  async function expectSetup(destination) {
+    await assert.rejects(startSetup(), { message: destination });
+  }
+  actor = {};
+  await expectSetup('/sign-in?redirect_url=%2Fstart');
+  actor = { userId: 'missing-profile' };
+  await expectSetup('/onboarding');
+  actor = { userId: 'fixture' };
+  profile.business_name = 'Fixture Arms';
+  await expectSetup('/connect');
+
   const startGoogle = load('app/api/auth/google/route').GET;
   const finishGoogle = load('app/api/auth/google/callback/route').GET;
   const begin = async () => new URL((await startGoogle(new Request(site + '/api/auth/google'))).headers.get('location'));
@@ -311,8 +324,11 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   const pickerRequest = body => new Request(site + '/api/integrations/google', {
     method: 'POST', body: JSON.stringify(body),
   });
+  await expectSetup('/dashboard');
   venue.account_id = null;
   venue.location_id = null;
+  await expectSetup('/connect/success?location=select');
+
   venue.access_token = 'expired-access';
   venue.access_token_expires_at = new Date(0).toISOString();
   const listed = await integration.POST(pickerRequest({ action: 'list' }));

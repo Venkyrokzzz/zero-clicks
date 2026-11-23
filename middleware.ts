@@ -12,6 +12,7 @@ const isProtectedRoute = createRouteMatcher([
   "/connect(.*)",
   "/admin(.*)",
   "/workspace",
+  "/start",
 ]);
 
 const isAuthEntry = createRouteMatcher(["/sign-in", "/sign-up"]);
@@ -47,7 +48,7 @@ export default clerkMiddleware(
           const destination = new URL(requested, req.url);
           if (
             destination.origin === req.nextUrl.origin &&
-            /^\/(dashboard|connect|onboarding)(?:\/|$)/.test(destination.pathname)
+            /^\/(dashboard|connect|onboarding|start)(?:\/|$)/.test(destination.pathname)
           ) {
             return NextResponse.redirect(destination);
           }

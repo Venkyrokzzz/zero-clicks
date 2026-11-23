@@ -299,3 +299,25 @@
 @media (prefers-reduced-motion: reduce) {
   .previewCue, .previewDecision path { animation: none; }
 }
+
+.folio.folio {
+  --sheet: #fff9ed;
+  --crease: #ebddc9;
+  --edge: #bdb0b8;
+  background: #f8f1e5;
+  box-shadow: 5px 6px #d4c8e1;
+}
+.scenarios button {
+  background: #f5ede2;
+  color: #332537;
+  border-color: #c6bac0;
+}
+.scenarios button[aria-pressed="true"] {
+  background: var(--accent, #d6e45c);
+  border-color: #9da949;
+  color: #292128;
+}
+.reply.reply {
+  background: #f4eddf;
+  border-color: #dbcec1;
+}
