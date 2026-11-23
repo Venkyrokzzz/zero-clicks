@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { getGoogleAccess, GOOGLE_CONNECTION_FIELDS } from "@/lib/googleAccess";
 import { listGoogleBusinessLocations } from "@/lib/googleBusiness";
 
 export async function GET() {
@@ -45,39 +46,11 @@ export async function POST(req: Request) {
   if (!userId)
     return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
-  const { data: connection } = await supabase
-    .from("google_connections")
-    .select("access_token")
-    .eq("clerk_user_id", userId)
-    .single();
-  if (!connection?.access_token)
-    return NextResponse.json(
-      { error: "Connect Google first." },
-      { status: 409 },
-    );
-
   const body = await req.json().catch(() => ({}));
-  if (body.action === "list") {
-    try {
-      return NextResponse.json({
-        locations: await listGoogleBusinessLocations(connection.access_token),
-      });
-    } catch (error) {
-      return NextResponse.json(
-        {
-          error:
-            error instanceof Error
-              ? error.message
-              : "Unable to load Google locations.",
-        },
-        { status: 502 },
-      );
-    }
-  }
-
+  const listing = body?.action === "list";
   if (
-    typeof body.accountId !== "string" ||
-    typeof body.locationId !== "string"
+    !listing &&
+    (typeof body?.accountId !== "string" || typeof body?.locationId !== "string")
   ) {
     return NextResponse.json(
       { error: "Choose a Google Business Profile location." },
@@ -85,10 +58,24 @@ export async function POST(req: Request) {
     );
   }
 
+  const { data: connection, error: loadError } = await supabase
+    .from("google_connections")
+    .select(GOOGLE_CONNECTION_FIELDS)
+    .eq("clerk_user_id", userId)
+    .maybeSingle();
+  if (loadError)
+    return NextResponse.json({ error: "Could not load your Google connection." }, { status: 503 });
+  if (!connection)
+    return NextResponse.json({ error: "Connect Google first." }, { status: 409 });
+
   try {
-    const locations = await listGoogleBusinessLocations(
-      connection.access_token,
-    );
+    const access = await getGoogleAccess(connection);
+    if (!access.token)
+      return NextResponse.json({ error: "Reconnect Google to choose a venue." }, { status: 409 });
+
+    const locations = await listGoogleBusinessLocations(access.token);
+    if (listing) return NextResponse.json({ locations });
+
     const selected = locations.find(
       (location) =>
         location.accountId === body.accountId &&
@@ -99,15 +86,20 @@ export async function POST(req: Request) {
         { error: "That location is not available to this Google account." },
         { status: 403 },
       );
-    const { error } = await supabase
+    const { data: saved, error } = await supabase
       .from("google_connections")
       .update({
         account_id: selected.accountId,
         location_id: selected.locationId,
       })
-      .eq("clerk_user_id", userId);
+      .eq("clerk_user_id", userId)
+      .eq("access_token", access.token)
+      .select("clerk_user_id")
+      .maybeSingle();
     if (error)
       return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!saved)
+      return NextResponse.json({ error: "Google connection changed. Check again." }, { status: 409 });
     return NextResponse.json({ success: true, location: selected });
   } catch (error) {
     return NextResponse.json(

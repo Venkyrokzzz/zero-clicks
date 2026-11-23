@@ -293,6 +293,29 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   const venue = tables.google_connections.find(row => row.clerk_user_id === 'fixture');
   assert.equal(venue.location_id, 'locations/456');
   assert.equal(profile.business_name, 'Fixture Arms');
+  // A customer can finish venue selection after the initial OAuth access token expires.
+  const integration = load('app/api/integrations/google/route');
+  const pickerRequest = body => new Request(site + '/api/integrations/google', {
+    method: 'POST', body: JSON.stringify(body),
+  });
+  venue.account_id = null;
+  venue.location_id = null;
+  venue.access_token = 'expired-access';
+  venue.access_token_expires_at = new Date(0).toISOString();
+  const listed = await integration.POST(pickerRequest({ action: 'list' }));
+  assert.equal(listed.status, 200);
+  assert.equal((await listed.json()).locations[0].locationId, 'locations/456');
+  assert.equal(venue.access_token, 'fake-access');
+  assert.equal(venue.location_id, null);
+
+  venue.access_token = 'expired-again';
+  venue.access_token_expires_at = new Date(0).toISOString();
+  const saved = await integration.POST(pickerRequest({
+    accountId: 'accounts/123', locationId: 'locations/456',
+  }));
+  assert.equal(saved.status, 200);
+  assert.equal(venue.access_token, 'fake-access');
+  assert.equal(venue.location_id, 'locations/456');
   const connection = await (await load('app/api/integrations/google/route').GET()).json();
   assert.equal(connection.connected, true);
   assert.equal(connection.connection.google_email, 'fake@example.test');

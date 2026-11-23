@@ -11,9 +11,14 @@ export type GoogleConnection = {
   needs_reconnect: boolean | null
 }
 
+type PendingGoogleConnection = Omit<GoogleConnection, 'account_id' | 'location_id'> & {
+  account_id: string | null
+  location_id: string | null
+}
+
 export const GOOGLE_CONNECTION_FIELDS = 'clerk_user_id, account_id, location_id, access_token, refresh_token, access_token_expires_at, needs_reconnect'
 
-export async function getGoogleAccess(connection: GoogleConnection) {
+export async function getGoogleAccess(connection: PendingGoogleConnection) {
   if (connection.needs_reconnect || !connection.refresh_token) return { reconnect: true } as const
   if (connection.access_token && Date.parse(connection.access_token_expires_at ?? '') > Date.now() + 300_000) {
     return { token: connection.access_token } as const
@@ -39,10 +44,13 @@ export async function getGoogleAccess(connection: GoogleConnection) {
     access_token: body.access_token,
     access_token_expires_at: new Date(Date.now() + body.expires_in * 1000).toISOString(),
   }
-  const { data, error } = await supabase.from('google_connections').update(update)
+  const query = supabase.from('google_connections').update(update)
     .eq('clerk_user_id', connection.clerk_user_id).eq('refresh_token', connection.refresh_token)
-    .eq('account_id', connection.account_id).eq('location_id', connection.location_id)
-    .select('clerk_user_id').maybeSingle()
+  if (connection.account_id === null) query.is('account_id', null)
+  else query.eq('account_id', connection.account_id)
+  if (connection.location_id === null) query.is('location_id', null)
+  else query.eq('location_id', connection.location_id)
+  const { data, error } = await query.select('clerk_user_id').maybeSingle()
   if (error || !data) throw new Error('Google connection changed or could not be updated')
   return revoked ? { reconnect: true } as const : { token: body.access_token as string } as const
 }
