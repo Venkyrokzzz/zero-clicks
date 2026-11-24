@@ -1120,10 +1120,6 @@
 @media (prefers-reduced-motion: no-preference) {
   html:has(.site) { scroll-behavior: smooth; }
   .pageMotion { animation: page-arrive 360ms cubic-bezier(.2,.72,.25,1) both; }
-  .processMotion li { animation: step-arrive 340ms cubic-bezier(.2,.72,.25,1) both; }
-  .processMotion li:nth-child(2) { animation-delay: 65ms; }
-  .processMotion li:nth-child(3) { animation-delay: 130ms; }
-  .processMotion li:nth-child(4) { animation-delay: 195ms; }
   .mobileNav[open] nav {
     transform-origin: top center;
     animation: menu-arrive 240ms cubic-bezier(.2,.72,.25,1) both;
@@ -1156,10 +1152,6 @@
 }
 @keyframes page-arrive {
   from { opacity: .55; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes step-arrive {
-  from { opacity: .35; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes menu-arrive {

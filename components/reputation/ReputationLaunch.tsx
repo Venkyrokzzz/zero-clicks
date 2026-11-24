@@ -96,11 +96,11 @@ function StepIcon({ index }: { index: number }) {
   );
 }
 
-export function Process({ animate = false }: { animate?: boolean }) {
+export function Process({ showWalkthroughLink = false }: { showWalkthroughLink?: boolean }) {
   return (
-    <section id="how-it-works" className={`${e.process} ${animate ? s.processMotion : ""}`}>
+    <section id="how-it-works" className={e.process}>
       <h2>From review to draft</h2>
-      {!animate && <Link className={e.underlined} href="/how-it-works#owner-walkthrough">Watch how drafts work</Link>}
+      {showWalkthroughLink && <Link className={e.underlined} href="/how-it-works#owner-walkthrough">Watch how drafts work</Link>}
       <ol>
         {steps.map(([title, body], index) => (
           <li key={title}>
@@ -240,25 +240,13 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
         Skip to content
       </a>
       <Header key={page} page={page} />
-      <main key={page} id="main-content" className={s.pageMotion}>
+      <main key={page} id="main-content" className={page === "process" || page === "demo" ? undefined : s.pageMotion}>
         {full && <ProductHero />}
-        {full && <Process />}
+        {full && <Process showWalkthroughLink />}
         {(full || page === "demo") && <DemoSection standalone={page === "demo"} />}
         {page === "demo" && <OwnerWalkthrough />}
-        {page === "process" && (
-          <section className={s.pageIntro}>
-            <h1>You keep the final word.</h1>
-            <p>
-              See how a Google review becomes a private draft in your owner inbox.
-            </p>
-            <div className={e.heroActions}>
-              <Link href="/demo" className={s.primary}>Try a review</Link>
-              <Link href="/start" className={e.underlined}>Connect Google</Link>
-            </div>
-          </section>
-        )}
-        {page === "process" && <OwnerWalkthrough />}
-        {page === "process" && <Process animate />}
+        {page === "process" && <OwnerWalkthrough standalone />}
+        {page === "process" && <Process />}
         {page === "pricing" && (
           <section className={s.pageIntro}>
             <h1>A clear plan for your venue.</h1>
