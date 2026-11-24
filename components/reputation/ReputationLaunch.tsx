@@ -1,3 +1,4 @@
+import ReviewHandoff from "./ReviewHandoff";
 import Link from "next/link";
 import Image from "next/image";
 import { FOUNDING_OPEN, FOUNDING_TOTAL } from "@/lib/foundingConfig";
@@ -242,6 +243,7 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
       <Header key={page} page={page} />
       <main key={page} id="main-content" className={page === "process" || page === "demo" ? undefined : s.pageMotion}>
         {full && <ProductHero />}
+        {full && <ReviewHandoff />}
         {full && <Process showWalkthroughLink />}
         {(full || page === "demo") && <DemoSection standalone={page === "demo"} />}
         {page === "demo" && <OwnerWalkthrough />}
