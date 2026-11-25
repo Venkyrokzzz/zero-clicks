@@ -43,7 +43,7 @@ function Header({ page }: { page: Page }) {
       </Link>
       <nav className={s.navigation} aria-label="Main navigation">{links}</nav>
       <div className={e.headerActions}>
-        <Link href="/sign-in" className={s.login}>Log in</Link>
+        <Link href="/workspace" className={s.login}>Workspace</Link>
         <Link href="/start" className={e.connect}>Connect Google</Link>
       </div>
       <details className={s.mobileNav}>

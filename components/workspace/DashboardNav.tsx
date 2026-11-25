@@ -39,7 +39,7 @@ export default function DashboardNav({ owner }: { owner: boolean }) {
         ))}
       </nav>
       {owner && (
-        <Link href="/admin">Admin</Link>
+        <Link href="/admin" className={s.primary}>Owner admin</Link>
       )}
     </header>
   );

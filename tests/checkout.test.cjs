@@ -12,7 +12,7 @@ test('pricing checkout preserves trial and founding gates and uses the correct S
   });
   const post = {};
   let userId;
-  let profile = { plan: 'trial', stripe_customer_id: 'cus_fixture' };
+  let profile = { business_name: 'Fixture Arms', plan: 'trial', stripe_customer_id: 'cus_fixture' };
   let publishedCount = 0;
   let subscriptions = [];
   let openSessions = [];
@@ -36,6 +36,7 @@ test('pricing checkout preserves trial and founding gates and uses the correct S
         select: () => query,
         eq: (_, owner) => { assert.equal(owner, 'fixture'); return query; },
         single: async () => ({ data: profile }),
+        maybeSingle: async () => ({ data: profile }),
         not: async () => {
           assert.equal(table, 'reviews');
           return { count: publishedCount };
@@ -57,12 +58,12 @@ test('pricing checkout preserves trial and founding gates and uses the correct S
   vm.runInNewContext(outputText, {
     exports: post,
     require: name => dependencies[name] ?? assert.fail(name),
-    process: { env: { NEXT_PUBLIC_SITE_URL: 'https://zero-clicks.test' } },
+    process: { env: { NEXT_PUBLIC_SITE_URL: 'https://zero-clicks.test', STRIPE_SECRET_KEY: 'mock-key' } },
     console,
   });
-  const checkout = plan => post.POST(new Request('https://zero-clicks.test/api/checkout', {
+  const checkout = (plan, startPaidPlanNow) => post.POST(new Request('https://zero-clicks.test/api/checkout', {
     method: 'POST',
-    body: JSON.stringify({ plan }),
+    body: JSON.stringify({ plan, startPaidPlanNow }),
   }));
 
   assert.equal((await checkout('standard')).status, 401);
@@ -70,13 +71,13 @@ test('pricing checkout preserves trial and founding gates and uses the correct S
   assert.equal((await checkout(['standard'])).status, 400);
   profile = null;
   assert.equal((await (await checkout('standard')).json()).code, 'ONBOARDING_REQUIRED');
-  profile = { plan: 'trial', stripe_customer_id: 'cus_fixture', trial_ends_at: '2099-01-01' };
+  profile = { business_name: 'Fixture Arms', plan: 'trial', stripe_customer_id: 'cus_fixture', trial_ends_at: '2099-01-01' };
   assert.equal((await (await checkout('standard')).json()).kind, 'trial_active');
+  assert.equal((await (await checkout('founding', true)).json()).kind, 'trial_active');
+  assert.equal(sessions.length, 0);
+  assert.equal((await (await checkout('standard', true)).json()).kind, 'checkout');
   profile.trial_ends_at = '2025-01-01';
   assert.equal((await (await checkout('founding')).json()).code, 'FIRST_REPLY_REQUIRED');
-  assert.equal(sessions.length, 0);
-
-  assert.equal((await (await checkout('standard')).json()).kind, 'checkout');
   assert.deepEqual(JSON.parse(JSON.stringify(sessions[0].line_items)), [
     { price: 'price_1TdrHfFkh5HZgB7WbtJAkjKC', quantity: 1 },
     { price: 'price_1TdrRSFkh5HZgB7WDd9Dr30i', quantity: 1 },

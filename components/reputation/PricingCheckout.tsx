@@ -8,7 +8,7 @@ import workspaceStyles from "@/components/workspace/Workspace.module.css";
 type Plan = "founding" | "standard";
 type CheckoutMessage = {
   text: string;
-  action?: "signin" | "onboarding" | "first-reply" | "trial";
+  action?: "signin" | "onboarding" | "first-reply" | "trial" | "start-standard";
 };
 
 export default function PricingCheckout({ foundingOpen, workspace = false }: { foundingOpen: boolean; workspace?: boolean }) {
@@ -18,7 +18,7 @@ export default function PricingCheckout({ foundingOpen, workspace = false }: { f
   const primary = workspace ? workspaceStyles.primary : s.primary;
   const secondary = workspace ? workspaceStyles.button : s.checkoutSecondary;
 
-  async function start(plan: Plan) {
+  async function start(plan: Plan, startPaidPlanNow = false) {
     if (busy.current) return;
     busy.current = true;
     setPending(plan);
@@ -27,7 +27,7 @@ export default function PricingCheckout({ foundingOpen, workspace = false }: { f
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, startPaidPlanNow }),
         signal: AbortSignal.timeout(15_000),
       });
       if (response.status === 401) {
@@ -44,7 +44,12 @@ export default function PricingCheckout({ foundingOpen, workspace = false }: { f
         return;
       }
       if (result.kind === "trial_active") {
-        setMessage({ text: "Your trial is still active. You can keep using Zero Clicks and return to billing when it ends.", action: "trial" });
+        setMessage({
+          text: plan === "standard"
+            ? "Your trial is still active. You can keep it or open Standard checkout now. The paid plan is £55/month plus £499 one-time setup."
+            : "Your trial is still active. You can keep using Zero Clicks and return to billing when it ends.",
+          action: plan === "standard" ? "start-standard" : "trial",
+        });
         return;
       }
 
@@ -85,6 +90,11 @@ export default function PricingCheckout({ foundingOpen, workspace = false }: { f
         )}
         {message?.action === "onboarding" && <Link href="/onboarding">Set up your venue</Link>}
         {message?.action === "first-reply" && <Link href="/contact?service=Reputation%20Manager">Arrange guided setup</Link>}
+        {message?.action === "start-standard" && (
+          <button type="button" className={secondary} onClick={() => void start("standard", true)} disabled={!!pending}>
+            Continue to Stripe for Standard
+          </button>
+        )}
         {message?.action === "trial" && !workspace && <Link href="/dashboard/billing">Open billing</Link>}
       </div>
     </div>

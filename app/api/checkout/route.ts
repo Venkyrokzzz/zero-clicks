@@ -5,8 +5,6 @@ import { supabase } from "@/lib/supabase";
 import { createCustomerPortal } from "@/lib/stripe-portal";
 import { FOUNDING_OPEN } from "@/lib/foundingConfig";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
 const PRICE_IDS = {
   standard: "price_1TdrHfFkh5HZgB7WbtJAkjKC",
   pro: "price_1TdrJeFkh5HZgB7Wj7EvOt8R",
@@ -16,7 +14,7 @@ const PRICE_IDS = {
 
 const PLANS_WITH_SETUP = ["standard", "pro"];
 
-async function getOrCreateStripeCustomer(userId: string, email: string, name: string) {
+async function getOrCreateStripeCustomer(stripe: Stripe, userId: string, email: string, name: string) {
   // Check if we already have a Stripe customer ID for this user
   const { data, error: profileError } = await supabase
     .from("profiles")
@@ -54,25 +52,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Founding Member plan is now closed. All 10 spots have been taken." }, { status: 410 });
   }
 
-  const user = await currentUser();
-  const email = user?.emailAddresses?.[0]?.emailAddress ?? "";
-  const name = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
-
   try {
     const { data: profile, error: profileError } = await supabase.from('profiles').select('business_name,trial_ends_at,plan').eq('clerk_user_id', userId).maybeSingle();
     if (profileError) return NextResponse.json({ error: 'Could not load venue details. Try again.' }, { status: 503 });
     if (!profile?.business_name?.trim()) return NextResponse.json({ error: 'Finish setting up your venue before starting checkout.', code: 'ONBOARDING_REQUIRED' }, { status: 409 });
-    if (profile.plan === 'trial' && profile.trial_ends_at && new Date(profile.trial_ends_at).getTime() > Date.now()) {
-      return NextResponse.json({ kind: 'trial_active', url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard` });
+    const trialActive = profile.plan === 'trial' && profile.trial_ends_at
+      && new Date(profile.trial_ends_at).getTime() > Date.now();
+    if (trialActive && !(plan === 'standard' && body?.startPaidPlanNow === true)) {
+      return NextResponse.json({ kind: 'trial_active' });
     }
     if (plan === 'founding') {
       const { count, error } = await supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('clerk_user_id', userId).not('posted_to_google_at', 'is', null);
       if (error) return NextResponse.json({ error: 'Could not check founding plan eligibility. Please try again.' }, { status: 503 });
       if (!count) return NextResponse.json({ error: 'Founding members pay after their first successful Google reply. Finish guided setup to continue.', code: 'FIRST_REPLY_REQUIRED' }, { status: 409 });
     }
-    const customerId = await getOrCreateStripeCustomer(userId, email, name);
+    const key = process.env.STRIPE_SECRET_KEY;
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
-    if (!baseUrl) throw new Error('Site URL is missing');
+    if (!key || !baseUrl) {
+      console.error("[checkout] Missing Stripe or return URL configuration");
+      return NextResponse.json({ error: "Stripe checkout is temporarily unavailable. Contact support." }, { status: 503 });
+    }
+    const stripe = new Stripe(key);
+    const user = await currentUser();
+    const email = user?.primaryEmailAddress?.emailAddress ?? user?.emailAddresses?.[0]?.emailAddress ?? "";
+    const name = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
+    const customerId = await getOrCreateStripeCustomer(stripe, userId, email, name);
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
       { price: PRICE_IDS[plan as keyof typeof PRICE_IDS], quantity: 1 },
