@@ -3,9 +3,17 @@ Allow: /
 
 # Block internal/utility pages from indexing
 Disallow: /connect/
-Disallow: /dashboard/
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /workspace
 Disallow: /neural-flow/
 Disallow: /pitch/
 Disallow: /api/
+
+# Opt out of AI training crawls while keeping search discoverability.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+Disallow: /
 
 Sitemap: https://www.0-clicks.uk/sitemap.xml

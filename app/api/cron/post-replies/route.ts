@@ -80,8 +80,7 @@ async function publish(review: ApprovedReply, reviewId: string, claim: string) {
 
 export async function GET(req: NextRequest) {
   const bearer = req.headers.get('authorization')?.match(/^Bearer (.+)$/)?.[1] ?? null
-  if (!verifyToken(bearer, process.env.CRON_SECRET)
-      && !verifyToken(req.headers.get('x-zeroclicks-token'), process.env.N8N_WEBHOOK_TOKEN)) {
+  if (!verifyToken(bearer, process.env.CRON_SECRET)) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
   }
 

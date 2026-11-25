@@ -1,30 +1,22 @@
 // app/api/contact/route.ts
 // Handles chat widget submissions via Resend (server-side email).
-// Rate limit: 5 submissions per IP per hour (in-memory).
+// Shared inbound request quotas run before email delivery.
 
 import { NextRequest, NextResponse } from "next/server";
-import { checkRateLimit } from "@/lib/rateLimit";
+import { consumePublicBudget } from "@/lib/sharedRateLimit";
 
 export async function POST(req: NextRequest) {
-  // ── Rate limiting ─────────────────────────────────────────────────
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown";
-
-  const { allowed, remaining } = checkRateLimit(ip);
-
-  if (!allowed) {
-    return NextResponse.json(
-      { error: "Too many requests. Please try again later." },
-      { status: 429 }
-    );
-  }
-
   // ── Parse body ────────────────────────────────────────────────────
+  const maxBytes = 32_000;
+  if (Number(req.headers.get("content-length")) > maxBytes)
+    return NextResponse.json({ error: "Message is too long." }, { status: 413 });
+
   let body: Record<string, string>;
   try {
-    body = await req.json();
+    const raw = await req.text();
+    if (Buffer.byteLength(raw, "utf8") > maxBytes)
+      return NextResponse.json({ error: "Message is too long." }, { status: 413 });
+    body = JSON.parse(raw);
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
@@ -50,6 +42,17 @@ export async function POST(req: NextRequest) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
+  }
+
+  const budgetState = await consumePublicBudget(req, "contact", 5, 100);
+  if (budgetState !== "allowed") {
+    const limited = budgetState === "limited";
+    return NextResponse.json(
+      { error: limited
+          ? "Too many requests. Please try again later."
+          : "The form is temporarily unavailable. Please email zeroclicks.hq@gmail.com directly." },
+      { status: limited ? 429 : 503 },
+    );
   }
 
   // ── Send via Resend ──────────────────────────────────────────────
@@ -95,10 +98,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email acceptance could not be confirmed. Please email zeroclicks.hq@gmail.com directly." }, { status: 502 });
     }
 
-    return NextResponse.json(
-      { success: true },
-      { headers: { "X-RateLimit-Remaining": String(remaining) } }
-    );
+    return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[contact] Network error:", err);
     return NextResponse.json({ error: "Delivery could not be confirmed. Please email zeroclicks.hq@gmail.com directly." }, { status: 503 });

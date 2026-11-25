@@ -119,6 +119,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   const draft = 'Thanks for the five stars! We’re glad you stopped by and hope to see you again soon.';
   const fourStarFallback = 'Really glad you enjoyed the food. Thanks for coming in!';
   const geminiDraft = 'Glad you enjoyed the food at the Fixture Arms. Hope to see you again soon!';
+  let blockRegeneration = false;
   const mocks = {
     crypto,
     'server-only': {},
@@ -159,6 +160,12 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
     },
     '@/lib/supabase': { supabase },
     '@/lib/rateLimit': { checkRateLimit: () => ({ allowed: true }) },
+    '@/lib/sharedRateLimit': { consumeRequestBudget: async (key, limit, windowSeconds) => {
+      assert.equal(key, 'review-regenerate:fixture');
+      assert.equal(limit, 12);
+      assert.equal(windowSeconds, 60);
+      return blockRegeneration ? 'limited' : 'allowed';
+    } },
   };
 
   async function fakeFetch(input, options = {}) {
@@ -167,7 +174,13 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
       draftCalls++;
       assert.equal(url.pathname, '/v1beta/models/fixture-gemini:generateContent');
       assert.equal(options.headers['x-goog-api-key'], 'fixture-gemini-key');
-      assert.match(JSON.parse(options.body).contents[0].parts[0].text, /Great food/);
+      const prompt = JSON.parse(options.body);
+      const input = JSON.parse(prompt.contents[0].parts[0].text);
+      assert.match(input.review.text, /Great food/);
+      assert.equal(input.review.rating, 4);
+      assert.equal(Object.hasOwn(input, 'manager_name'), false);
+      assert.equal(Object.hasOwn(input.review, 'reviewer_name'), false);
+      assert.doesNotMatch(prompt.systemInstruction.parts[0].text, /Fixture Arms/);
       await new Promise(resolve => setImmediate(resolve));
       if (geminiUnavailable) return Response.json({}, { status: 429 });
       return Response.json({ candidates: [{ finishReason: 'STOP', content: { parts: [{ text: JSON.stringify({ reply: geminiDraft, assessment: 'routine_praise' }) }] } }] });
@@ -351,6 +364,15 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   assert.equal('access_token' in connection.connection, false);
 
   const cron = (route) => load('app/api/cron/' + route + '/route').GET(new Request(site, { headers: tokenHeaders }));
+  env.N8N_WEBHOOK_TOKEN = 'legacy-fixture-token';
+  for (const route of ['poll-reviews', 'post-replies']) {
+    const rejected = await load('app/api/cron/' + route + '/route').GET(new Request(site, {
+      headers: { 'x-zeroclicks-token': env.N8N_WEBHOOK_TOKEN },
+    }));
+    assert.equal(rejected.status, 401);
+  }
+  delete env.N8N_WEBHOOK_TOKEN;
+
   const poller = load('app/api/cron/poll-reviews/route');
   assert.equal((await poller.GET(new Request(site))).status, 401);
   const parallelPolls = await Promise.all([cron('poll-reviews'), cron('poll-reviews')]);
@@ -460,6 +482,9 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   const regenerate = () => load('app/api/reviews/regenerate/route').POST(new Request(site, {
     method: 'POST', body: JSON.stringify({ id: review.id }),
   }));
+  blockRegeneration = true;
+  assert.equal((await regenerate()).status, 429);
+  blockRegeneration = false;
   assert.equal((await (await regenerate()).json()).draft, draft);
   env.GEMINI_API_KEY = 'fixture-gemini-key';
   env.GEMINI_REVIEW_MODEL = 'fixture-gemini';

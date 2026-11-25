@@ -1,3 +1,4 @@
+import "server-only";
 // lib/supabase.ts — server-only Supabase client using service-role key
 // NEVER import this in client components. Service-role key bypasses RLS.
 import { createClient } from "@supabase/supabase-js";

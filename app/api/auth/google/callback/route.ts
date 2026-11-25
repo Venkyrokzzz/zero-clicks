@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const { userId } = await auth();
-  const nonce = cookies().get(NONCE_COOKIE)?.value;
+  const cookieStore = await cookies();
+  const nonce = cookieStore.get(NONCE_COOKIE)?.value;
   if (!userId) return failure("session_expired");
   if (
     !code ||
@@ -44,7 +45,7 @@ export async function GET(req: NextRequest) {
   ) {
     return failure("invalid_state");
   }
-  cookies().set(NONCE_COOKIE, "", { ...cookieSettings, maxAge: 0 });
+  cookieStore.set(NONCE_COOKIE, "", { ...cookieSettings, maxAge: 0 });
 
   let tokens: {
     error?: unknown;

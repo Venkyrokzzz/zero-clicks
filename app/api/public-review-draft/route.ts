@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateReviewDraft } from "@/lib/generateReviewDraft";
-import { checkRateLimit } from "@/lib/rateLimit";
+import { consumePublicBudget } from "@/lib/sharedRateLimit";
 
 const MAX_REVIEW_LENGTH = 800;
 
@@ -50,20 +50,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const forwarded =
-    request.headers.get("x-vercel-forwarded-for") ??
-    request.headers.get("x-forwarded-for");
-  const ip = forwarded?.split(",")[0]?.trim() || "unknown";
-  if (
-    !checkRateLimit(`public-draft:${ip}`, 6).allowed ||
-    !checkRateLimit("public-draft:instance", 90).allowed
-  ) {
+  const budget = await consumePublicBudget(request, "public-draft", 6, 90);
+  if (budget !== "allowed") {
     return NextResponse.json(
-      {
-        error:
-          "The demo has reached its draft limit. Try a sample review or come back later.",
-      },
-      { status: 429 },
+      { error: budget === "limited"
+          ? "The demo has reached its draft limit. Try a sample review or come back later."
+          : "Custom drafts are temporarily unavailable. Try a sample review." },
+      { status: budget === "limited" ? 429 : 503 },
     );
   }
 

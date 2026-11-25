@@ -5,6 +5,8 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
+permissions: {}
+
 concurrency:
   group: review-loop-production
   cancel-in-progress: false
@@ -14,18 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
-      LEGACY_WEBHOOK_TOKEN: ${{ secrets.N8N_WEBHOOK_TOKEN }}
     steps:
       - name: Import Google reviews and prepare drafts
         run: |
-          if [[ -n "$CRON_SECRET" ]]; then
-            auth_header="Authorization: Bearer $CRON_SECRET"
-          elif [[ -n "$LEGACY_WEBHOOK_TOKEN" ]]; then
-            auth_header="x-zeroclicks-token: $LEGACY_WEBHOOK_TOKEN"
-          else
+          if [[ -z "$CRON_SECRET" ]]; then
             echo "::error::Set the CRON_SECRET repository secret."
             exit 1
           fi
+          auth_header="Authorization: Bearer $CRON_SECRET"
 
           status=$(curl -sS --connect-timeout 10 --max-time 290 -o /dev/null -w "%{http_code}" \
             -H "$auth_header" "https://www.0-clicks.uk/api/cron/poll-reviews") || status=000

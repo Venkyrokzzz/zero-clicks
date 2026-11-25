@@ -38,7 +38,8 @@ export async function GET(req: NextRequest) {
   }
 
   const nonce = crypto.randomUUID();
-  cookies().set(NONCE_COOKIE, nonce, {
+  const cookieStore = await cookies();
+  cookieStore.set(NONCE_COOKIE, nonce, {
     ...cookieSettings,
     maxAge: STATE_LIFETIME,
   });

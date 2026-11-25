@@ -13,13 +13,8 @@ function toSentiment(rating: number) {
 }
 
 export async function GET(req: NextRequest) {
-  // Accept either Vercel CRON_SECRET (Bearer token) or the shared webhook token
-  const bearer = req.headers.get('authorization')?.replace('Bearer ', '')
-  const webhookToken = req.headers.get('x-zeroclicks-token')
-  const cronOk = bearer && process.env.CRON_SECRET && bearer === process.env.CRON_SECRET
-  const webhookOk = verifyToken(webhookToken, process.env.N8N_WEBHOOK_TOKEN)
-
-  if (!cronOk && !webhookOk) {
+  const bearer = req.headers.get('authorization')?.match(/^Bearer (.+)$/)?.[1] ?? null
+  if (!verifyToken(bearer, process.env.CRON_SECRET)) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
   }
 
