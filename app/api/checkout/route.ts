@@ -59,8 +59,9 @@ export async function POST(req: NextRequest) {
   const name = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
 
   try {
-    const { data: profile, error: profileError } = await supabase.from('profiles').select('trial_ends_at,plan').eq('clerk_user_id', userId).single();
-    if (profileError || !profile) return NextResponse.json({ error: 'Finish setting up your venue before starting checkout.', code: 'ONBOARDING_REQUIRED' }, { status: 409 });
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('business_name,trial_ends_at,plan').eq('clerk_user_id', userId).maybeSingle();
+    if (profileError) return NextResponse.json({ error: 'Could not load venue details. Try again.' }, { status: 503 });
+    if (!profile?.business_name?.trim()) return NextResponse.json({ error: 'Finish setting up your venue before starting checkout.', code: 'ONBOARDING_REQUIRED' }, { status: 409 });
     if (profile.plan === 'trial' && profile.trial_ends_at && new Date(profile.trial_ends_at).getTime() > Date.now()) {
       return NextResponse.json({ kind: 'trial_active', url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard` });
     }
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
       customer: customerId,
       line_items: lineItems,
       subscription_data: { metadata: { clerk_user_id: userId, plan } },
-      success_url: `${baseUrl}/dashboard?checkout=success`,
+      success_url: `${baseUrl}/dashboard/billing?checkout=returned`,
       cancel_url: `${baseUrl}/pricing#pricing`,
       metadata: { clerk_user_id: userId, plan },
     }, { idempotencyKey: `checkout-${userId}-${plan}-${Math.floor(Date.now() / 1800000)}` });

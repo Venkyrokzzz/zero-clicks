@@ -8,6 +8,8 @@ import {
   type BillingSnapshot,
 } from "./panel-data";
 import s from "./Workspace.module.css";
+import PricingCheckout from "@/components/reputation/PricingCheckout";
+import { FOUNDING_OPEN } from "@/lib/foundingConfig";
 
 export default function BillingPanel({ clientId }: { clientId?: string }) {
   const [data, setData] = useState<BillingSnapshot>();
@@ -31,23 +33,16 @@ export default function BillingPanel({ clientId }: { clientId?: string }) {
     void refresh();
   }, [refresh]);
 
-  async function openBilling(plan?: "standard" | "pro") {
-    setAction(plan || "portal");
+  async function openBilling() {
+    setAction("portal");
     setError("");
     try {
-      const { url } = await panelRequest<{ url?: string }>(
-        plan ? "/api/checkout" : "/api/billing",
-        {
-          method: "POST",
-          ...(plan && {
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ plan }),
-          }),
-        },
-      );
-      if (!url || new URL(url).protocol !== "https:")
-        throw new Error("Stripe returned no secure billing link.");
-      window.location.assign(url);
+      const { url } = await panelRequest<{ url?: string }>("/api/billing", { method: "POST" });
+      const target = url ? new URL(url) : null;
+      if (target?.protocol !== "https:" || target.hostname !== "billing.stripe.com") {
+        throw new Error("Stripe returned no secure billing portal link.");
+      }
+      window.location.assign(target.href);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not open Stripe.");
       setAction("");
@@ -192,25 +187,10 @@ export default function BillingPanel({ clientId }: { clientId?: string }) {
                 <div className={s.stack}>
                   <h3>Choose a subscription</h3>
                   <p className={s.muted}>
-                    Standard £55/month or Pro £75/month, plus £499 one-time
-                    setup.
+                    {FOUNDING_OPEN && "Founding is £35/month after your first successful Google reply. "}
+                    Standard is £55/month plus £499 one-time setup.
                   </p>
-                  <div className={s.row}>
-                    <button
-                      className={s.button}
-                      onClick={() => openBilling("standard")}
-                      disabled={!!action}
-                    >
-                      {action === "standard" ? "Opening…" : "Choose Standard"}
-                    </button>
-                    <button
-                      className={s.button}
-                      onClick={() => openBilling("pro")}
-                      disabled={!!action}
-                    >
-                      {action === "pro" ? "Opening…" : "Choose Pro"}
-                    </button>
-                  </div>
+                  <PricingCheckout foundingOpen={FOUNDING_OPEN} workspace />
                 </div>
               )}
             </div>

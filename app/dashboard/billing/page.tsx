@@ -1,7 +1,7 @@
 import BillingPanel from "@/components/workspace/BillingPanel";
 import s from "@/components/workspace/Workspace.module.css";
 
-export default function BillingPage() {
+export default function BillingPage({ searchParams }: { searchParams: { checkout?: string } }) {
   return (
     <main className={s.workspace}>
       <div className={`${s.compact} ${s.stack}`}>
@@ -14,6 +14,11 @@ export default function BillingPage() {
             Review inbox
           </a>
         </header>
+        {searchParams.checkout === "returned" && (
+          <p role="status" className={s.notice}>
+            You returned from Stripe. Your plan updates after Stripe confirms payment.
+          </p>
+        )}
         <BillingPanel />
         <p className={s.muted}>
           Questions about billing?{" "}

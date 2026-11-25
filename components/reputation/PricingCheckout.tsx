@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import s from "./ReputationLaunch.module.css";
+import workspaceStyles from "@/components/workspace/Workspace.module.css";
 
 type Plan = "founding" | "standard";
 type CheckoutMessage = {
@@ -10,10 +11,12 @@ type CheckoutMessage = {
   action?: "signin" | "onboarding" | "first-reply" | "trial";
 };
 
-export default function PricingCheckout({ foundingOpen }: { foundingOpen: boolean }) {
+export default function PricingCheckout({ foundingOpen, workspace = false }: { foundingOpen: boolean; workspace?: boolean }) {
   const [pending, setPending] = useState<Plan>();
   const [message, setMessage] = useState<CheckoutMessage>();
   const busy = useRef(false);
+  const primary = workspace ? workspaceStyles.primary : s.primary;
+  const secondary = workspace ? workspaceStyles.button : s.checkoutSecondary;
 
   async function start(plan: Plan) {
     if (busy.current) return;
@@ -62,13 +65,13 @@ export default function PricingCheckout({ foundingOpen }: { foundingOpen: boolea
 
   return (
     <div className={s.checkout}>
-      <div className={s.checkoutButtons}>
+      <div className={workspace ? workspaceStyles.row : s.checkoutButtons}>
         {foundingOpen && (
-          <button type="button" className={s.primary} disabled={!!pending} onClick={() => void start("founding")}>
+          <button type="button" className={primary} disabled={!!pending} onClick={() => void start("founding")}>
             {pending === "founding" ? "Opening Stripe…" : "Founding plan checkout"}
           </button>
         )}
-        <button type="button" className={foundingOpen ? s.checkoutSecondary : s.primary} disabled={!!pending} onClick={() => void start("standard")}>
+        <button type="button" className={foundingOpen ? secondary : primary} disabled={!!pending} onClick={() => void start("standard")}>
           {pending === "standard" ? "Opening Stripe…" : "Standard plan checkout"}
         </button>
       </div>
@@ -76,13 +79,13 @@ export default function PricingCheckout({ foundingOpen }: { foundingOpen: boolea
         {message && <p>{message.text}</p>}
         {message?.action === "signin" && (
           <div className={s.checkoutLinks}>
-            <Link href={"/sign-in?redirect_url=" + encodeURIComponent("/pricing#pricing")}>Sign in</Link>
+            <Link href={"/sign-in?redirect_url=" + encodeURIComponent("/dashboard/billing")}>Sign in</Link>
             <Link href="/sign-up">Create an account</Link>
           </div>
         )}
         {message?.action === "onboarding" && <Link href="/onboarding">Set up your venue</Link>}
         {message?.action === "first-reply" && <Link href="/contact?service=Reputation%20Manager">Arrange guided setup</Link>}
-        {message?.action === "trial" && <Link href="/dashboard/billing">Open billing</Link>}
+        {message?.action === "trial" && !workspace && <Link href="/dashboard/billing">Open billing</Link>}
       </div>
     </div>
   );

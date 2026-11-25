@@ -55,6 +55,11 @@ function ConnectContent() {
             </p>
           </div>
         </header>
+        <ol className={styles.setupSteps} aria-label="Venue setup steps">
+          <li>Venue details</li>
+          <li aria-current="step">Connect Google</li>
+          <li>Review inbox</li>
+        </ol>
         {message && (
           <p role="alert" className={styles.alert}>
             {message}

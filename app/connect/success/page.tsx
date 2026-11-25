@@ -108,6 +108,11 @@ export default function ConnectionStatus() {
         <header className={s.header}>
           <h1>{heading}</h1>
         </header>
+        <ol className={s.setupSteps} aria-label="Venue setup steps">
+          <li>Venue details</li>
+          <li aria-current={state === "connected" ? undefined : "step"}>Connect Google</li>
+          <li aria-current={state === "connected" ? "step" : undefined}>Review inbox</li>
+        </ol>
         {state === "loading" && (
           <p role="status" className={s.muted}>
             Looking up your connection and available locations…
