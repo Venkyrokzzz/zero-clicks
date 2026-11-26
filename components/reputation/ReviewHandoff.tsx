@@ -5,112 +5,123 @@ import { classifyReview } from "@/lib/reviewDisposition";
 import { reviewExamples } from "./reviewExamples";
 import s from "./ReviewHandoff.module.css";
 
+const stages = ["Guest review arrives", "V1 checks tone and risk", "Draft lands in the inbox"];
+
 export default function ReviewHandoff() {
-  const flow = useRef<HTMLDivElement>(null);
-  const [scenario, setScenario] = useState(0);
-  const [playing, setPlaying] = useState(true);
-  const [visible, setVisible] = useState(false);
-  const [pageVisible, setPageVisible] = useState(true);
+  const bench = useRef<HTMLDivElement>(null);
+  const [selection, setSelection] = useState({ index: 0, run: 0 });
   const [started, setStarted] = useState(false);
-  const [showImmediately, setShowImmediately] = useState(false);
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [pinned, setPinned] = useState<number | null>(null);
+  const [copyStatus, setCopyStatus] = useState("");
+  const currentSelection = useRef(selection);
+  const example = reviewExamples[selection.index];
+  const review = `${example.leading}${example.praise}${example.middle}${example.concern}.`;
+  const needsAttention = classifyReview(example.rating, review).disposition === "manager";
+  const activeTopic = hovered ?? pinned;
 
   useEffect(() => {
-    if (!flow.current || !window.IntersectionObserver) return;
+    const node = bench.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(([entry]) => {
-      setVisible(entry.isIntersecting);
-      if (entry.isIntersecting) setStarted(true);
-    }, { rootMargin: "0px 0px -15% 0px" });
-    observer.observe(flow.current);
+      if (entry.isIntersecting) {
+        setStarted(true);
+        observer.disconnect();
+      }
+    }, { threshold: 0.12 });
+    observer.observe(node);
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const syncVisibility = () => setPageVisible(!document.hidden);
-    syncVisibility();
-    document.addEventListener("visibilitychange", syncVisibility);
-    return () => document.removeEventListener("visibilitychange", syncVisibility);
-  }, []);
-
-  const running = playing && visible && pageVisible;
-  const example = reviewExamples[scenario];
-  const review = example.leading + example.praise + example.middle + example.concern;
-  const needsAttention = classifyReview(example.rating, review).disposition === "manager";
-
   function select(index: number) {
-    setShowImmediately(!playing);
-    setScenario(index);
+    const next = { index, run: currentSelection.current.run + 1 };
+    currentSelection.current = next;
+    setSelection(next);
+    setStarted(true);
+    setHovered(null);
+    setPinned(null);
+    setCopyStatus("");
   }
 
-  function advance() {
-    setShowImmediately(false);
-    setScenario(current => (current + 1) % reviewExamples.length);
+  async function copyDraft() {
+    try {
+      await navigator.clipboard.writeText(example.draft);
+      if (currentSelection.current === selection) setCopyStatus("Copied draft");
+    } catch {
+      if (currentSelection.current === selection) setCopyStatus("Select the reply to copy it.");
+    }
+  }
+
+  function highlight(text: string, topic: number, tone: string) {
+    return <mark data-tone={tone} data-active={activeTopic === topic}>{text}</mark>;
   }
 
   return (
     <section id="review-handoff" className={s.section} aria-labelledby="review-handoff-title">
       <h2 id="review-handoff-title">How V1 handles a review</h2>
-      <p className={s.intro}>A guest leaves a review. V1 picks up the details and prepares a private reply.</p>
-
-      <div ref={flow} data-running={running} className={s.demo}>
+      <p className={s.intro}>Pick a guest review to see what V1 picks up, how it drafts a reply, and what reaches the manager.</p>
+      <div ref={bench} className={s.workbench}>
         <div className={s.toolbar}>
           <div className={s.scenarios} role="group" aria-label="Review examples">
             {reviewExamples.map(({ label }, index) => (
-              <button key={label} type="button" aria-pressed={index === scenario} onClick={() => select(index)}>
-                {label}
-                {index === scenario && started && (
-                  <span key={scenario} className={s.progress} aria-hidden="true" onAnimationEnd={advance} />
-                )}
-              </button>
+              <button key={label} type="button" aria-pressed={index === selection.index} onClick={() => select(index)}>{label}</button>
             ))}
           </div>
-          <button className={s.playback} type="button" onClick={() => setPlaying(current => !current)}>
-            {playing ? "Pause rotation" : "Resume rotation"}
-          </button>
+          <button type="button" className={s.replay} onClick={() => select(selection.index)} aria-label="Replay current review scenario">Replay</button>
         </div>
 
-        <ol key={scenario} className={s.flow} data-animate={started && !showImmediately} aria-label="From Google review to private draft">
-          <li className={s.input}>
-            <div className={s.paper}>
-              <h3>Google review</h3>
-              <p className={s.stars} role="img" aria-label={`${example.rating} out of 5 stars`}>
-                {"★".repeat(example.rating)}{"☆".repeat(5 - example.rating)}
-              </p>
-              <blockquote>
-                “{example.leading}{example.praise && <mark className={s.praise}>{example.praise}</mark>}
-                {example.middle}{example.concern && <mark className={s.comment}>{example.concern}</mark>}.”
-              </blockquote>
-            </div>
-          </li>
-          <li className={s.process}>
-            <span className={s.route} aria-hidden="true" />
-            <div className={s.v1}>
-              <h3><span>V1</span> Review Replier</h3>
-              <div className={s.topics}>
-                <span className={s.praise}>{example.topics[0]}</span>
-                <span className={s.comment}>{example.topics[1]}</span>
+        <ol key={selection.run} className={s.flow} data-animate={started} aria-label="Review workflow">
+          <li className={s.review}>
+            <div className={s.step}><span>1</span>{stages[0]}</div>
+            <article className={s.paper} aria-label="Guest review">
+              <div className={s.cardHeader}>
+                <div><strong>{example.venue}</strong><small>Google Business Profile</small></div>
+                <span role="img" aria-label={`${example.rating} out of 5 stars`} className={s.stars}>{"★".repeat(example.rating)}</span>
               </div>
+              <blockquote>
+                “{example.leading}{example.praise && highlight(example.praise, 0, "praise")}{example.middle}
+                {highlight(example.concern, example.praise ? 1 : 0, needsAttention ? "risk" : example.label === "Straight praise" ? "praise" : "note") }.”
+              </blockquote>
+            </article>
+          </li>
+          <li className={s.triage}>
+            <div className={s.step}><span>2</span>{stages[1]}</div>
+            <div className={s.ledger}>
+              <div className={s.cardHeader}>
+                <span className={s.badge}>V1</span>
+                <div><strong>Review triage</strong><small>{example.summary}</small></div>
+              </div>
+              <div className={s.signals} aria-label="Details picked up by V1">
+                {example.topics.map((topic, index) => (
+                  <button key={topic} type="button" aria-pressed={pinned === index} data-active={activeTopic === index}
+                    onMouseEnter={() => setHovered(index)} onMouseLeave={() => setHovered(null)}
+                    onClick={() => setPinned(current => current === index ? null : index)}>
+                    {topic}
+                  </button>
+                ))}
+              </div>
+              <p className={s.destination}>{needsAttention ? "Needs attention · Owner inbox" : "Routine drafts · Owner inbox"}<small>Saved privately</small></p>
             </div>
           </li>
-          <li className={s.output}>
-            <span className={s.route} aria-hidden="true" />
-            <div className={s.paper}>
-              <h3>Owner inbox · Private draft</h3>
-              <blockquote>
-                {example.draft.split(/(atmosphere|service)/g).map((part, index) => index % 2 === 0
-                  ? part
-                  : <mark key={index} className={part === "atmosphere" ? s.praise : s.comment}>{part}</mark>
-                )}
-              </blockquote>
-              <strong className={s.stamp} data-attention={needsAttention}>
-                {needsAttention ? "Needs attention" : "Routine draft"}
-              </strong>
-            </div>
+          <li className={s.reply}>
+            <div className={s.step}><span>3</span>{stages[2]}</div>
+            <article className={s.paper} aria-label="Owner inbox private draft">
+              <div className={s.cardHeader}><div><strong>Owner inbox</strong><small>Private draft</small></div></div>
+              <p className={s.replyText}>{example.draft.split(example.replyPattern).map((part, index) => index % 2 === 0 ? part :
+                <mark key={index} data-tone={needsAttention ? "risk" : index === 3 && selection.index === 0 ? "note" : "praise"}
+                  data-active={activeTopic === (needsAttention ? 1 : Math.floor(index / 2))}>{part}</mark>)}</p>
+              <div className={s.cardFooter}>
+                <button type="button" onClick={copyDraft}>{copyStatus === "Copied draft" ? copyStatus : "Copy draft"}</button>
+                <strong className={s.stamp} data-attention={needsAttention}>{needsAttention ? "Needs attention" : "Routine draft"}</strong>
+              </div>
+              <span className={s.feedback} role="status">{copyStatus}</span>
+            </article>
           </li>
         </ol>
       </div>
       <footer className={s.footer}>
-        <p>V1 flags serious concerns even at five stars. You decide what goes on Google.</p>
-        <a href="#walkthrough">Try your own review</a>
+        <p>Serious concerns are flagged even at five stars. All pilot replies stay private.</p>
+        <a href="#walkthrough">Try your own review <span aria-hidden="true">→</span></a>
       </footer>
     </section>
   );

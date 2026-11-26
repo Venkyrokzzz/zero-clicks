@@ -1,8 +1,9 @@
-import { FIVE_STAR_REPLY } from "@/lib/reviewDraftDefaults";
-
 export const reviewExamples = [
   {
     label: "Mixed feedback",
+    venue: "The Crown & Anchor",
+    summary: "Praise with a service note",
+    replyPattern: /(atmosphere|service)/g,
     leading: "Loved the ",
     praise: "atmosphere",
     middle: ", but ",
@@ -13,16 +14,22 @@ export const reviewExamples = [
   },
   {
     label: "Straight praise",
+    venue: "The Willow Arms",
+    summary: "Food and hospitality praise",
+    replyPattern: /(Sunday roast|warm welcome)/g,
     leading: "Wonderful ",
     praise: "Sunday roast",
     middle: " and ",
     concern: "a lovely welcome",
     topics: ["Sunday roast", "Warm welcome"],
     rating: 5,
-    draft: FIVE_STAR_REPLY,
+    draft: "Thanks for the five stars! We’re glad you enjoyed the Sunday roast and warm welcome. See you again soon.",
   },
   {
     label: "Serious concern",
+    venue: "The George Inn",
+    summary: "Injury flagged at five stars",
+    replyPattern: /(duty manager)/g,
     leading: "The chair broke and I ",
     praise: "",
     middle: "",

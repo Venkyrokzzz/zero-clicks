@@ -122,7 +122,7 @@ function ProductHero() {
         <h1 id="product-heading">Good service deserves a good reply.</h1>
         <p>Get private drafts for Google reviews at your pub or restaurant.</p>
         <div className={e.heroActions}>
-          <a className={s.primary} href="#walkthrough">Try a review <span aria-hidden="true">→</span></a>
+          <a className={s.primary} href="#review-handoff">Try a review <span aria-hidden="true">→</span></a>
           <Link className={e.underlined} href="/start">Connect Google</Link>
         </div>
       </div>
