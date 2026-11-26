@@ -80,8 +80,8 @@ function Footer() {
 }
 const steps = [
   ["Connect your venue", "Link the Google Business Profile you manage."],
-  ["Check your drafts", "Read the guest’s review, then edit the draft to sound like your team."],
-  ["Keep the final word", "Edit or copy your draft in the owner inbox. The pilot saves replies privately."],
+  ["Enable automatic replies", "Routine reviews can be answered automatically at any rating when you opt in."],
+  ["Review flagged replies", "When a review needs attention, check the private draft before approving it for Google."],
 ] as const;
 
 function StepIcon({ index }: { index: number }) {
@@ -120,7 +120,7 @@ function ProductHero() {
     <section className={e.hero} aria-labelledby="product-heading">
       <div className={e.heroCopy}>
         <h1 id="product-heading">Good service deserves a good reply.</h1>
-        <p>Get private drafts for Google reviews at your pub or restaurant.</p>
+        <p>Automatically reply to routine Google reviews. Check the ones that need your attention.</p>
         <div className={e.heroActions}>
           <a className={s.primary} href="#review-handoff">Try a review <span aria-hidden="true">→</span></a>
           <Link className={e.underlined} href="/start">Connect Google</Link>
@@ -200,7 +200,7 @@ export function FAQ() {
         {[
           [
             "Will replies go out without me?",
-            "The pilot saves drafts in your owner inbox. You can edit or copy them, and anything that needs a closer look is flagged.",
+            "With automatic publishing enabled for your venue, routine replies can go to Google without individual approval. Flagged reviews stay private until you approve them.",
           ],
           [
             "Does this demo connect to Google?",

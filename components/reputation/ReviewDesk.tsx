@@ -2,14 +2,16 @@
 
 import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { isRoutineReview, type ReviewDisposition } from "@/lib/reviewDisposition";
+import { ratingOnlyReply } from "@/lib/reviewDraftDefaults";
 import { scenarios } from "./scenarios";
 import s from "./ReputationLaunch.module.css";
 import p from "./PaperDesk.module.css";
 
-type Draft = { reply: string; source: "sample" | "ai" | "template"; disposition?: "routine_praise" | "approval" | "manager"; reason?: string };
+type Draft = { reply: string; source: "sample" | "ai" | "template"; disposition?: ReviewDisposition; reason?: string };
 const sampleDecisions = [
   { disposition: "routine_praise", reason: "Straightforward praise", cue: "Lovely Sunday roast" },
-  { disposition: "approval", reason: "The guest enjoyed the roast but reported a wait", cue: "waited 40 minutes" },
+  { disposition: "routine_reply", reason: "The guest enjoyed the roast but reported a wait", cue: "waited 40 minutes" },
   { disposition: "manager", reason: "The review describes how the team handled a complaint", cue: "made things worse" },
 ] as const;
 const CUSTOM = scenarios.length;
@@ -69,6 +71,13 @@ export default function ReviewDesk() {
   async function generate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy.current) return;
+    if (!review.trim()) {
+      setError("");
+      setCopied(false);
+      setCustomDraft({ reply: ratingOnlyReply(rating), source: "template", disposition: "routine_reply", reason: "Rating only. Uses the default reply for this rating." });
+      setFold(current => current + 1);
+      return;
+    }
     busy.current = true;
     setLoading(true);
     setCopied(false);
@@ -158,8 +167,6 @@ export default function ReviewDesk() {
               <label htmlFor="custom-review">Paste a review</label>
               <textarea
                 id="custom-review"
-                required
-                minLength={10}
                 maxLength={800}
                 value={review}
                 placeholder="The Sunday roast was lovely, but the food took a while…"
@@ -194,13 +201,13 @@ export default function ReviewDesk() {
                 </label>
                 <button
                   className={s.primary}
-                  disabled={loading || review.trim().length < 10}
+                  disabled={loading}
                 >
                   {loading ? "Drafting reply…" : "Generate reply"}
                 </button>
               </div>
               <p id="review-privacy" className={p.hint}>
-                Use public review text only. It may be sent to our AI provider.
+                Leave blank to see the default for a rating. Public review text may be sent to our AI provider.
               </p>
               <div role="status" className={p.hint}>
                 {loading && "Writing a reply for your review."}
@@ -250,8 +257,8 @@ export default function ReviewDesk() {
                 <strong>
                   {draft.disposition === "manager"
                     ? "Needs manager attention"
-                    : draft.disposition === "routine_praise"
-                      ? "Routine praise"
+                    : isRoutineReview(draft.disposition)
+                      ? "Eligible for automatic replies"
                       : "Needs attention"}
                 </strong>
                 {draft.reason && <p>{draft.reason}</p>}

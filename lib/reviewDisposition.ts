@@ -18,18 +18,18 @@ export function hasReviewComplaint(review: string) {
     || /\b(?:fr[ií]a|lento|mal|mauvais|schlecht)\b/i.test(review)
 }
 
-export type ReviewDisposition = 'routine_praise' | 'approval' | 'manager'
+export type ReviewDisposition = 'routine_praise' | 'routine_reply' | 'approval' | 'manager'
+
+export function isRoutineReview(disposition: ReviewDisposition) {
+  return disposition === 'routine_praise' || disposition === 'routine_reply'
+}
 
 export function classifyReview(rating: number, review: string): { disposition: ReviewDisposition; reason: string } {
   if (SERIOUS.test(review) || ALLERGEN_QUESTION.test(review)) return { disposition: 'manager', reason: 'The guest raised a safety or welfare concern.' }
   if (STAFF.test(review) || NO_APOLOGY.test(review)) return { disposition: 'manager', reason: 'Check how the team handled the guest’s visit.' }
-  if (BILL.test(review)) return { disposition: 'approval', reason: 'The guest raised a billing issue.' }
-  if (DRINKS_DELAY.test(review)) return { disposition: 'approval', reason: 'The guest reported that their drinks arrived late.' }
-  if (WAIT.test(review)) return { disposition: 'approval', reason: 'The guest reported a wait.' }
-  if (COLD_FOOD.test(review)) return { disposition: 'approval', reason: 'The guest reported cold food.' }
-  if (BOOKING.test(review)) return { disposition: 'approval', reason: 'The guest raised a booking issue.' }
-  if (WRONG_ORDER.test(review)) return { disposition: 'approval', reason: 'The guest says they received the wrong order.' }
-  if (hasReviewComplaint(review)) return { disposition: 'approval', reason: 'The wording needs a closer look.' }
-  if (rating !== 5) return { disposition: 'approval', reason: 'Check that the reply addresses the guest’s feedback.' }
-  return { disposition: 'routine_praise', reason: 'Five-star review with the default thank-you draft.' }
+  if (BILL.test(review) || /\b(?:refund|fraud|stolen|theft|scam|legal action|lawsuit|police)\b/i.test(review)) {
+    return { disposition: 'approval', reason: 'The guest raised a sensitive incident or payment issue.' }
+  }
+  if (rating === 5 && !hasReviewComplaint(review)) return { disposition: 'routine_praise', reason: 'Straightforward five-star feedback.' }
+  return { disposition: 'routine_reply', reason: review.trim() ? 'Routine feedback with a tailored reply.' : 'Rating only. Uses the default reply for this rating.' }
 }

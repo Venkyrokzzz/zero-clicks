@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
   const review = typeof input?.review === "string" ? input.review.trim() : "";
   const rating = input?.rating;
   if (
-    review.length < 10 ||
     review.length > MAX_REVIEW_LENGTH ||
     typeof rating !== "number" ||
     !Number.isInteger(rating) ||
@@ -44,7 +43,7 @@ export async function POST(request: NextRequest) {
   ) {
     return NextResponse.json(
       {
-        error: "Enter a review of 10–800 characters and a rating from 1 to 5.",
+        error: "Enter a rating from 1 to 5 and up to 800 characters of review text.",
       },
       { status: 400 },
     );

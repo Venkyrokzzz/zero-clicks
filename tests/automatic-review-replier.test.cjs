@@ -119,6 +119,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   const draft = 'Thanks for the five stars! We’re glad you stopped by and hope to see you again soon.';
   const fourStarFallback = 'Really glad you enjoyed the food. Thanks for coming in!';
   const geminiDraft = 'Glad you enjoyed the food at the Fixture Arms. Hope to see you again soon!';
+  const mixedDraft = 'Glad you enjoyed the atmosphere. I’m sorry our service was slow. Thanks for telling us.';
   let blockRegeneration = false;
   const mocks = {
     crypto,
@@ -176,14 +177,14 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
       assert.equal(options.headers['x-goog-api-key'], 'fixture-gemini-key');
       const prompt = JSON.parse(options.body);
       const input = JSON.parse(prompt.contents[0].parts[0].text);
-      assert.match(input.review.text, /Great food/);
-      assert.equal(input.review.rating, 4);
+      assert.match(input.review.text, /Great food|Loved the atmosphere/);
+      assert.ok([4, 5].includes(input.review.rating));
       assert.equal(Object.hasOwn(input, 'manager_name'), false);
       assert.equal(Object.hasOwn(input.review, 'reviewer_name'), false);
       assert.doesNotMatch(prompt.systemInstruction.parts[0].text, /Fixture Arms/);
       await new Promise(resolve => setImmediate(resolve));
       if (geminiUnavailable) return Response.json({}, { status: 429 });
-      return Response.json({ candidates: [{ finishReason: 'STOP', content: { parts: [{ text: JSON.stringify({ reply: geminiDraft, assessment: 'routine_praise' }) }] } }] });
+      return Response.json({ candidates: [{ finishReason: 'STOP', content: { parts: [{ text: JSON.stringify({ reply: input.review.text.includes('atmosphere') ? mixedDraft : geminiDraft, assessment: 'routine_reply' }) }] } }] });
     }
     if (url.href === 'https://oauth2.googleapis.com/token') {
       if (options.body.get('grant_type') === 'authorization_code') {
@@ -207,7 +208,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
       assert.equal(options.headers.Authorization, 'Bearer fake-access');
       return Response.json({ reviews: [{
         name: 'accounts/123/locations/456/reviews/' + incomingReviewId, reviewId: incomingReviewId,
-        starRating: incomingReviewId === 'r1' ? 'FIVE' : 'FOUR', comment: 'Great food', reviewer: { displayName: 'Test guest' },
+        starRating: incomingReviewId === 'r1' ? 'FIVE' : 'FOUR', comment: incomingReviewId === 'r1' ? '' : 'Great food', reviewer: { displayName: 'Test guest' },
         reviewReply: incomingGoogleReply,
       }] });
     }
@@ -223,6 +224,18 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
       name: 'accounts/123/locations/456/reviews/r2',
       reviewReply: { comment: 'An owner replied first.' },
     });
+    if (url.href === reviewUrl + '/automatic' || url.href === reviewUrl + '/revoked') return Response.json({
+      name: 'accounts/123/locations/456/reviews/' + url.pathname.split('/').pop(), starRating: 'ONE',
+    });
+    if (url.href === reviewUrl + '/edited') return Response.json({
+      name: 'accounts/123/locations/456/reviews/edited', starRating: 'ONE', comment: 'The chair broke and I injured my back.',
+    });
+    if (url.href === reviewUrl + '/automatic/reply') {
+      assert.equal(options.method, 'PUT');
+      assert.match(JSON.parse(options.body).comment, /let you down/);
+      attempts++;
+      return Response.json({ reviewReplyState: 'APPROVED' });
+    }
     if (url.href === reviewUrl + '/r1/reply') {
       assert.equal(options.method, 'PUT');
       assert.equal(options.headers.Authorization, 'Bearer fake-access');
@@ -394,7 +407,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   assert.equal(review.draft_response, draft);
   assert.equal(review.status, 'pending');
   assert.equal(review.reviewer_name, 'Test guest');
-  assert.equal(review.review_text, 'Great food');
+  assert.equal(review.review_text, '');
   assert.equal(review.rating, 5);
   assert.equal(review.sentiment, 'POSITIVE');
   assert.deepEqual(listing.metrics, { totalReviews: 1, negativeCount: 0, pendingCount: 1, sentCount: 0 });
@@ -491,6 +504,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   assert.equal((await (await regenerate()).json()).draft, draft);
   assert.equal(draftCalls, 0, 'five-star defaults never call the AI provider');
   tables.reviews[0].rating = 4;
+  tables.reviews[0].review_text = 'Great food';
   assert.equal((await (await regenerate()).json()).draft, geminiDraft);
   geminiUnavailable = true;
   assert.equal((await (await regenerate()).json()).draft, fourStarFallback);
@@ -592,6 +606,52 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
   assert.match(second.publication_message, /Already replied on Google/);
   assert.equal(attempts, 2);
   assert.equal((await cron('post-replies')).status, 200);
+  const settings = load('app/api/settings/route');
+  const setAuto = value => settings.PUT(new Request(site, { method: 'PUT', body: JSON.stringify({ autoPublishRoutine: value }) }));
+  assert.equal((await setAuto(true)).status, 200);
+  assert.equal((await (await settings.GET()).json()).autoPublishRoutine, true);
+  const storedConsent = tables.settings.find(row => row.clerk_user_id === 'fixture');
+  assert.equal(storedConsent.auto_publish_venue, 'accounts/123/locations/456');
+  const processReview = load('lib/processReview').processReview;
+  const importNew = async (id, stars, comment, date = storedConsent.auto_publish_enabled_at, venueId = '456') => {
+    const result = await processReview({ clerk_user_id: 'fixture', external_id: id, rating: stars, review_text: comment, google_created_at: date },
+      { googleResource: `accounts/123/locations/${venueId}/reviews/${id}` });
+    assert.equal(result.status, 200);
+    return tables.reviews.find(row => row.external_id === id);
+  };
+  const automatic = await importNew('automatic', 1, '');
+  assert.equal(automatic.status, 'approved');
+  assert.equal(automatic.automatically_approved, true);
+  assert.equal((await cron('post-replies')).status, 200);
+  assert.equal(automatic.status, 'sent');
+  assert.equal(attempts, 3);
+  const mixed = await importNew('mixed', 5, 'Loved the atmosphere, but service was slow.');
+  assert.equal(mixed.status, 'approved');
+  assert.equal(mixed.draft_response, mixedDraft);
+  const sensitive = await importNew('sensitive', 5, 'The chair broke and I injured my back.');
+  assert.equal(sensitive.status, 'pending');
+  assert.match(sensitive.attention_reason, /safety|welfare/);
+  const prior = await importNew('prior', 3, '', new Date(0).toISOString());
+  assert.equal(prior.status, 'pending');
+  const otherVenue = await importNew('other-venue', 4, '', storedConsent.auto_publish_enabled_at, '999');
+  assert.equal(otherVenue.status, 'pending');
+  const revoked = await importNew('revoked', 1, '');
+  assert.equal(revoked.status, 'approved');
+  assert.equal((await setAuto(false)).status, 200);
+  tables.reviews.splice(tables.reviews.indexOf(mixed), 1);
+  assert.equal((await cron('post-replies')).status, 200);
+  assert.equal(revoked.status, 'pending');
+  assert.match(revoked.attention_reason, /switched off/);
+  assert.equal(attempts, 3);
+  assert.equal((await setAuto(true)).status, 200);
+  const edited = await importNew('edited', 1, '');
+  assert.equal(edited.status, 'approved');
+  assert.equal((await cron('post-replies')).status, 200);
+  assert.equal(edited.status, 'pending');
+  assert.match(edited.review_text, /injured my back/);
+  assert.match(edited.attention_reason, /edited this review/);
+  assert.equal(attempts, 3);
+
   // Venue setup can recover when Clerk's signup event has not created a profile.
   actor = { userId: 'missing-profile' };
   const saveProfile = load('app/api/profile/route').PUT;
@@ -634,19 +694,22 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
     assert.ok((await draftReply({ ...sampleContext, rating, review_text: '' })).text.trim());
   }
   assert.equal((await draftReply({ ...sampleContext, rating: 5, review_text: '' })).text, draft);
-  assert.equal((await draftReply({ ...sampleContext, rating: 5, review_text: 'Lovely roast.' })).text, draft);
+  assert.match((await draftReply({ ...sampleContext, rating: 5, review_text: 'Lovely roast.' })).text, /enjoyed the roast/);
+  const ratings = await Promise.all([1, 2, 3, 4, 5].map(rating => draftReply({ ...sampleContext, rating, review_text: '   ' })));
+  assert.equal(new Set(ratings.map(reply => reply.text)).size, 5);
+  assert.ok(ratings.every(reply => ['routine_reply', 'routine_praise'].includes(reply.disposition)));
   const classifyReview = load('lib/reviewDisposition').classifyReview;
   for (const [rating, review_text, expectedDisposition, expectedWording] of [
-    [5, "Lovely roast. Can't wait to come back.", 'routine_praise', /Thanks for the five stars/],
-    [4, 'Lovely Sunday roast, but we waited 40 minutes for it.', 'approval', /enjoyed the roast.*wait 40 minutes/],
-    [4, 'Great fish and chips, but our drinks arrived after our mains.', 'approval', /fish and chips.*wait so long for your drinks/],
-    [3, "We booked a table but it wasn’t ready.", 'approval', /couldn’t get you seated as booked/],
+    [5, "Lovely roast. Can't wait to come back.", 'routine_praise', /enjoyed the roast/],
+    [4, 'Lovely Sunday roast, but we waited 40 minutes for it.', 'routine_reply', /enjoyed the roast.*wait 40 minutes/],
+    [4, 'Great fish and chips, but our drinks arrived after our mains.', 'routine_reply', /fish and chips.*wait so long for your drinks/],
+    [3, "We booked a table but it wasn’t ready.", 'routine_reply', /couldn’t get you seated as booked/],
     [2, 'Nobody could tell me if the gravy contained dairy.', 'manager', /couldn’t get a clear answer.*privately/],
-    [1, 'They served us the wrong order.', 'approval', /served the wrong order/],
+    [1, 'They served us the wrong order.', 'routine_reply', /served the wrong order/],
     [5, 'The staff were rude and made things worse. Nobody apologised.', 'manager', /things got worse.*apology.*privately/],
   ]) {
     const outcome = await draftReply({ ...sampleContext, rating, review_text });
-    assert.equal(outcome.disposition, expectedDisposition, review_text);
+    assert.equal(outcome.disposition, expectedDisposition === 'manager' ? 'manager' : 'approval', review_text);
     assert.equal(classifyReview(rating, review_text).disposition, expectedDisposition);
     assert.match(outcome.text, expectedWording, review_text);
   }

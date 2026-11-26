@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { ratingOnlyReply } from '@/lib/reviewDraftDefaults'
 
 const TONES = [
   { value: 'warm-professional', label: '☀️ Warm & Professional', desc: 'Friendly but polished. Works for most pubs.' },
@@ -11,30 +12,49 @@ const TONES = [
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
     tone: 'warm-professional',
-    flag_negative: true,
+    autoPublishRoutine: false,
+    canEnableAutomaticPublishing: false,
     signature: '',
   })
+  const [savedAutoPublish, setSavedAutoPublish] = useState(false)
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     fetch('/api/settings')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data) setSettings(data); setLoading(false) })
-      .catch(() => setLoading(false))
+      .then(r => { if (!r.ok) throw new Error(); return r.json() })
+      .then(data => { setSettings(data); setSavedAutoPublish(data.autoPublishRoutine) })
+      .catch(() => setError('Could not load settings. Refresh to try again.'))
+      .finally(() => setLoading(false))
   }, [])
 
   async function handleSave() {
     setSaving(true)
-    await fetch('/api/settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tone: settings.tone, flag_negative: settings.flag_negative, signature: settings.signature }),
-    })
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
+    setSaved(false)
+    setError('')
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tone: settings.tone, signature: settings.signature,
+          autoPublishRoutine: settings.autoPublishRoutine === savedAutoPublish ? undefined : settings.autoPublishRoutine,
+        }),
+      })
+      if (!response.ok) {
+        const result = await response.json().catch(() => null)
+        throw new Error(result?.error || 'Could not save settings.')
+      }
+      setSavedAutoPublish(settings.autoPublishRoutine)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not save settings.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loading) return <PageShell><p style={{ color: '#a1a1aa' }}>Loading...</p></PageShell>
@@ -68,14 +88,22 @@ export default function SettingsPage() {
         </div>
       </Section>
 
-      {/* Toggles */}
-      <Section title="Behaviour">
+      <Section title="Google replies">
         <Toggle
-          label="Flag negative reviews"
-          desc="1 and 2-star reviews appear at the top with a red badge."
-          checked={settings.flag_negative}
-          onChange={v => setSettings(s => ({ ...s, flag_negative: v }))}
+          label="Automatically publish routine replies"
+          desc="Allow Zero Clicks to post routine replies on your connected Google venue without individual approval. Ratings without comments use a default for each star rating. Reviews needing attention stay private until you approve them."
+          checked={settings.autoPublishRoutine}
+          disabled={saving || (!settings.canEnableAutomaticPublishing && !settings.autoPublishRoutine)}
+          onChange={v => setSettings(s => ({ ...s, autoPublishRoutine: v }))}
         />
+        {!settings.canEnableAutomaticPublishing && <p style={{ color: '#a1a1aa' }}>Automatic replies are paused until publishing is available and the Google venue is connected.</p>}
+        <p style={{ color: '#a1a1aa' }}>Applies to reviews left after you turn it on. You can switch it off here.</p>
+        <details>
+          <summary>See the five rating-only replies</summary>
+          <ul>
+            {[5, 4, 3, 2, 1].map(rating => <li key={rating}><strong>{rating} {rating === 1 ? 'star' : 'stars'}</strong> · {ratingOnlyReply(rating)}</li>)}
+          </ul>
+        </details>
       </Section>
 
       {/* Signature */}
@@ -101,6 +129,7 @@ export default function SettingsPage() {
         />
       </Section>
 
+      {error && <p role="alert">{error}</p>}
       <button
         onClick={handleSave}
         disabled={saving}
@@ -123,7 +152,7 @@ export default function SettingsPage() {
   )
 }
 
-function Toggle({ label, desc, checked, onChange }: { label: string; desc: string; checked: boolean; onChange: (v: boolean) => void }) {
+function Toggle({ label, desc, checked, disabled, onChange }: { label: string; desc: string; checked: boolean; disabled: boolean; onChange: (v: boolean) => void }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
       <div>
@@ -131,6 +160,11 @@ function Toggle({ label, desc, checked, onChange }: { label: string; desc: strin
         <div style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>{desc}</div>
       </div>
       <button
+        type="button"
+        role="switch"
+        aria-label={label}
+        aria-checked={checked}
+        disabled={disabled}
         onClick={() => onChange(!checked)}
         style={{
           width: '48px', height: '26px', borderRadius: '13px', border: 'none', cursor: 'pointer',

@@ -12,12 +12,18 @@ export function googleReplyUrl(account: string, location: string, review: string
   return `${googleReviewsUrl(account, location)}/${encodeURIComponent(reviewId)}/reply`;
 }
 
-export function googleReviewResource(account: string, location: string, review: string): string | null {
+export function googleVenueResource(account: string, location: string): string | null {
   const accountId = account.replace(/^accounts\//, '');
   const locationId = location.split('/').pop();
+  if (![accountId, locationId].every(id => id && /^[\w-]+$/.test(id))) return null;
+  return `accounts/${accountId}/locations/${locationId}`;
+}
+
+export function googleReviewResource(account: string, location: string, review: string): string | null {
+  const venue = googleVenueResource(account, location);
   const reviewId = review.split('/').pop();
-  if (![accountId, locationId, reviewId].every(id => id && /^[\w-]+$/.test(id))) return null;
-  const resource = `accounts/${accountId}/locations/${locationId}/reviews/${reviewId}`;
+  if (!venue || !reviewId || !/^[\w-]+$/.test(reviewId)) return null;
+  const resource = `${venue}/reviews/${reviewId}`;
   return !review.includes('/') || review === resource ? resource : null;
 }
 

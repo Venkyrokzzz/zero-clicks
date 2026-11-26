@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { classifyReview } from "@/lib/reviewDisposition";
+import { classifyReview, isRoutineReview } from "@/lib/reviewDisposition";
 import { TrialBanner } from "@/components/TrialBanner";
 import ReviewProgress from "@/components/workspace/ReviewProgress";
 import {
@@ -20,9 +20,12 @@ type Review = ReviewEvidence & {
   review_text?: string | null;
   sentiment?: string;
   escalation_reason?: string | null;
+  attention_reason?: string | null;
 };
 function draftDecision(review: Review) {
-  return classifyReview(review.rating, review.review_text ?? "");
+  const decision = classifyReview(review.rating, review.review_text ?? "");
+  if (review.attention_reason && decision.disposition !== "manager") return { disposition: "approval" as const, reason: review.attention_reason };
+  return decision;
 }
 
 type Connection = {
@@ -122,7 +125,7 @@ function ReviewEditor({
         {review.review_text ||
           "This guest left a star rating without a comment."}
       </blockquote>
-      {(review.escalation_reason || (review.status === "pending" && decision.disposition !== "routine_praise")) && (
+      {(review.escalation_reason || (review.status === "pending" && !isRoutineReview(decision.disposition))) && (
         <p className={s.alert}>
           {decision.disposition === "manager" && <strong>Manager review. </strong>}
           {review.escalation_reason || decision.reason}
@@ -252,10 +255,12 @@ export default function Inbox() {
     (r) =>
       (filter === "all" ||
         (filter === "flagged"
-          ? r.status === "pending" && draftDecision(r).disposition !== "routine_praise"
+          ? (r.status === "pending" && !isRoutineReview(draftDecision(r).disposition)) || r.publication_blocked || r.google_reply_state === "rejected"
           : filter === "routine"
-            ? r.status === "pending" && draftDecision(r).disposition === "routine_praise"
-            : r.status === filter)) &&
+            ? r.status === "pending" && isRoutineReview(draftDecision(r).disposition)
+            : filter === "automatic"
+              ? r.automatically_approved === true
+              : r.status === filter)) &&
       (!search.trim() ||
         `${r.reviewer_name} ${r.review_text ?? ""}`
           .toLowerCase()
@@ -275,6 +280,7 @@ export default function Inbox() {
             </p>
           </div>
           <div className={s.row}>
+            <a className={s.button} href="/dashboard/settings">Reply settings</a>
             <a className={s.button} href="/dashboard/billing">
               Billing
             </a>
@@ -291,7 +297,7 @@ export default function Inbox() {
           </div>
         </header>
         <TrialBanner />
-        {!publishingEnabled && <p className={s.notice}>Draft pilot · Replies stay in Zero Clicks until you copy them.</p>}
+        <p className={s.notice}>{publishingEnabled ? "Manage automatic replies in Settings. Reviews flagged for attention need your approval." : "Google publishing is unavailable. Replies stay in Zero Clicks until you copy them."}</p>
         {connectionError && (
           <p className={s.alert}>
             Could not read your Google connection. Select Refresh to retry.
@@ -354,6 +360,7 @@ export default function Inbox() {
             >
               <option value="all">All reviews</option>
               <option value="flagged">Needs attention</option>
+              <option value="automatic">Automatic replies</option>
               <option value="routine">Routine drafts</option>
               <option value="pending">All open drafts</option>
               <option value="approved">{publishingEnabled ? "Queued" : "Previously approved drafts"}</option>

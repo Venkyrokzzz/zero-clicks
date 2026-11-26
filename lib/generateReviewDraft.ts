@@ -1,8 +1,8 @@
 import 'server-only'
-import { FIVE_STAR_REPLY } from '@/lib/reviewDraftDefaults'
+import { ratingOnlyReply } from '@/lib/reviewDraftDefaults'
 import { buildSystemPrompt, buildUserMessage, type ReviewContext } from '@/lib/buildReplyPrompt'
 
-import { ALLERGEN_QUESTION, BILL, BOOKING, COLD_FOOD, DRINKS_DELAY, NO_APOLOGY, SERIOUS, STAFF, WAIT, WRONG_ORDER, classifyReview, hasReviewComplaint } from '@/lib/reviewDisposition'
+import { ALLERGEN_QUESTION, BILL, BOOKING, COLD_FOOD, DRINKS_DELAY, NO_APOLOGY, SERIOUS, STAFF, WAIT, WRONG_ORDER, classifyReview, hasReviewComplaint, isRoutineReview } from '@/lib/reviewDisposition'
 
 const GENERIC_OPENING = /^(?:thank you for (?:your feedback|taking the time)|we(?:['’]re| are) sorry to hear|we strive to|your feedback is (?:important|valuable))/i
 const UNSAFE_DRAFT = /hacked|pwned|system prompt|debug mode|ignore (all |your )?(previous|rules)|as an ai|i am an ai|i cannot reveal|language model|verbatim|on us\b|on the house|complimentary|free of charge|no charge|free (drink|pint|meal|round|glass)|refund|money back|compensation|voucher|discount|off your next/i
@@ -95,7 +95,7 @@ function reviewDecision(ctx: ReviewContext, assessment?: unknown) {
   if (decision.disposition !== 'manager' && assessment === 'manager') {
     return { disposition: 'manager' as const, reason: 'The review was flagged for the duty manager to assess.' }
   }
-  if (decision.disposition === 'routine_praise' && unsafeReply(ctx.review_text, ctx)) {
+  if (isRoutineReview(decision.disposition) && (assessment === 'approval' || unsafeReply(ctx.review_text, ctx))) {
     return { disposition: 'approval' as const, reason: 'The wording needs a closer look.' }
   }
   return decision
@@ -104,13 +104,13 @@ function reviewDecision(ctx: ReviewContext, assessment?: unknown) {
 export async function generateReviewDraft(ctx: ReviewContext, signature?: string | null) {
   const key = process.env.GEMINI_API_KEY
   const model = process.env.GEMINI_REVIEW_MODEL
-  const routine = reviewDecision(ctx).disposition === 'routine_praise'
-  const defaultText = routine ? FIVE_STAR_REPLY : templateReply(ctx)
+  const hasComment = Boolean(ctx.review_text.trim())
+  const defaultText = hasComment ? templateReply(ctx) : ratingOnlyReply(ctx.rating)
   let text = defaultText
   let provider: 'template' | 'gemini' = 'template'
   let assessment: unknown
 
-  if (ctx.rating !== 5 && key && model && ctx.review_text.trim()) {
+  if (hasComment && key && model) {
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
@@ -129,7 +129,7 @@ export async function generateReviewDraft(ctx: ReviewContext, signature?: string
                 type: 'object',
                 properties: {
                   reply: { type: 'string' },
-                  assessment: { type: 'string', enum: ['routine_praise', 'approval', 'manager'] },
+                  assessment: { type: 'string', enum: ['routine_reply', 'routine_praise', 'approval', 'manager'] },
                 },
                 required: ['reply', 'assessment'],
               },
@@ -147,7 +147,7 @@ export async function generateReviewDraft(ctx: ReviewContext, signature?: string
       if (candidate?.finishReason === 'STOP' && output) {
         const parsed = JSON.parse(output)
         const reply = typeof parsed?.reply === 'string' ? parsed.reply.trim() : ''
-        if (['routine_praise', 'approval', 'manager'].includes(parsed?.assessment)) {
+        if (['routine_reply', 'routine_praise', 'approval', 'manager'].includes(parsed?.assessment)) {
           assessment = parsed.assessment
           const missesConcern = replyDetails.some(([input, output]) => input.test(ctx.review_text) && !output.test(reply))
           if (reply && reply.length <= 480 && !GENERIC_OPENING.test(reply) && !missesConcern && !unsafeReply(reply, ctx) && !/^[A-Z\s!.]{2,15}$/.test(reply)) {
@@ -164,7 +164,11 @@ export async function generateReviewDraft(ctx: ReviewContext, signature?: string
   const signoff = signature?.trim()
   const signedDraft = signoff ? `${text}\n\n${signoff}` : text
   if (Buffer.byteLength(signedDraft, 'utf8') > 4096 || (signoff && unsafeReply(signoff, ctx))) {
-    return { text: defaultText, provider: 'template' as const, ...reviewDecision(ctx, assessment === 'manager' ? assessment : undefined) }
+    return { text: defaultText, provider: 'template' as const, ...reviewDecision(ctx, assessment === 'manager' ? assessment : 'approval') }
   }
-  return { text: signedDraft, provider, ...reviewDecision(ctx, provider === 'gemini' || assessment === 'manager' ? assessment : undefined) }
+  const decision = reviewDecision(ctx, assessment)
+  if (hasComment && provider !== 'gemini' && isRoutineReview(decision.disposition)) {
+    return { text: signedDraft, provider, disposition: 'approval' as const, reason: 'The tailored reply could not be verified. Check the draft before posting.' }
+  }
+  return { text: signedDraft, provider, ...decision }
 }

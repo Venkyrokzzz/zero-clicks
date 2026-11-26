@@ -29,3 +29,10 @@ jobs:
             -H "$auth_header" "https://www.0-clicks.uk/api/cron/poll-reviews") || status=000
           echo "poll-reviews HTTP $status"
           [[ "$status" = "200" ]]
+      - name: Publish eligible Google replies
+        if: ${{ !cancelled() }}
+        run: |
+          status=$(curl -sS --connect-timeout 10 --max-time 40 -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" "https://www.0-clicks.uk/api/cron/post-replies") || status=000
+          echo "post-replies HTTP $status"
+          [[ "$status" = "200" ]]

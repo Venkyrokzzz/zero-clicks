@@ -3,8 +3,8 @@ import { randomUUID } from 'node:crypto'
 import { supabase } from '@/lib/supabase'
 import { hasServiceAccess } from '@/lib/entitlements'
 import { generateReviewDraft } from '@/lib/generateReviewDraft'
-import { hasReviewComplaint } from '@/lib/reviewDisposition'
-import { reviewPublishingEnabled } from '@/lib/reviewPublishing'
+import { hasReviewComplaint, isRoutineReview } from '@/lib/reviewDisposition'
+import { consentCoversReview, reviewPublishingEnabled } from '@/lib/reviewPublishing'
 
 const VALID_SENTIMENTS = new Set(['POSITIVE', 'NEUTRAL', 'NEGATIVE'])
 const VALID_PLATFORMS = new Set(['google', 'tripadvisor', 'facebook'])
@@ -149,10 +149,12 @@ export async function processReview(body: Record<string, unknown>, { legacy = fa
   let finalDraft = legacyPublishing ? safeStr(draft_response) : null
   let finalStatus = legacyPublishing ? (safeStr(status, 20) ?? 'pending') : 'pending'
   let autoSent = false
+  let automaticApproval = false
+  let attentionReason: string | null = null
   try {
     const [{ data: fullProfile }, { data: settings }] = await Promise.all([
       supabase.from('profiles').select('business_name,manager_name,business_type,location').eq('clerk_user_id', clerk_user_id).single(),
-      supabase.from('settings').select('tone,auto_send_positive,signature').eq('clerk_user_id', clerk_user_id).single(),
+      supabase.from('settings').select('tone,auto_send_positive,signature,auto_publish_venue,auto_publish_enabled_at').eq('clerk_user_id', clerk_user_id).single(),
     ])
 
     const ctx = {
@@ -169,6 +171,11 @@ export async function processReview(body: Record<string, unknown>, { legacy = fa
     const generated = await generateReviewDraft(ctx, settings?.signature)
     if (!legacy || generated.provider === 'gemini' || !finalDraft?.trim()) finalDraft = generated.text
 
+    if (!isRoutineReview(generated.disposition)) attentionReason = generated.reason
+    automaticApproval = !legacy && reviewPublishingEnabled() && reviewFields.platform === 'google' &&
+      reviewFields.rating !== null && isRoutineReview(generated.disposition) && !!finalDraft?.trim() &&
+      consentCoversReview(settings, googleResource, reviewFields.google_created_at)
+
     // Preserve the legacy Pro setting for existing webhook callers. V1 waits for owner approval.
     const ratingNum = Number(rating) || 3
     const hasComplaint = hasReviewComplaint(safeStr(review_text, 5000) ?? '')
@@ -183,7 +190,9 @@ export async function processReview(body: Record<string, unknown>, { legacy = fa
 
   if (draftClaim) {
     const { error } = await supabase.from('reviews')
-      .update({ draft_response: finalDraft, draft_claim_id: null, draft_claim_until: null })
+      .update({ draft_response: finalDraft, status: automaticApproval ? 'approved' : 'pending',
+        automatically_approved: automaticApproval, attention_reason: attentionReason,
+        draft_claim_id: null, draft_claim_until: null })
       .eq('id', draftClaim.id).eq('clerk_user_id', clerk_user_id).eq('draft_claim_id', draftClaim.token)
       .eq('status', 'pending').is('draft_response', null)
     if (error || !finalDraft) return result({ error: 'Draft could not be saved; a later poll can retry' }, { status: 503 })

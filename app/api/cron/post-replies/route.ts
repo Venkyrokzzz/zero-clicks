@@ -1,17 +1,21 @@
 import { randomUUID } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { googleReplyState, googleReviewResource } from '@/lib/googleReviews'
+import { googleRating, googleReplyState, googleReviewResource } from '@/lib/googleReviews'
 import { getGoogleAccess, recordGoogleAuthFailure, GOOGLE_CONNECTION_FIELDS } from '@/lib/googleAccess'
 import { serviceAccess } from '@/lib/requireService'
 import { supabase } from '@/lib/supabase'
 import { verifyToken } from '@/lib/verifyToken'
-import { reviewPublishingEnabled } from '@/lib/reviewPublishing'
+import { consentCoversReview, reviewPublishingEnabled } from '@/lib/reviewPublishing'
 
 type ApprovedReply = {
   clerk_user_id: string
   google_review_resource: string | null
   draft_response: string | null
   status: string
+  automatically_approved?: boolean
+  google_created_at: string | null
+  review_text: string | null
+  rating: number | null
 }
 
 async function publish(review: ApprovedReply, reviewId: string, claim: string) {
@@ -65,6 +69,20 @@ async function publish(review: ApprovedReply, reviewId: string, claim: string) {
   if (!stillConnected) return { message: 'Google connection changed. Publishing was deferred.' } as const
   if (approvalCheckError) throw new Error('Could not recheck the reply approval.')
   if (!stillApproved) return { message: 'Reply approval changed. Publishing was deferred.' } as const
+
+  if (review.automatically_approved) {
+    const { data: settings, error: settingsError } = await supabase.from('settings')
+      .select('auto_publish_venue, auto_publish_enabled_at').eq('clerk_user_id', review.clerk_user_id).maybeSingle()
+    if (settingsError) throw new Error('Could not recheck automatic publishing consent.')
+    if (!consentCoversReview(settings, resource, review.google_created_at)) {
+      return { held: true, message: 'Automatic publishing was switched off or the venue changed.' } as const
+    }
+    const rating = googleRating(googleReview.starRating) ?? null
+    const comment = typeof googleReview.comment === 'string' ? googleReview.comment : ''
+    if (rating !== review.rating || comment.trim() !== (review.review_text ?? '').trim()) {
+      return { held: true, message: 'The guest edited this review on Google. Update the draft before posting.', latest: { rating, review_text: comment.slice(0, 5000) } } as const
+    }
+  }
 
   const response = await fetch(`${url}/reply`, {
     method: 'PUT',
@@ -124,7 +142,7 @@ export async function GET(req: NextRequest) {
         .eq('id', review.id).eq('clerk_user_id', review.clerk_user_id)
         .in('status', ['approved', 'sent']).is('posted_to_google_at', null)
         .eq('publication_blocked', false).or(eligible)
-        .select('clerk_user_id, google_review_resource, draft_response, status').maybeSingle()
+        .select('clerk_user_id, google_review_resource, draft_response, status, automatically_approved, google_created_at, review_text, rating').maybeSingle()
       if (claimError) {
         results.push({ id: review.id, error: 'Could not claim the reply.' })
         continue
@@ -146,6 +164,10 @@ export async function GET(req: NextRequest) {
         status: 'sent', sent_at: timestamp, posted_to_google_at: timestamp,
         google_reply_state: outcome.state, publication_message: null,
         publish_claim_until: null,
+      } : 'held' in outcome ? {
+        status: 'pending', automatically_approved: false, attention_reason: outcome.message,
+        ...('latest' in outcome ? outcome.latest : {}),
+        publication_message: null, publish_claim_until: null,
       } : {
         publication_blocked: 'blocked' in outcome && outcome.blocked,
         publication_message: outcome.message,
@@ -157,7 +179,7 @@ export async function GET(req: NextRequest) {
         .select('id').maybeSingle()
       if (saveError || !saved) results.push({ id: review.id, error: 'Could not save the publish result. The next attempt will recheck Google.' })
       else if (submitted) results.push({ id: review.id, submitted: true })
-      else if (access === false) { deferred++; results.push({ id: review.id, deferred: true }) }
+      else if ('held' in outcome || access === false) { deferred++; results.push({ id: review.id, deferred: true }) }
       else results.push({ id: review.id, error: outcome.message })
     }
     if (!progressed) { stopReason = 'no_progress'; break }

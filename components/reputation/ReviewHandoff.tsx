@@ -5,7 +5,7 @@ import { classifyReview } from "@/lib/reviewDisposition";
 import { reviewExamples } from "./reviewExamples";
 import s from "./ReviewHandoff.module.css";
 
-const stages = ["Guest review arrives", "V1 checks tone and risk", "Draft lands in the inbox"];
+const stages = ["Guest review arrives", "V1 checks tone and risk", "V1 routes the reply"];
 
 export default function ReviewHandoff() {
   const bench = useRef<HTMLDivElement>(null);
@@ -100,19 +100,19 @@ export default function ReviewHandoff() {
                   </button>
                 ))}
               </div>
-              <p className={s.destination}>{needsAttention ? "Needs attention · Owner inbox" : "Routine drafts · Owner inbox"}<small>Saved privately</small></p>
+              <p className={s.destination}>{needsAttention ? "Needs attention · Owner inbox" : "Automatic queue · When enabled"}<small>{needsAttention ? "Held for approval" : "Sample only"}</small></p>
             </div>
           </li>
           <li className={s.reply}>
             <div className={s.step}><span>3</span>{stages[2]}</div>
-            <article className={s.paper} aria-label="Owner inbox private draft">
-              <div className={s.cardHeader}><div><strong>Owner inbox</strong><small>Private draft</small></div></div>
+            <article className={s.paper} aria-label={needsAttention ? "Owner inbox private draft" : "Automatic reply preview"}>
+              <div className={s.cardHeader}><div><strong>{needsAttention ? "Owner inbox" : "Google reply preview"}</strong><small>{needsAttention ? "Private draft" : "Automatic when enabled"}</small></div></div>
               <p className={s.replyText}>{example.draft.split(example.replyPattern).map((part, index) => index % 2 === 0 ? part :
                 <mark key={index} data-tone={needsAttention ? "risk" : index === 3 && selection.index === 0 ? "note" : "praise"}
                   data-active={activeTopic === (needsAttention ? 1 : Math.floor(index / 2))}>{part}</mark>)}</p>
               <div className={s.cardFooter}>
                 <button type="button" onClick={copyDraft}>{copyStatus === "Copied draft" ? copyStatus : "Copy draft"}</button>
-                <strong className={s.stamp} data-attention={needsAttention}>{needsAttention ? "Needs attention" : "Routine draft"}</strong>
+                <strong className={s.stamp} data-attention={needsAttention}>{needsAttention ? "Needs attention" : "Auto-publish"}</strong>
               </div>
               <span className={s.feedback} role="status">{copyStatus}</span>
             </article>
@@ -120,7 +120,7 @@ export default function ReviewHandoff() {
         </ol>
       </div>
       <footer className={s.footer}>
-        <p>Serious concerns are flagged even at five stars. All pilot replies stay private.</p>
+        <p>Demo only. Routine replies can auto-publish after you opt in. Flagged replies require approval.</p>
         <a href="#walkthrough">Try your own review <span aria-hidden="true">→</span></a>
       </footer>
     </section>

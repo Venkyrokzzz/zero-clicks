@@ -25,7 +25,7 @@ export default function OwnerWalkthrough({ standalone = false }: { standalone?: 
   const startedAt = useRef(0);
   const review = scenarios[scenario];
   const decision = classifyReview(review.rating, review.review);
-  const inbox = { routine_praise: "Routine drafts", approval: "Needs attention", manager: "Manager review" }[decision.disposition];
+  const inbox = { routine_praise: "Automatic queue", routine_reply: "Automatic queue", approval: "Needs attention", manager: "Manager review" }[decision.disposition];
   const playing = playback === "playing";
   const holdMs = storyboard[shot].holdMs;
   const Heading = standalone ? "h1" : "h2";
@@ -71,7 +71,7 @@ export default function OwnerWalkthrough({ standalone = false }: { standalone?: 
   return (
     <section id="owner-walkthrough" className={s.scene} data-standalone={standalone} aria-labelledby="owner-walkthrough-title">
       <header className={s.heading}>
-        <Heading id="owner-walkthrough-title">From Google review to private draft</Heading>
+        <Heading id="owner-walkthrough-title">From Google review to reply</Heading>
         <div className={s.scenarios} role="group" aria-label="Choose a sample review">
           {scenarios.map(({ label }, index) => (
             <button key={label} type="button" aria-pressed={scenario === index} onClick={() => select(index, 0)}>{label}</button>
@@ -96,13 +96,13 @@ export default function OwnerWalkthrough({ standalone = false }: { standalone?: 
             {shot === 2 ? (
               <>
                 <strong className={s.destination} data-manager={decision.disposition === "manager"}>{inbox}</strong>
-                <p>{decision.disposition === "routine_praise" ? "Ready for the owner to edit or copy." : decision.reason}</p>
+                <p>{inbox === "Automatic queue" ? "Publishes on Google when automatic replies are enabled." : decision.reason}</p>
                 <blockquote className={s.inboxDraft}>{review.draft}</blockquote>
               </>
             ) : (
               <>
                 <blockquote>{shot === 0 ? review.review : review.draft}</blockquote>
-                {shot === 1 && <p>{decision.disposition === "routine_praise" ? "Default five-star reply" : "Draft based on the guest’s feedback"}</p>}
+                {shot === 1 && <p>{"Reply based on the guest’s feedback"}</p>}
               </>
             )}
           </div>

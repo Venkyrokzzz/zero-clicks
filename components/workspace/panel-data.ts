@@ -26,6 +26,7 @@ export interface ReviewEvidence {
   created_at: string;
   draft_response?: string | null;
   posted_to_google_at?: string | null;
+  automatically_approved?: boolean | null;
   publication_message?: string | null;
   publication_blocked?: boolean | null;
   google_reply_state?: string | null;
@@ -43,11 +44,11 @@ export function reviewLabel(value: ReviewEvidence, publishingEnabled = false) {
   if (value.publication_blocked) return "Needs attention";
   if (value.posted_to_google_at) {
     if (value.google_reply_state === "pending") return "Google moderation";
-    if (value.google_reply_state === "approved") return "Approved by Google";
+    if (value.google_reply_state === "approved") return value.automatically_approved ? "Auto-posted on Google" : "Approved by Google";
     return "Accepted by Google";
   }
   if (value.status === "sent") return "Publication unverified";
-  if (value.status === "approved") return publishingEnabled ? "Queued" : "Draft ready";
+  if (value.status === "approved") return publishingEnabled ? (value.automatically_approved ? "Queued automatically" : "Queued with approval") : "Draft ready";
   if (value.status === "skipped") return "Skipped";
   return value.draft_response?.trim() ? (publishingEnabled ? "Needs approval" : "Draft ready") : "Needs draft";
 }
