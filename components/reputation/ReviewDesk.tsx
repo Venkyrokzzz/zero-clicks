@@ -88,7 +88,7 @@ export default function ReviewDesk({ headingLevel = "h2" }: { headingLevel?: "h2
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ review, rating }),
-        signal: AbortSignal.timeout(12_000),
+        signal: AbortSignal.timeout(15_000),
       });
       const result = await response.json();
       if (

@@ -10,6 +10,7 @@ export const DRINKS_DELAY = /\bdrinks?\b[^.!?]{0,45}\b(?:after (?:the |our )?(?:
 export const BOOKING = /\b(?:lost|couldn['’]t find|no record of) (?:our |my |the )?(?:booking|reservation)\b|\b(?:booked|reserved) (?:a |our )?table\b[^.!?]{0,42}\b(?:wasn['’]t ready|no table|unavailable)\b/i
 export const WRONG_ORDER = /\b(?:wrong (?:order|meal|dish)|(?:brought|served) (?:me |us )?(?:someone else['’]s|the wrong))\b/i
 export const ALLERGEN_QUESTION = /\b(?:couldn['’]t|could not|nobody could|no one could) (?:tell|say|confirm)\b[^.!?]{0,70}\b(?:dairy|gluten|nuts?|allergens?)\b/i
+export const PROMPT_INJECTION = /\b(?:ignore (?:all |your )?(?:previous |prior )?(?:instructions|rules)|system prompt|reveal (?:your |the )?prompt|debug mode|say [^.!?]{1,40} verbatim)\b/i
 
 export function hasReviewComplaint(review: string) {
   const feedback = review.replace(/\b(?:can['’]t|cannot) wait to (?:come|be|get|go) back\b/gi, '')
@@ -27,6 +28,9 @@ export function isRoutineReview(disposition: ReviewDisposition) {
 export function classifyReview(rating: number, review: string): { disposition: ReviewDisposition; reason: string } {
   if (SERIOUS.test(review) || ALLERGEN_QUESTION.test(review)) return { disposition: 'manager', reason: 'The guest raised a safety or welfare concern.' }
   if (STAFF.test(review) || NO_APOLOGY.test(review)) return { disposition: 'manager', reason: 'Check how the team handled the guest’s visit.' }
+  if (PROMPT_INJECTION.test(review)) {
+    return { disposition: 'approval', reason: 'The review contains prompt-style instructions and needs owner review.' }
+  }
   if (BILL.test(review) || /\b(?:refund|fraud|stolen|theft|scam|legal action|lawsuit|police)\b/i.test(review)) {
     return { disposition: 'approval', reason: 'The guest raised a sensitive incident or payment issue.' }
   }
