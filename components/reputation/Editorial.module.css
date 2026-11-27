@@ -42,13 +42,24 @@
 .site .connect {
   display: inline-flex;
   align-items: center;
-  min-height: 42px;
+  min-height: 44px;
   padding: 9px 15px;
   border-radius: 6px;
   background: var(--ink);
   color: #fff;
   font-size: 14px;
   font-weight: 650;
+}
+
+.site .wordmark,
+.site .navigation a,
+.site .headerActions a,
+.site .footer nav a,
+.site .underlined,
+.site .pricingContact {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 .site .connect:hover {

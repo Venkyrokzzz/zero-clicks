@@ -27,10 +27,14 @@
   border-radius: 11px 11px 0 0;
   background: transparent;
 }
-.cover h2 {
+.cover :is(h2, h3) {
   padding: 0 6px;
   font-size: clamp(29px, 3.2vw, 46px);
   margin-bottom: 17px;
+  font-family: var(--font-display, Arial), Arial, sans-serif;
+  font-weight: 750;
+  letter-spacing: -0.062em;
+  line-height: 1.05;
 }
 .scenarios {
   display: grid;

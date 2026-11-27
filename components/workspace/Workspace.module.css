@@ -100,11 +100,11 @@
 }
 .button,
 .primary {
-  min-height: 42px;
+  min-height: 44px;
   padding: 9px 15px;
   border: 1px solid #bb909e;
-  background: var(--surface);
-  color: var(--ink) !important;
+  background: var(--surface, #fffbf8);
+  color: var(--ink, #4c172e) !important;
   border-radius: 5px;
   display: inline-flex;
   justify-content: center;
@@ -118,12 +118,12 @@
   cursor: pointer;
 }
 .button:hover {
-  background: var(--olive);
+  background: var(--olive, #f7e3dd);
 }
 .primary {
-  background: var(--action);
+  background: var(--action, #671f3d);
   color: white !important;
-  border-color: var(--action);
+  border-color: var(--action, #671f3d);
 }
 .primary:hover {
   background: #4c172e;
@@ -373,6 +373,10 @@
   margin-top: 14px;
 }
 .workspaceNav {
+  --ink: #4c172e;
+  --surface: #fffbf8;
+  --olive: #f7e3dd;
+  --action: #671f3d;
   background: #fbf2ed;
   color: #4c172e;
   border-bottom: 1px solid #e0c8cb;
@@ -387,6 +391,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  min-height: 44px;
   font:
     650 23px Georgia,
     serif;
@@ -401,6 +406,9 @@
   font-size: 14px;
   font-weight: 560;
   text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
 }
 .workspaceNav nav a,
 .workspaceNav > a:not(.brand) {

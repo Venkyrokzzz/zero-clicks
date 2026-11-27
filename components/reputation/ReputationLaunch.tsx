@@ -152,17 +152,17 @@ function DemoSection({ standalone }: { standalone: boolean }) {
           <Heading id="demo-heading">Try it with a review</Heading>
           <p>Choose a sample or paste a public review. Try editing and copying a private draft.</p>
         </div>
-        <ReviewDesk />
+        <ReviewDesk headingLevel={standalone ? "h2" : "h3"} />
       </div>
     </section>
   );
 }
 
-export function Pricing() {
+export function Pricing({ standalone = false }: { standalone?: boolean }) {
   return (
     <section id="pricing" className={`${s.pricing} ${e.pricing}`}>
       <div>
-        <h2>A clear plan for your venue</h2>
+        <h2>{standalone ? "Founding & Standard plans" : "A clear plan for your venue"}</h2>
         <p className={s.pricingDescription}>
           Google review drafts, an owner inbox, and guided onboarding.
         </p>
@@ -257,7 +257,7 @@ export default function ReputationLaunch({ page = "home" }: { page?: Page }) {
             </p>
           </section>
         )}
-        {(full || page === "pricing" || page === "process") && <Pricing />}
+        {(full || page === "pricing" || page === "process") && <Pricing standalone={page === "pricing"} />}
         {page === "contact" && (
           <section className={s.contact}>
             <div>

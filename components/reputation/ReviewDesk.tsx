@@ -17,7 +17,8 @@ const sampleDecisions = [
 const CUSTOM = scenarios.length;
 const options = [...scenarios.map(({ label }) => label), "Your review"];
 
-export default function ReviewDesk() {
+export default function ReviewDesk({ headingLevel = "h2" }: { headingLevel?: "h2" | "h3" } = {}) {
+  const DeskHeading = headingLevel;
   const [selected, setSelected] = useState(0);
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(5);
@@ -125,7 +126,7 @@ export default function ReviewDesk() {
       tabIndex={-1}
     >
       <header className={`${s.deskHeader} ${p.cover}`}>
-        <h2 id="desk-title">Your review desk</h2>
+        <DeskHeading id="desk-title">Your review desk</DeskHeading>
         <div
           className={p.scenarios}
           role="group"

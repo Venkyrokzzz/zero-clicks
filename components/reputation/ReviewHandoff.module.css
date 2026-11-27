@@ -130,7 +130,7 @@
 .ledger .cardHeader { justify-content: flex-start; flex-wrap: nowrap; }
 .badge { padding: 3px 6px; background: #ebdff2; color: #302338; border-radius: 4px; font-weight: 750; }
 .signals { display: grid; gap: 5px; margin-block: 14px; }
-.signals button { width: 100%; min-height: 36px; text-align: left; }
+.signals button { width: 100%; min-height: 44px; text-align: left; }
 .signals button[data-active="true"] { background: #ebdff2; }
 .destination { margin: auto 0 0; padding-top: 8px; border-top: 1px solid #ffffff40; font-size: .82rem; }
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import ReputationLaunch from '@/components/reputation/ReputationLaunch';
 export const metadata: Metadata = {
   title: 'Reputation Manager pricing',
-  description: 'Reputation Manager by Zero Clicks helps UK hospitality venues draft, review and approve Google review replies. Your voice. Your approval. Your reputation.',
+  description: 'Simple monthly plans for UK hospitality venues: Founding Member (£35/month with no setup fee) and Standard (£55/month + £499 guided setup).',
   alternates: { canonical: 'https://www.0-clicks.uk/pricing' },
 };
 export default function Page() { return <ReputationLaunch page="pricing"/>; }
