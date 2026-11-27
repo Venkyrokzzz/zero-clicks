@@ -10,15 +10,19 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select("clerk_user_id, email, business_name, business_type, manager_name, location, postcode, phone, plan, trial_ends_at, subscription_status")
       .eq("clerk_user_id", userId)
-      .single();
+      .maybeSingle();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("[api/profile GET] db error:", error.code);
+      return NextResponse.json({ error: "Could not load profile." }, { status: 500 });
+    }
+    if (!data) return NextResponse.json({ error: "Profile not found." }, { status: 404 });
     return NextResponse.json(data);
   } catch (e: unknown) {
     console.error("[api/profile GET] thrown:", e);
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: "Could not load profile." }, { status: 500 });
   }
 }
 

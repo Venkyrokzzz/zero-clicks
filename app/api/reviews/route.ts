@@ -5,16 +5,12 @@ import { checkRateLimit } from "@/lib/rateLimit";
 import { supabase } from "@/lib/supabase";
 import { reviewPublishingEnabled } from "@/lib/reviewPublishing";
 
-export async function GET(request: NextRequest) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown";
-  const { allowed } = checkRateLimit(ip, 60);
-  if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
-
+export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+
+  const { allowed } = checkRateLimit(`reviews:read:${userId}`, 60);
+  if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
 
   if (!(await serviceAccess(userId))) return NextResponse.json({ error: 'Subscription inactive', code: 'TRIAL_EXPIRED' }, { status: 403 });
 
@@ -24,7 +20,7 @@ export async function GET(request: NextRequest) {
     .eq("clerk_user_id", userId)
     .order("created_at", { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: "Could not load reviews." }, { status: 500 });
 
   const metrics = {
     totalReviews: reviews.length,
@@ -37,15 +33,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown";
-  const { allowed } = checkRateLimit(ip, 60);
-  if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
-
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+
+  const { allowed } = checkRateLimit(`reviews:write:${userId}`, 60);
+  if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
 
   if (!(await serviceAccess(userId))) return NextResponse.json({ error: 'Subscription inactive' }, { status: 403 });
   const body = await request.json().catch(() => null);
@@ -99,7 +91,7 @@ export async function PUT(request: NextRequest) {
     .select("id")
     .maybeSingle();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: "Could not update review." }, { status: 500 });
   if (!data) return NextResponse.json({ error: "This review is no longer editable or needs a verified Google import." }, { status: 409 });
 
   return NextResponse.json({ success: true });

@@ -96,18 +96,14 @@ export async function POST(req: Request) {
       .select("clerk_user_id")
       .maybeSingle();
     if (error)
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: "Could not save Google location." }, { status: 500 });
     if (!saved)
       return NextResponse.json({ error: "Google connection changed. Check again." }, { status: 409 });
     return NextResponse.json({ success: true, location: selected });
   } catch (error) {
+    console.error("[integrations/google POST]", error instanceof Error ? error.message : "");
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to select Google location.",
-      },
+      { error: "Unable to select Google location." },
       { status: 502 },
     );
   }
@@ -124,6 +120,6 @@ export async function DELETE() {
     .eq("clerk_user_id", userId);
 
   if (error)
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Could not disconnect Google." }, { status: 500 });
   return NextResponse.json({ success: true });
 }

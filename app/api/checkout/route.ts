@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     if (!profile?.business_name?.trim()) return NextResponse.json({ error: 'Finish setting up your venue before starting checkout.', code: 'ONBOARDING_REQUIRED' }, { status: 409 });
     const trialActive = profile.plan === 'trial' && profile.trial_ends_at
       && new Date(profile.trial_ends_at).getTime() > Date.now();
-    if (trialActive && !(plan === 'standard' && body?.startPaidPlanNow === true)) {
+    if (trialActive && !(['standard', 'pro'].includes(plan) && body?.startPaidPlanNow === true)) {
       return NextResponse.json({ kind: 'trial_active' });
     }
     if (plan === 'founding') {

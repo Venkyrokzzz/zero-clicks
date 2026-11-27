@@ -20,11 +20,12 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('settings')
-    .select('*')
+    .select('tone, signature, flag_negative, auto_publish_venue, auto_publish_enabled_at')
     .eq('clerk_user_id', userId)
-    .single()
+    .maybeSingle()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Could not load settings.' }, { status: 500 })
+  if (!data) return NextResponse.json({ error: 'Settings not found.' }, { status: 404 })
   const venue = await getVenue(userId).catch(() => null)
   return NextResponse.json({
     tone: data.tone, signature: data.signature, flag_negative: data.flag_negative,
@@ -39,7 +40,20 @@ export async function PUT(req: Request) {
 
   const body = await req.json().catch(() => null)
   if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid settings.' }, { status: 400 })
-  const { tone, auto_send_positive, flag_negative, signature, autoPublishRoutine } = body
+  const { tone, auto_send_positive, flag_negative, signature, autoPublishRoutine } = body as Record<string, unknown>
+  const VALID_TONES = ['warm-professional', 'casual', 'formal']
+  if (tone !== undefined && (typeof tone !== 'string' || !VALID_TONES.includes(tone))) {
+    return NextResponse.json({ error: 'Invalid reply tone.' }, { status: 400 })
+  }
+  if (auto_send_positive !== undefined && typeof auto_send_positive !== 'boolean') {
+    return NextResponse.json({ error: 'Invalid auto-send setting.' }, { status: 400 })
+  }
+  if (flag_negative !== undefined && typeof flag_negative !== 'boolean') {
+    return NextResponse.json({ error: 'Invalid flag setting.' }, { status: 400 })
+  }
+  if (signature !== undefined && signature !== null && (typeof signature !== 'string' || Buffer.byteLength(signature, 'utf8') > 500)) {
+    return NextResponse.json({ error: 'Signature must be 500 bytes or less.' }, { status: 400 })
+  }
   const hasAccess = await serviceAccess(userId)
   if (!hasAccess && autoPublishRoutine !== false) return NextResponse.json({ error: 'Subscription inactive' }, { status: 403 });
   if (autoPublishRoutine !== undefined && typeof autoPublishRoutine !== 'boolean') return NextResponse.json({ error: 'Invalid automatic publishing setting.' }, { status: 400 });
@@ -47,12 +61,17 @@ export async function PUT(req: Request) {
   if (auto_send_positive === true) {
     if (!reviewPublishingEnabled())
       return NextResponse.json({ error: 'Google publishing is off during the draft pilot.' }, { status: 409 })
-    const { data: profile } = await supabase.from('profiles').select('plan').eq('clerk_user_id', userId).single();
+    const { data: profile } = await supabase.from('profiles').select('plan').eq('clerk_user_id', userId).maybeSingle();
     if (profile?.plan !== 'pro') return NextResponse.json({ error: 'Automatic sending requires Pro' }, { status: 403 });
   }
 
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
-  if (hasAccess) Object.assign(update, { tone, auto_send_positive, flag_negative, signature })
+  if (hasAccess) {
+    if (tone !== undefined) update.tone = tone
+    if (auto_send_positive !== undefined) update.auto_send_positive = auto_send_positive
+    if (flag_negative !== undefined) update.flag_negative = flag_negative
+    if (signature !== undefined) update.signature = signature === null ? null : signature.trim()
+  }
   if (autoPublishRoutine === true) {
     if (!reviewPublishingEnabled()) return NextResponse.json({ error: 'Google publishing is unavailable.' }, { status: 409 })
     const venue = await getVenue(userId).catch(() => null)
@@ -70,6 +89,6 @@ export async function PUT(req: Request) {
     .select('clerk_user_id').maybeSingle()
 
   if (!error && !saved) return NextResponse.json({ error: 'Finish account setup before changing settings.' }, { status: 409 })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Could not save settings.' }, { status: 500 })
   return NextResponse.json({ success: true })
 }

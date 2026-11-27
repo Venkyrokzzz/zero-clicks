@@ -16,20 +16,38 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const body = await req.json()
-  const { clerk_user_id, business_name, manager_name, business_type, location, phone, tone, auto_send_positive } = body
+  const body = await req.json().catch(() => null)
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+  const { clerk_user_id, business_name, manager_name, business_type, location, phone, tone, auto_send_positive } = body as Record<string, unknown>
 
-  if (!clerk_user_id) return NextResponse.json({ error: 'Missing clerk_user_id' }, { status: 400 })
+  if (typeof clerk_user_id !== 'string' || !clerk_user_id.trim()) {
+    return NextResponse.json({ error: 'Missing clerk_user_id' }, { status: 400 })
+  }
+
+  const VALID_TYPES = ['pub', 'restaurant', 'cafe', 'hotel', 'bar']
+  const VALID_TONES = ['warm-professional', 'casual', 'formal']
 
   const profileUpdate: Record<string, unknown> = {}
   if (business_name !== undefined) profileUpdate.business_name = String(business_name).slice(0, 200)
   if (manager_name  !== undefined) profileUpdate.manager_name  = String(manager_name).slice(0, 200)
-  if (business_type !== undefined) profileUpdate.business_type = String(business_type).slice(0, 50)
+  if (business_type !== undefined) {
+    if (typeof business_type !== 'string' || !VALID_TYPES.includes(business_type)) {
+      return NextResponse.json({ error: 'Invalid business_type' }, { status: 400 })
+    }
+    profileUpdate.business_type = business_type
+  }
   if (location      !== undefined) profileUpdate.location      = String(location).slice(0, 200)
   if (phone         !== undefined) profileUpdate.phone         = String(phone).slice(0, 50)
 
   const settingsUpdate: Record<string, unknown> = {}
-  if (tone              !== undefined) settingsUpdate.tone              = String(tone).slice(0, 50)
+  if (tone !== undefined) {
+    if (typeof tone !== 'string' || !VALID_TONES.includes(tone)) {
+      return NextResponse.json({ error: 'Invalid tone' }, { status: 400 })
+    }
+    settingsUpdate.tone = tone
+  }
   if (Boolean(auto_send_positive) && !reviewPublishingEnabled())
     return NextResponse.json({ error: 'Publishing is off during the draft pilot.' }, { status: 409 })
   if (auto_send_positive !== undefined) settingsUpdate.auto_send_positive = Boolean(auto_send_positive)
@@ -48,7 +66,7 @@ export async function PATCH(req: NextRequest) {
   ])
 
   const failed = results.find(r => r.error)
-  if (failed?.error) return NextResponse.json({ error: (failed.error as { message: string }).message }, { status: 500 })
+  if (failed?.error) return NextResponse.json({ error: 'Could not update client profile.' }, { status: 500 })
 
   return NextResponse.json({ success: true })
 }

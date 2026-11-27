@@ -37,13 +37,14 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               // unsafe-inline needed for theme script + Tailwind; unsafe-eval for Framer Motion
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://clerk.0-clicks.uk https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.protect.clerk.com",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data:",
               "img-src 'self' blob: data: https:",
-              // Allow fetch to Web3Forms, Google OAuth, n8n webhook, and Clerk
-              "connect-src 'self' https://api.web3forms.com https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://clerk.0-clicks.uk https://*.clerk.accounts.dev https://clerk.com",
-              "frame-src 'self' https://accounts.google.com https://clerk.0-clicks.uk",
+              // Allow fetch to Web3Forms, Google OAuth, Clerk, Clerk Protect, and Turnstile
+              "connect-src 'self' https://api.web3forms.com https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://clerk.0-clicks.uk https://*.clerk.accounts.dev https://clerk.com https://clerk-telemetry.com https://*.clerk-telemetry.com https://challenges.cloudflare.com https://*.protect.clerk.com:*",
+              "frame-src 'self' https://accounts.google.com https://clerk.0-clicks.uk https://*.clerk.accounts.dev https://challenges.cloudflare.com https://*.protect.clerk.com",
+              "worker-src 'self' blob:",
               "frame-ancestors 'none'",
             ].join("; "),
           },

@@ -37,7 +37,7 @@ export async function POST(req: Request) {
 
   // ── 3. Replay attack protection (5-minute window) ────────────────────────
   const msgTime = parseInt(svix_timestamp, 10) * 1000; // svix sends seconds
-  if (Math.abs(Date.now() - msgTime) > REPLAY_WINDOW_MS) {
+  if (!Number.isFinite(msgTime) || Math.abs(Date.now() - msgTime) > REPLAY_WINDOW_MS) {
     console.warn("[clerk-webhook] Stale timestamp, possible replay:", svix_timestamp);
     return NextResponse.json({ error: "Stale request" }, { status: 400 });
   }

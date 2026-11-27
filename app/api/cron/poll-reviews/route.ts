@@ -34,12 +34,14 @@ export async function GET(req: NextRequest) {
     .not('refresh_token', 'is', null)
 
   const { data: connections, error: connErr } = await (customer ? query.eq('clerk_user_id', customer) : query)
-  if (connErr) return NextResponse.json({ error: connErr.message }, { status: 500 })
+  if (connErr) return NextResponse.json({ error: 'Could not load Google connections.' }, { status: 500 })
   if (!connections?.length) return NextResponse.json({ processed: 0, message: 'No connected clients' })
 
+  const startedAt = Date.now()
   const results = []
 
   for (const conn of connections) {
+    if (Date.now() - startedAt >= 20_000) break
     try {
       if (!(await serviceAccess(conn.clerk_user_id))) continue
       const access = await getGoogleAccess(conn)

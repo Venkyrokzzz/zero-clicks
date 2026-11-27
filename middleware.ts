@@ -46,10 +46,9 @@ export default clerkMiddleware(
       if (requested) {
         try {
           const destination = new URL(requested, req.url);
-          if (
-            destination.origin === req.nextUrl.origin &&
-            /^\/(dashboard|connect|onboarding|start)(?:\/|$)/.test(destination.pathname)
-          ) {
+          const allowedPath = /^\/(admin|dashboard|connect|onboarding|start)(?:\/|$)/.test(destination.pathname);
+          const allowedAdmin = !destination.pathname.startsWith("/admin") || isWorkspaceOwner(userId);
+          if (destination.origin === req.nextUrl.origin && allowedPath && allowedAdmin) {
             return NextResponse.redirect(destination);
           }
         } catch {
@@ -62,9 +61,27 @@ export default clerkMiddleware(
   {
     contentSecurityPolicy: {
       directives: {
-        // Clerk Protect is used during sign-in and can use ports other than 443.
-        "connect-src": ["https://*.protect.clerk.com:*"],
-        "frame-src": ["https://*.protect.clerk.com"],
+        "script-src": ["'unsafe-eval'", "https://clerk.0-clicks.uk", "https://*.clerk.accounts.dev", "https://challenges.cloudflare.com", "https://*.protect.clerk.com"],
+        "img-src": ["blob:", "data:", "https:"],
+        // Preserve app fetch/iframe targets alongside Clerk Protect and Turnstile.
+        "connect-src": [
+          "https://api.web3forms.com",
+          "https://accounts.google.com",
+          "https://oauth2.googleapis.com",
+          "https://www.googleapis.com",
+          "https://clerk.0-clicks.uk",
+          "https://*.clerk.accounts.dev",
+          "https://clerk.com",
+          "https://challenges.cloudflare.com",
+          "https://*.protect.clerk.com:*",
+        ],
+        "frame-src": [
+          "https://accounts.google.com",
+          "https://clerk.0-clicks.uk",
+          "https://*.clerk.accounts.dev",
+          "https://challenges.cloudflare.com",
+          "https://*.protect.clerk.com",
+        ],
       },
     },
   }

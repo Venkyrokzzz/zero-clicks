@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(100)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Could not load reviews.' }, { status: 500 })
   return NextResponse.json({ reviews: reviews ?? [] })
 }
 
@@ -40,14 +40,14 @@ export async function DELETE(req: NextRequest) {
 
   if (review_id) {
     const { error } = await supabase.from('reviews').delete().eq('id', review_id)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) return NextResponse.json({ error: 'Could not delete review.' }, { status: 500 })
     return NextResponse.json({ success: true })
   }
 
   if (user_id) {
     // Bulk delete all reviews for a user (for clearing test/demo data)
     const { error } = await supabase.from('reviews').delete().eq('clerk_user_id', user_id)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) return NextResponse.json({ error: 'Could not delete reviews.' }, { status: 500 })
     return NextResponse.json({ success: true })
   }
 
@@ -60,15 +60,18 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const body = await req.json()
-  const { review_id, status, draft_response } = body
+  const body = await req.json().catch(() => null)
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+  const { review_id, status, draft_response } = body as Record<string, unknown>
 
-  if (!review_id) return NextResponse.json({ error: 'Missing review_id' }, { status: 400 })
+  if (typeof review_id !== 'string' || !review_id.trim()) return NextResponse.json({ error: 'Missing review_id' }, { status: 400 })
 
   const VALID_STATUSES = ['pending', 'skipped']
   const update: Record<string, unknown> = {}
   if (status !== undefined) {
-    if (!VALID_STATUSES.includes(status)) {
+    if (typeof status !== 'string' || !VALID_STATUSES.includes(status)) {
       return NextResponse.json({ error: 'Only the owner can approve a reply. Publication is recorded by the publisher.' }, { status: 400 })
     }
     update.status = status
@@ -86,7 +89,7 @@ export async function PATCH(req: NextRequest) {
 
   const { data, error } = await supabase.from('reviews').update(update).eq('id', review_id)
     .in('status', ['pending', 'skipped']).is('posted_to_google_at', null).select('id').maybeSingle()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Could not update review.' }, { status: 500 })
   if (!data) return NextResponse.json({ error: 'This review can no longer be edited.' }, { status: 409 })
   return NextResponse.json({ success: true })
 }
