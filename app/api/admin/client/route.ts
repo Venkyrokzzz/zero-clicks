@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
+import { googleConnectionStatus } from "@/lib/googleConnectionStatus";
 import { isWorkspaceOwner } from "@/lib/workspaceAccess";
 
 async function requireAdmin() {
@@ -35,7 +36,7 @@ export async function GET(req: Request) {
       .maybeSingle(),
     supabase
       .from("google_connections")
-      .select("account_id,location_id,last_synced_at,needs_reconnect")
+      .select("account_id,location_id,last_synced_at,needs_reconnect,refresh_token")
       .eq("clerk_user_id", id)
       .maybeSingle(),
     supabase
@@ -59,7 +60,7 @@ export async function GET(req: Request) {
   const { stripe_customer_id, ...profileFields } = profile;
   return NextResponse.json({
     profile: { ...profileFields, has_stripe_customer: !!stripe_customer_id },
-    connection,
+    connection: connection ? { status: googleConnectionStatus(connection), last_synced_at: connection.last_synced_at } : null,
     settings,
     reviews_count: count ?? 0,
   });

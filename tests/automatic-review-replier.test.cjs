@@ -26,8 +26,12 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
     }],
     reviews: [],
     settings: [],
+    contact_enquiries: [],
   };
   let failPublicationStamp = true;
+  let failEnquirySave = false;
+  let resendResponse = 200;
+  let resendAttempts = 0;
   const supabase = {
     from(table) {
       const rows = tables[table];
@@ -36,8 +40,12 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
       let insert;
       let limit = Infinity;
       let countOnly = false;
+      let remove = false;
       const query = {
         select: (_, options) => { countOnly = options?.head && options?.count === "exact"; return query; },
+        lt: (key, value) => { predicates.push(row => row[key] < value); return query; },
+        delete: () => { remove = true; return query; },
+        insert: value => { insert = { value }; return query; },
         eq: (key, value) => { predicates.push(row => row[key] === value); return query; },
         in: (key, values) => { predicates.push(row => values.includes(row[key])); return query; },
         is: (key, value) => { predicates.push(row => (row[key] ?? null) === value); return query; },
@@ -64,6 +72,12 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
         then(resolveResult) {
           if (insert) {
             const { value, options } = insert;
+            if (!options) {
+              if (failEnquirySave) return Promise.resolve(resolveResult({ data: null, error: { code: 'fixture' } }));
+              const row = { id: `fixture-${rows.length + 1}`, created_at: new Date().toISOString(), ...value };
+              rows.push(row);
+              return Promise.resolve(resolveResult({ data: [row], error: null }));
+            }
             const columns = options.onConflict.split(',');
             const previous = rows.find(row => columns.every(column => row[column] === value[column]));
             if (previous && options.ignoreDuplicates) return Promise.resolve(resolveResult({ data: [], error: null }));
@@ -78,6 +92,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
             return Promise.resolve(resolveResult({ data: null, error: { message: 'Mock write failure' } }));
           }
           const data = rows.filter(row => predicates.every(match => match(row))).slice(0, limit);
+          if (remove) data.forEach(row => rows.splice(rows.indexOf(row), 1));
           if (patch) data.forEach(row => Object.assign(row, patch));
           return Promise.resolve(resolveResult(countOnly ? { data: null, error: null, count: data.length } : { data, error: null }));
         },
@@ -161,7 +176,7 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
     },
     '@/lib/supabase': { supabase },
     '@/lib/rateLimit': { checkRateLimit: () => ({ allowed: true }) },
-    '@/lib/sharedRateLimit': { consumeRequestBudget: async (key, limit, windowSeconds) => {
+    '@/lib/sharedRateLimit': { consumePublicBudget: async () => 'allowed', consumeRequestBudget: async (key, limit, windowSeconds) => {
       assert.equal(key, 'review-regenerate:fixture');
       assert.equal(limit, 12);
       assert.equal(windowSeconds, 60);
@@ -171,6 +186,14 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
 
   async function fakeFetch(input, options = {}) {
     const url = new URL(input);
+    if (url.href === 'https://api.resend.com/emails') {
+      resendAttempts++;
+      const mail = JSON.parse(options.body);
+      assert.deepEqual(mail.to, ['zeroclicks.hq@gmail.com']);
+      assert.equal(mail.reply_to, 'guest@example.test');
+      assert.match(mail.html, /&lt;3/);
+      return Response.json(resendResponse === 200 ? { id: 'test-email' } : { message: 'Rejected' }, { status: resendResponse });
+    }
     if (url.origin === 'https://generativelanguage.googleapis.com') {
       draftCalls++;
       assert.equal(url.pathname, '/v1beta/models/fixture-gemini:generateContent');
@@ -678,6 +701,45 @@ test('new customer signs up, activates Founding, connects, and publishes an appr
     method: 'POST', body: signup,
   }))).status, 200);
   assert.equal(profile.plan, 'founding');
+
+  const contact = load('app/api/contact/route');
+  const inbox = load('app/api/admin/enquiries/route');
+  const sendEnquiry = () => contact.POST(new Request(site + '/api/contact', {
+    method: 'POST', body: JSON.stringify({ name: ' Test Guest ', email: ' guest@example.test ', message: 'Hello <3' }),
+  }));
+  actor = { userId: 'fixture' };
+  assert.equal((await inbox.GET()).status, 403);
+  assert.equal((await sendEnquiry()).status, 201);
+  assert.equal(tables.contact_enquiries[0].email_status, 'unconfigured');
+  assert.equal(resendAttempts, 0);
+  env.RESEND_API_KEY = 'fixture-resend';
+  env.RESEND_FROM_EMAIL = 'Zero Clicks <notify@example.test>';
+  resendResponse = 403;
+  assert.equal((await sendEnquiry()).status, 201);
+  assert.equal(tables.contact_enquiries[1].email_status, 'failed');
+  resendResponse = 200;
+  assert.equal((await sendEnquiry()).status, 201);
+  assert.equal(tables.contact_enquiries[2].email_status, 'accepted');
+  failEnquirySave = true;
+  assert.equal((await sendEnquiry()).status, 503);
+  assert.equal(resendAttempts, 2);
+  actor = { userId: 'admin' };
+  const enquiryResponse = await inbox.GET();
+  assert.equal(enquiryResponse.headers.get('Cache-Control'), 'private, no-store');
+  assert.equal((await enquiryResponse.json()).enquiries.length, 3);
+  const adminStatus = (await (await adminClients.GET()).json()).ownerConnection;
+  assert.equal(adminStatus.status, 'not_connected');
+  const retainedToken = venue.refresh_token;
+  venue.refresh_token = null;
+  const withoutGrant = (await (await adminClients.GET()).json()).clients.find(client => client.clerk_user_id === 'fixture');
+  assert.equal(withoutGrant.google_status, 'reconnect');
+  assert.equal(Object.hasOwn(withoutGrant, 'refresh_token'), false);
+  actor = { userId: 'fixture' };
+  const clientStatus = await (await integration.GET()).json();
+  assert.equal(clientStatus.status, 'reconnect');
+  assert.equal(clientStatus.connected, false);
+  await expectSetup('/connect');
+  venue.refresh_token = retainedToken;
 
   delete env.GEMINI_API_KEY;
   delete env.GEMINI_REVIEW_MODEL;

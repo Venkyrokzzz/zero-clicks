@@ -20,6 +20,12 @@ export async function GET(req: NextRequest) {
 
   // Fetch all clients with a connected Google account
   const customer = new URL(req.url).searchParams.get('customer')
+  if (!customer) {
+    const cutoff = new Date()
+    cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 1)
+    const { error } = await supabase.from('contact_enquiries').delete().lt('created_at', cutoff.toISOString())
+    if (error) console.error('[contact] Could not enforce enquiry retention', error.code)
+  }
   const query = supabase
     .from('google_connections')
     .select(GOOGLE_CONNECTION_FIELDS)

@@ -10,6 +10,7 @@ import {
   reviewLabel,
   type ReviewEvidence,
 } from "@/components/workspace/panel-data";
+import { googleConnectionLabels } from "@/lib/googleConnectionStatus";
 import s from "@/components/workspace/Workspace.module.css";
 
 interface Profile {
@@ -30,10 +31,8 @@ interface ClientRecord {
   profile: Profile;
   settings: { tone?: string; auto_send_positive?: boolean } | null;
   connection: {
-    account_id?: string;
-    location_id?: string;
+    status: keyof typeof googleConnectionLabels;
     last_synced_at?: string;
-    needs_reconnect?: boolean;
   } | null;
   reviews_count: number;
 }
@@ -368,14 +367,7 @@ export default function AdminDetail() {
             <section className={`${s.box} ${s.row}`}>
               <h2>Google connection</h2>
               <p className={s.muted}>
-                {client.connection?.needs_reconnect
-                  ? "Reconnect required"
-                  : client.connection?.account_id &&
-                      client.connection?.location_id
-                    ? "Connected"
-                    : client.connection
-                      ? "Location still needs to be selected"
-                      : "Not connected"}{" "}
+                {googleConnectionLabels[client.connection?.status ?? "not_connected"]}{" "}
                 · Last successful check:{" "}
                 {formatDateTime(client.connection?.last_synced_at)}
               </p>

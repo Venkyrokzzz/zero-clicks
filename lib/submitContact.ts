@@ -11,11 +11,11 @@ export async function submitContact(data: Record<string, string>) {
     const body = await response.json().catch(() => null)
     if (!response.ok || body?.success !== true) {
       throw new Error(typeof body?.error === 'string' ? body.error
-        : 'We could not confirm delivery. Please email zeroclicks.hq@gmail.com directly.')
+        : 'We could not confirm receipt. Please email zeroclicks.hq@gmail.com directly.')
     }
   } catch (error) {
     if (controller.signal.aborted) {
-      throw new Error('Delivery could not be confirmed in time. Please email zeroclicks.hq@gmail.com directly.')
+      throw new Error('Receipt could not be confirmed in time. Please email zeroclicks.hq@gmail.com directly.')
     }
     throw error
   } finally {

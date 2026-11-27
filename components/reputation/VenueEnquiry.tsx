@@ -37,7 +37,7 @@ export default function VenueEnquiry() {
       <div className={s.enquirySuccess} role="status">
         <h2>Thanks for getting in touch.</h2>
         <p>
-          Your enquiry has been accepted for sending. We’ll reply to the email
+          We’ve received your enquiry. We’ll reply to the email
           address you provided.
         </p>
         <button className={s.textButton} onClick={() => setStatus("idle")}>

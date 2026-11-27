@@ -6,6 +6,7 @@ import {
   panelRequest,
   statusLabel,
 } from "@/components/workspace/panel-data";
+import { googleConnectionLabels } from "@/lib/googleConnectionStatus";
 import s from "@/components/workspace/Workspace.module.css";
 
 interface Client {
@@ -17,6 +18,7 @@ interface Client {
   trial_paused: boolean;
   trial_ends_at: string | null;
   notes: string | null;
+  google_status: keyof typeof googleConnectionLabels;
   google_connected: boolean;
   google_needs_reconnect: boolean;
   last_synced_at: string | null;
@@ -26,6 +28,7 @@ interface Client {
 }
 
 export default function AdminPage() {
+  const [ownerConnection, setOwnerConnection] = useState<{ status: keyof typeof googleConnectionLabels; lastSyncedAt: string | null }>();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -36,14 +39,9 @@ export default function AdminPage() {
     setLoading(true);
     setError("");
     try {
-      const data = await panelRequest<{ clients: Client[] }>(
-        "/api/admin/clients",
-      );
-      setClients(
-        data.clients.filter(
-          (c) => c.plan !== "admin" && c.email !== "zeroclicks.hq@gmail.com",
-        ),
-      );
+      const data = await panelRequest<{ clients: Client[]; ownerConnection: NonNullable<typeof ownerConnection> }>("/api/admin/clients");
+      setClients(data.clients);
+      setOwnerConnection(data.ownerConnection);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load clients.");
     } finally {
@@ -94,6 +92,16 @@ export default function AdminPage() {
           <p role="alert" className={s.alert}>
             {error}
           </p>
+        )}
+        {ownerConnection && !error && (
+          <section className={s.box} aria-label="Admin account Google connection">
+            <h2>Your Google venue</h2>
+            <p>{googleConnectionLabels[ownerConnection.status]}
+              {ownerConnection.lastSyncedAt && ` · Last synced ${formatDate(ownerConnection.lastSyncedAt)}`}</p>
+            <a href={ownerConnection.status === "connected" ? "/dashboard" : "/start"} className={s.button}>
+              {ownerConnection.status === "connected" ? "Open venue workspace" : "Set up Google"}
+            </a>
+          </section>
         )}
         <div className={s.controls}>
           <label>
@@ -149,14 +157,10 @@ export default function AdminPage() {
                       </p>
                     </td>
                     <td>
-                      {c.google_needs_reconnect
-                        ? "Reconnect required"
-                        : c.google_connected
-                          ? "Connected"
-                          : "Not connected"}
+                      {googleConnectionLabels[c.google_status]}
                       {c.last_synced_at && (
                         <p className={s.muted}>
-                          Last check {formatDate(c.last_synced_at)}
+                          Last synced {formatDate(c.last_synced_at)}
                         </p>
                       )}
                     </td>

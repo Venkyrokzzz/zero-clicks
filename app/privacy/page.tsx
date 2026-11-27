@@ -87,8 +87,8 @@ export default function PrivacyPage() {
             We use the following third-party services to operate the site:
           </p>
           <ul style={{ ...pStyle, paddingLeft: "20px" }}>
-            <li>Resend — delivers contact form submissions by email (no data retained after forwarding)</li>
-            <li>Our contact form — call requests and enquiries</li>
+            <li>Resend — sends us email notifications for contact form submissions</li>
+            <li>Supabase — stores contact form enquiries in our private admin inbox so we can respond</li>
             <li>Vercel — hosting and anonymous analytics</li>
             <li>n8n (self-hosted) — automation workflows for client review replies</li>
             <li>Anthropic Claude API — AI-generated reply drafts (no personal data stored by Anthropic)</li>

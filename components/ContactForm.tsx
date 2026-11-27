@@ -121,7 +121,7 @@ export default function ContactForm() {
           </svg>
         </div>
         <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: "1.8rem", color: "var(--text-primary)", marginBottom: "14px" }}>
-          Message sent.
+          Message received.
         </h2>
         <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: 1.7, marginBottom: "28px", fontFamily: "var(--font-body)" }}>
           I'll reply within one business day.

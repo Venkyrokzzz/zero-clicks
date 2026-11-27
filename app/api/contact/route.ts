@@ -1,8 +1,9 @@
 // app/api/contact/route.ts
-// Handles chat widget submissions via Resend (server-side email).
+// Store enquiries before attempting the Resend notification.
 // Shared inbound request quotas run before email delivery.
 
 import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
 import { consumePublicBudget } from "@/lib/sharedRateLimit";
 
 export async function POST(req: NextRequest) {
@@ -25,7 +26,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid fields' }, { status: 400 });
   }
   const escape = (value: string) => value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
-  const { name, email, company, message, budget } = body as Record<string, string>;
+  const name = body.name.trim();
+  const email = body.email.trim();
+  const message = body.message.trim();
+  const company = body.company?.trim() || null;
+  const budget = body.budget?.trim() || null;
 
   if (!name || !email || !message) {
     return NextResponse.json(
@@ -55,52 +60,48 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Send via Resend ──────────────────────────────────────────────
-  const resendKey = process.env.RESEND_API_KEY;
-  if (!resendKey) {
-    console.error("[contact] RESEND_API_KEY not set");
-    return NextResponse.json({ error: "Email delivery is temporarily unavailable. Please email zeroclicks.hq@gmail.com directly." }, { status: 503 });
+  const { data: enquiry, error: saveError } = await supabase.from("contact_enquiries")
+    .insert({ name, email, company, budget, message }).select("id").single();
+  if (saveError || !enquiry) {
+    console.error("[contact] Could not save enquiry", saveError?.code);
+    return NextResponse.json({ error: "We could not save your enquiry. Please email zeroclicks.hq@gmail.com directly." }, { status: 503 });
   }
 
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      signal: AbortSignal.timeout(8_000),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${resendKey}`,
-      },
-      body: JSON.stringify({
-        from: process.env.RESEND_FROM_EMAIL || "Zero Clicks Contact <onboarding@resend.dev>",
-        to: ["zeroclicks.hq@gmail.com"],
-        reply_to: email,
-        subject: `New enquiry from ${name} — Zero Clicks`,
-        html: `
-          <h2>New enquiry</h2>
-          <p><strong>Name:</strong> ${escape(name)}</p>
-          <p><strong>Email:</strong> <a href="mailto:${escape(email)}">${escape(email)}</a></p>
-          ${company ? `<p><strong>Company:</strong> ${escape(company)}</p>` : ""}
-          ${budget ? `<p><strong>Budget:</strong> ${escape(budget)}</p>` : ""}
-          <p><strong>Message:</strong></p>
-          <p style="white-space:pre-wrap">${escape(message)}</p>
-        `,
-      }),
-    });
+  const key = process.env.RESEND_API_KEY?.trim();
+  const from = process.env.RESEND_FROM_EMAIL?.trim();
+  let status: "unconfigured" | "accepted" | "failed" | "unknown" = "unconfigured";
+  let emailId: string | null = null;
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      console.error("[contact] Resend error:", err);
-      return NextResponse.json({ error: "Failed to send. Please try again." }, { status: 502 });
+  if (key && from) {
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        signal: AbortSignal.timeout(8_000),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+        body: JSON.stringify({
+          from,
+          to: ["zeroclicks.hq@gmail.com"],
+          reply_to: email,
+          subject: "New venue enquiry — Zero Clicks",
+          html: `<h2>New enquiry</h2><p><strong>Name:</strong> ${escape(name)}</p>
+            <p><strong>Email:</strong> ${escape(email)}</p>
+            ${company ? `<p><strong>Company:</strong> ${escape(company)}</p>` : ""}
+            ${budget ? `<p><strong>Budget:</strong> ${escape(budget)}</p>` : ""}
+            <p style="white-space:pre-wrap">${escape(message)}</p>`,
+        }),
+      });
+      const result = await response.json().catch(() => null);
+      emailId = response.ok && typeof result?.id === "string" ? result.id : null;
+      status = emailId ? "accepted" : (response.ok || response.status >= 500 ? "unknown" : "failed");
+      if (status !== "accepted") console.error("[contact] Notification not confirmed", response.status);
+    } catch {
+      status = "unknown";
+      console.error("[contact] Notification timed out or could not reach Resend");
     }
-
-    const accepted = await res.json().catch(() => null);
-    if (typeof accepted?.id !== "string" || !accepted.id) {
-      return NextResponse.json({ error: "Email acceptance could not be confirmed. Please email zeroclicks.hq@gmail.com directly." }, { status: 502 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("[contact] Network error:", err);
-    return NextResponse.json({ error: "Delivery could not be confirmed. Please email zeroclicks.hq@gmail.com directly." }, { status: 503 });
   }
+
+  const { error: statusError } = await supabase.from("contact_enquiries")
+    .update({ email_status: status, email_id: emailId }).eq("id", enquiry.id);
+  if (statusError) console.error("[contact] Could not record notification status", statusError.code);
+  return NextResponse.json({ success: true }, { status: 201 });
 }

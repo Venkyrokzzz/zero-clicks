@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { getGoogleAccess, GOOGLE_CONNECTION_FIELDS } from "@/lib/googleAccess";
+import { googleConnectionStatus } from "@/lib/googleConnectionStatus";
 import { listGoogleBusinessLocations } from "@/lib/googleBusiness";
 
 export async function GET() {
@@ -12,7 +13,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("google_connections")
     .select(
-      "id, google_email, connected_at, account_id, location_id, needs_reconnect, last_synced_at",
+      "id, google_email, connected_at, account_id, location_id, needs_reconnect, refresh_token, last_synced_at",
     )
     .eq("clerk_user_id", userId)
     .maybeSingle();
@@ -22,14 +23,12 @@ export async function GET() {
       { status: 503 },
     );
 
+  const status = googleConnectionStatus(data);
   return NextResponse.json({
+    status,
     lastSyncedAt: data?.last_synced_at ?? null,
-    connected: !!(
-      data?.account_id &&
-      data?.location_id &&
-      !data.needs_reconnect
-    ),
-    needs_reconnect: !!data?.needs_reconnect,
+    connected: status === "connected",
+    needs_reconnect: status === "reconnect",
     authorization: !!data,
     connection: data
       ? {
@@ -38,7 +37,7 @@ export async function GET() {
           connected_at: data.connected_at,
         }
       : null,
-  });
+  }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function POST(req: Request) {

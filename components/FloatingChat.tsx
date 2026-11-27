@@ -179,7 +179,7 @@ export default function FloatingChat() {
                 style={{ padding: "32px 20px", textAlign: "center" }}
               >
                 <div style={{ fontSize: "28px", marginBottom: "12px" }}>✓</div>
-                <p style={{ fontSize: "14px", color: "#f4f4f5", fontFamily: "var(--font-body)", fontWeight: 500, margin: "0 0 6px" }}>Message sent.</p>
+                <p style={{ fontSize: "14px", color: "#f4f4f5", fontFamily: "var(--font-body)", fontWeight: 500, margin: "0 0 6px" }}>Message received.</p>
                 <p style={{ fontSize: "12px", color: "#71717a", fontFamily: "var(--font-body)", margin: "0 0 20px" }}>We reply within a few hours.</p>
                 <button
                   onClick={() => { setOpen(false); setState("idle"); setName(""); setEmail(""); setMessage(""); }}

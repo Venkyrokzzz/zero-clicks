@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { googleConnectionStatus } from "@/lib/googleConnectionStatus";
 import { isWorkspaceOwner } from "@/lib/workspaceAccess";
 
 export async function GET() {
@@ -23,7 +24,7 @@ export async function GET() {
     supabase
       .from("google_connections")
       .select(
-        "clerk_user_id,last_synced_at,account_id,location_id,needs_reconnect",
+        "clerk_user_id,last_synced_at,account_id,location_id,needs_reconnect,refresh_token",
       ),
   ]);
   if (error || connectionError)
@@ -33,13 +34,16 @@ export async function GET() {
     );
 
   const connectionFor = new Map(connections.map((c) => [c.clerk_user_id, c]));
+  const ownerConnection = connectionFor.get(userId);
+  const customerProfiles = profiles.filter(profile => profile.clerk_user_id !== userId);
   const clients = [];
-  for (let i = 0; i < profiles.length; i += 12) {
+  for (let i = 0; i < customerProfiles.length; i += 12) {
     const batch = await Promise.all(
-      profiles
+      customerProfiles
         .slice(i, i + 12)
         .map(async ({ stripe_customer_id, ...profile }) => {
           const connection = connectionFor.get(profile.clerk_user_id);
+          const googleStatus = googleConnectionStatus(connection);
           const counts = await supabase
             .from("reviews")
             .select("id", { count: "exact", head: true })
@@ -47,12 +51,9 @@ export async function GET() {
           return {
             ...profile,
             has_stripe_customer: !!stripe_customer_id,
-            google_connected: !!(
-              connection?.account_id &&
-              connection.location_id &&
-              !connection.needs_reconnect
-            ),
-            google_needs_reconnect: !!connection?.needs_reconnect,
+            google_status: googleStatus,
+            google_connected: googleStatus === "connected",
+            google_needs_reconnect: googleStatus === "reconnect",
             reviews_count: counts.error ? null : counts.count,
             last_synced_at: connection?.last_synced_at ?? null,
           };
@@ -62,7 +63,7 @@ export async function GET() {
   }
 
   return NextResponse.json(
-    { clients },
+    { clients, ownerConnection: { status: googleConnectionStatus(ownerConnection), lastSyncedAt: ownerConnection?.last_synced_at ?? null } },
     { headers: { "Cache-Control": "private, no-store" } },
   );
 }

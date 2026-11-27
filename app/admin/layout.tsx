@@ -22,6 +22,7 @@ export default async function AdminLayout({
         </Link>
         <nav aria-label="Admin navigation">
           <Link href="/admin">Client operations</Link>
+          <Link href="/admin/enquiries">Venue enquiries</Link>
           <Link href="/dashboard">Client workspace</Link>
         </nav>
       </header>
