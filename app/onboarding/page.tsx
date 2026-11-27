@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { useUser } from "@clerk/nextjs";
 import s from "@/components/workspace/Workspace.module.css";
 
 const fields = [
@@ -12,16 +13,64 @@ const fields = [
   { name: "phone", label: "Phone number", autoComplete: "tel", type: "tel" },
 ] as const;
 
+type FormFields = {
+  business_name: string;
+  manager_name: string;
+  location: string;
+  postcode: string;
+  phone: string;
+  business_type: string;
+};
+
 export default function OnboardingPage() {
+  const { user } = useUser();
+  const [values, setValues] = useState<FormFields>({
+    business_name: "",
+    manager_name: "",
+    location: "",
+    postcode: "",
+    phone: "",
+    business_type: "",
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const clerkName =
+      user?.fullName?.trim() ||
+      [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
+    if (clerkName) {
+      setValues((prev) => (prev.manager_name ? prev : { ...prev, manager_name: clerkName }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/profile", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((profile) => {
+        if (!active || !profile) return;
+        setValues((prev) => ({
+          business_name: prev.business_name || profile.business_name || "",
+          manager_name: prev.manager_name || profile.manager_name || "",
+          location: prev.location || profile.location || "",
+          postcode: prev.postcode || profile.postcode || "",
+          phone: prev.phone || profile.phone || "",
+          business_type: prev.business_type || profile.business_type || "",
+        }));
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function saveVenue(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading) return;
 
     const details = Object.fromEntries(
-      Array.from(new FormData(event.currentTarget), ([key, value]) => [key, String(value).trim()]),
+      Object.entries(values).map(([key, value]) => [key, value.trim()]),
     );
     if (Object.values(details).some(value => !value)) {
       setError("Fill in each field to continue.");
@@ -67,12 +116,26 @@ export default function OnboardingPage() {
             {fields.map(field => (
               <label key={field.name}>
                 {field.label}
-                <input className={s.input} name={field.name} type={"type" in field ? field.type : "text"} autoComplete={field.autoComplete} required />
+                <input
+                  className={s.input}
+                  name={field.name}
+                  type={"type" in field ? field.type : "text"}
+                  autoComplete={field.autoComplete}
+                  value={values[field.name]}
+                  onChange={(e) => setValues((prev) => ({ ...prev, [field.name]: e.target.value }))}
+                  required
+                />
               </label>
             ))}
             <label>
               Business type
-              <select className={s.input} name="business_type" defaultValue="" required>
+              <select
+                className={s.input}
+                name="business_type"
+                value={values.business_type}
+                onChange={(e) => setValues((prev) => ({ ...prev, business_type: e.target.value }))}
+                required
+              >
                 <option value="" disabled>Choose a type</option>
                 <option value="pub">Pub</option>
                 <option value="restaurant">Restaurant</option>

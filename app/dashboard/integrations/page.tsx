@@ -14,25 +14,36 @@ export default function IntegrationsPage() {
   const [connected, setConnected] = useState(false)
   const [loading, setLoading] = useState(true)
   const [disconnecting, setDisconnecting] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch('/api/integrations/google')
-      .then(r => r.json())
-      .then(data => {
-        setConnected(data.connected)
-        setConnection(data.connection)
-        setLoading(false)
+    fetch('/api/integrations/google', { cache: 'no-store' })
+      .then(async (r) => {
+        const data = await r.json().catch(() => null)
+        if (!r.ok || !data) throw new Error(data?.error || 'Could not load Google connection.')
+        setConnected(Boolean(data.connected))
+        setConnection(data.connection ?? null)
       })
-      .catch(() => setLoading(false))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Could not load Google connection.'))
+      .finally(() => setLoading(false))
   }, [])
 
   async function handleDisconnect() {
     if (!confirm('Disconnect your Google Business Profile? Reviews will stop syncing.')) return
     setDisconnecting(true)
-    await fetch('/api/integrations/google', { method: 'DELETE' })
-    setConnected(false)
-    setConnection(null)
-    setDisconnecting(false)
+    setError('')
+    try {
+      const res = await fetch('/api/integrations/google', { method: 'DELETE' })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) throw new Error(data?.error || 'Could not disconnect Google.')
+      setConnected(false)
+      setConnection(null)
+      router.refresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not disconnect Google.')
+    } finally {
+      setDisconnecting(false)
+    }
   }
 
   return (
@@ -40,6 +51,9 @@ export default function IntegrationsPage() {
       <div style={{ maxWidth: '640px', margin: '0 auto' }}>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '8px' }}>Integrations</h1>
         <p style={{ color: '#a1a1aa', marginBottom: '36px' }}>Connect your platforms.</p>
+        {error && (
+          <p role="alert" style={{ color: '#ef4444', marginBottom: '16px' }}>{error}</p>
+        )}
 
         {loading ? (
           <p style={{ color: '#a1a1aa' }}>Loading...</p>

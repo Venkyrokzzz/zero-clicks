@@ -78,7 +78,10 @@ export default function BillingPanel({ clientId }: { clientId?: string }) {
       )}
       {error && (
         <p role="alert" className={s.alert}>
-          {error}
+          {error}{" "}
+          {!clientId && error === "Complete venue setup first." && (
+            <a href="/onboarding">Set up your venue</a>
+          )}
         </p>
       )}
       {data && (

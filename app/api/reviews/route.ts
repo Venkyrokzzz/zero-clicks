@@ -1,4 +1,5 @@
 import { serviceAccess } from '@/lib/requireService';
+import { hasServiceAccess } from '@/lib/entitlements';
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { checkRateLimit } from "@/lib/rateLimit";
@@ -12,7 +13,17 @@ export async function GET() {
   const { allowed } = checkRateLimit(`reviews:read:${userId}`, 60);
   if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
 
-  if (!(await serviceAccess(userId))) return NextResponse.json({ error: 'Subscription inactive', code: 'TRIAL_EXPIRED' }, { status: 403 });
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("business_name,plan,trial_ends_at,trial_paused,subscription_status")
+    .eq("clerk_user_id", userId)
+    .maybeSingle();
+
+  if (profileError) return NextResponse.json({ error: "Could not verify venue access." }, { status: 503 });
+  if (!profile?.business_name?.trim()) {
+    return NextResponse.json({ error: "Finish setting up your venue first.", code: "ONBOARDING_REQUIRED" }, { status: 409 });
+  }
+  if (!hasServiceAccess(profile)) return NextResponse.json({ error: 'Subscription inactive', code: 'TRIAL_EXPIRED' }, { status: 403 });
 
   const { data: reviews, error } = await supabase
     .from("reviews")

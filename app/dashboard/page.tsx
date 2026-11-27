@@ -335,6 +335,9 @@ export default function Inbox() {
             {error === "Subscription inactive" && (
               <a href="/dashboard/billing">Open billing</a>
             )}
+            {error === "Finish setting up your venue first." && (
+              <a href="/onboarding">Set up your venue</a>
+            )}
           </p>
         )}
         <div className={s.controls}>
