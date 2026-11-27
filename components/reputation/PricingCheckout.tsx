@@ -84,8 +84,8 @@ export default function PricingCheckout({ foundingOpen, workspace = false }: { f
         {message && <p>{message.text}</p>}
         {message?.action === "signin" && (
           <div className={s.checkoutLinks}>
-            <Link href={"/sign-in?redirect_url=" + encodeURIComponent("/dashboard/billing")}>Sign in</Link>
-            <Link href="/sign-up">Create an account</Link>
+            <a href={"/sign-in?redirect_url=" + encodeURIComponent("/dashboard/billing")}>Sign in</a>
+            <a href="/sign-up">Create an account</a>
           </div>
         )}
         {message?.action === "onboarding" && <Link href="/onboarding">Set up your venue</Link>}

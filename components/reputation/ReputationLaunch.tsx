@@ -43,8 +43,8 @@ function Header({ page }: { page: Page }) {
       </Link>
       <nav className={s.navigation} aria-label="Main navigation">{links}</nav>
       <div className={e.headerActions}>
-        <Link href="/workspace" className={s.login}>Workspace</Link>
-        <Link href="/start" className={e.connect}>Connect Google</Link>
+        <a href="/workspace" className={s.login}>Workspace</a>
+        <a href="/start" className={e.connect}>Connect Google</a>
       </div>
       <details className={s.mobileNav}>
         <summary>
@@ -55,7 +55,7 @@ function Header({ page }: { page: Page }) {
         </summary>
         <nav aria-label="Mobile navigation">
           {links}
-          <Link href="/start">Connect Google</Link>
+          <a href="/start">Connect Google</a>
           <Link href={enquiry} aria-current={page === "contact" ? "page" : undefined}>Contact</Link>
         </nav>
       </details>
@@ -123,7 +123,7 @@ function ProductHero() {
         <p>Automatically reply to routine Google reviews. Check the ones that need your attention.</p>
         <div className={e.heroActions}>
           <a className={s.primary} href="#review-handoff">Try a review <span aria-hidden="true">→</span></a>
-          <Link className={e.underlined} href="/start">Connect Google</Link>
+          <a className={e.underlined} href="/start">Connect Google</a>
         </div>
       </div>
       <figure className={e.heroPhoto}>

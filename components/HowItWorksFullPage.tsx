@@ -245,7 +245,7 @@ export default function HowItWorksFullPage() {
           </p>
 
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <Link href="/sign-up" style={{
+            <a href="/sign-up" style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
               padding: "13px 24px", borderRadius: "8px",
               background: "#10b981", color: "#000",
@@ -253,7 +253,7 @@ export default function HowItWorksFullPage() {
               fontFamily: "var(--font-body)",
             }}>
               Claim a founding spot →
-            </Link>
+            </a>
             <Link href="/demo" style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
               padding: "13px 24px", borderRadius: "8px",
@@ -633,7 +633,7 @@ export default function HowItWorksFullPage() {
             7 of 10 founding spots remaining. We build it free — you pay £35/month only when it&apos;s live and working on your real reviews.
           </p>
           <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/sign-up" style={{
+            <a href="/sign-up" style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
               padding: "15px 32px", borderRadius: "8px",
               background: "#10b981", color: "#000",
@@ -642,7 +642,7 @@ export default function HowItWorksFullPage() {
               boxShadow: "0 0 32px rgba(16,185,129,0.3)",
             }}>
               Claim your spot →
-            </Link>
+            </a>
             <Link href="/contact" style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
               padding: "15px 28px", borderRadius: "8px",
