@@ -59,7 +59,15 @@ export default clerkMiddleware(
       return NextResponse.redirect(new URL(workspaceHome(userId), req.url));
     }
   },
-  { contentSecurityPolicy: {} }
+  {
+    contentSecurityPolicy: {
+      directives: {
+        // Clerk Protect is used during sign-in and can use ports other than 443.
+        "connect-src": ["https://*.protect.clerk.com:*"],
+        "frame-src": ["https://*.protect.clerk.com"],
+      },
+    },
+  }
 );
 
 export const config = {
