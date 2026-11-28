@@ -28,10 +28,11 @@ async function getOrCreateStripeCustomer(stripe: Stripe, userId: string, email: 
   // Create new Stripe customer
   const customer = await stripe.customers.create({ email, name, metadata: { clerk_user_id: userId } }, { idempotencyKey: `customer-${userId}` });
 
-  // Store it
+  // Store it on the existing profile row (avoids NOT NULL email errors from INSERT/UPSERT).
   const { error: saveError } = await supabase
     .from("profiles")
-    .upsert({ clerk_user_id: userId, stripe_customer_id: customer.id }, { onConflict: "clerk_user_id" });
+    .update({ stripe_customer_id: customer.id })
+    .eq("clerk_user_id", userId);
 
   if (saveError) throw new Error('Customer persistence failed');
   return customer.id;
@@ -66,10 +67,10 @@ export async function POST(req: NextRequest) {
       if (error) return NextResponse.json({ error: 'Could not check founding plan eligibility. Please try again.' }, { status: 503 });
       if (!count) return NextResponse.json({ error: 'Founding members pay after their first successful Google reply. Finish guided setup to continue.', code: 'FIRST_REPLY_REQUIRED' }, { status: 409 });
     }
-    const key = process.env.STRIPE_SECRET_KEY;
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
-    if (!key || !baseUrl) {
-      console.error("[checkout] Missing Stripe or return URL configuration");
+    const key = process.env.STRIPE_SECRET_KEY?.trim();
+    const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://www.0-clicks.uk").replace(/\/+$/, "");
+    if (!key) {
+      console.error("[checkout] Missing STRIPE_SECRET_KEY");
       return NextResponse.json({ error: "Stripe checkout is temporarily unavailable. Contact support." }, { status: 503 });
     }
     const stripe = new Stripe(key);
@@ -99,7 +100,7 @@ export async function POST(req: NextRequest) {
       lineItems.push({ price: PRICE_IDS.setup_fee, quantity: 1 });
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "subscription",
       integration_identifier: "zero-clicks-pricing-nqlaxtpk",
       customer: customerId,
@@ -108,7 +109,20 @@ export async function POST(req: NextRequest) {
       success_url: `${baseUrl}/dashboard/billing?checkout=returned`,
       cancel_url: `${baseUrl}/pricing#pricing`,
       metadata: { clerk_user_id: userId, plan },
-    }, { idempotencyKey: `checkout-${userId}-${plan}-${Math.floor(Date.now() / 1800000)}` });
+    };
+    const idempotencyKey = `checkout-${userId}-${plan}-${Math.floor(Date.now() / 1800000)}`;
+    let session: Stripe.Checkout.Session;
+    try {
+      session = await stripe.checkout.sessions.create(sessionParams, { idempotencyKey });
+    } catch (sessionErr: unknown) {
+      const param = (sessionErr as { param?: string })?.param;
+      if (param === "integration_identifier") {
+        const { integration_identifier: _ignored, ...fallbackParams } = sessionParams;
+        session = await stripe.checkout.sessions.create(fallbackParams, { idempotencyKey: `${idempotencyKey}-retry` });
+      } else {
+        throw sessionErr;
+      }
+    }
 
     if (!session.url) throw new Error('Checkout session missing a hosted URL');
     return NextResponse.json({ kind: 'checkout', url: session.url });
