@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import { googleConnectionStatus } from "@/lib/googleConnectionStatus";
 import { isWorkspaceOwner } from "@/lib/workspaceAccess";
 
+const privateHeaders = { "Cache-Control": "private, no-store" };
+
 async function requireAdmin() {
   const { userId } = await auth();
   return isWorkspaceOwner(userId);
@@ -14,12 +16,12 @@ async function requireAdmin() {
 // GET /api/admin/client?id=clerk_user_id — fetch one client's full profile
 export async function GET(req: Request) {
   if (!(await requireAdmin())) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403, headers: privateHeaders });
   }
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
-  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400, headers: privateHeaders });
 
   const [
     { data: profile, error: profileError },
@@ -30,7 +32,7 @@ export async function GET(req: Request) {
     supabase
       .from("profiles")
       .select(
-        "clerk_user_id,email,business_name,business_type,manager_name,location,phone,plan,trial_paused,trial_ends_at,notes,stripe_customer_id,subscription_status",
+        "email,business_name,business_type,manager_name,location,phone,plan,trial_paused,trial_ends_at,notes,stripe_customer_id,subscription_status",
       )
       .eq("clerk_user_id", id)
       .maybeSingle(),
@@ -53,17 +55,17 @@ export async function GET(req: Request) {
   if (profileError || connectionError || countError || settingsError)
     return NextResponse.json(
       { error: "Could not load venue data." },
-      { status: 503 },
+      { status: 503, headers: privateHeaders },
     );
   if (!profile)
-    return NextResponse.json({ error: "Venue not found." }, { status: 404 });
+    return NextResponse.json({ error: "Venue not found." }, { status: 404, headers: privateHeaders });
   const { stripe_customer_id, ...profileFields } = profile;
   return NextResponse.json({
     profile: { ...profileFields, has_stripe_customer: !!stripe_customer_id },
     connection: connection ? { status: googleConnectionStatus(connection), last_synced_at: connection.last_synced_at } : null,
     settings,
     reviews_count: count ?? 0,
-  });
+  }, { headers: privateHeaders });
 }
 
 // PATCH /api/admin/client — update trial_paused, plan, or notes

@@ -69,5 +69,5 @@ export async function POST(req: Request) {
   if (saveError) return NextResponse.json({ error: 'Unable to save the draft.' }, { status: 500 })
   if (!updated) return NextResponse.json({ error: 'This review is no longer editable.' }, { status: 409 })
 
-  return NextResponse.json({ draft: text })
+  return NextResponse.json({ draft: text }, { headers: { 'Cache-Control': 'private, no-store' } })
 }

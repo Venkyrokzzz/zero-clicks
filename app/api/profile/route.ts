@@ -3,26 +3,28 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
+const privateHeaders = { "Cache-Control": "private, no-store" };
+
 export async function GET() {
   try {
     const { userId } = await auth();
-    if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+    if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401, headers: privateHeaders });
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("clerk_user_id, email, business_name, business_type, manager_name, location, postcode, phone, plan, trial_ends_at, subscription_status")
+      .select("email, business_name, business_type, manager_name, location, postcode, phone, plan, trial_ends_at, subscription_status")
       .eq("clerk_user_id", userId)
       .maybeSingle();
 
     if (error) {
       console.error("[api/profile GET] db error:", error.code);
-      return NextResponse.json({ error: "Could not load profile." }, { status: 500 });
+      return NextResponse.json({ error: "Could not load profile." }, { status: 500, headers: privateHeaders });
     }
-    if (!data) return NextResponse.json({ error: "Profile not found." }, { status: 404 });
-    return NextResponse.json(data);
+    if (!data) return NextResponse.json({ error: "Profile not found." }, { status: 404, headers: privateHeaders });
+    return NextResponse.json(data, { headers: privateHeaders });
   } catch (e: unknown) {
     console.error("[api/profile GET] thrown:", e);
-    return NextResponse.json({ error: "Could not load profile." }, { status: 500 });
+    return NextResponse.json({ error: "Could not load profile." }, { status: 500, headers: privateHeaders });
   }
 }
 

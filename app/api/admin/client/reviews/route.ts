@@ -5,6 +5,11 @@ import { supabase } from '@/lib/supabase'
 
 import { isWorkspaceOwner } from "@/lib/workspaceAccess";
 
+const ADMIN_REVIEW_FIELDS =
+  'id, reviewer_name, rating, review_text, status, draft_response, created_at, posted_to_google_at, automatically_approved, publication_message, publication_blocked, google_reply_state'
+
+const privateHeaders = { 'Cache-Control': 'private, no-store' }
+
 async function requireAdmin() {
   const { userId } = await auth();
   return isWorkspaceOwner(userId);
@@ -13,20 +18,20 @@ async function requireAdmin() {
 // GET /api/admin/client/reviews?id=clerk_user_id
 export async function GET(req: NextRequest) {
   if (!(await requireAdmin())) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403, headers: privateHeaders })
   }
   const id = req.nextUrl.searchParams.get('id')
-  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400, headers: privateHeaders })
 
   const { data: reviews, error } = await supabase
     .from('reviews')
-    .select('*')
+    .select(ADMIN_REVIEW_FIELDS)
     .eq('clerk_user_id', id)
     .order('created_at', { ascending: false })
     .limit(100)
 
-  if (error) return NextResponse.json({ error: 'Could not load reviews.' }, { status: 500 })
-  return NextResponse.json({ reviews: reviews ?? [] })
+  if (error) return NextResponse.json({ error: 'Could not load reviews.' }, { status: 500, headers: privateHeaders })
+  return NextResponse.json({ reviews: reviews ?? [] }, { headers: privateHeaders })
 }
 
 // DELETE /api/admin/client/reviews?id=review_id  OR ?user_id=clerk_user_id (bulk clear)

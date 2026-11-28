@@ -73,7 +73,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Reconnect Google to choose a venue." }, { status: 409 });
 
     const locations = await listGoogleBusinessLocations(access.token);
-    if (listing) return NextResponse.json({ locations });
+    if (listing) return NextResponse.json({ locations }, { headers: { "Cache-Control": "private, no-store" } });
 
     const selected = locations.find(
       (location) =>

@@ -4,9 +4,11 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
+const privateHeaders = { "Cache-Control": "private, no-store" };
+
 export async function GET() {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401, headers: privateHeaders });
 
   const { data, error } = await supabase
     .from("profiles")
@@ -15,10 +17,10 @@ export async function GET() {
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: "Could not load subscription." }, { status: 500 });
+    return NextResponse.json({ error: "Could not load subscription." }, { status: 500, headers: privateHeaders });
   }
   if (!data) {
-    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    return NextResponse.json({ error: "Profile not found" }, { status: 404, headers: privateHeaders });
   }
 
   const now = new Date();
@@ -39,5 +41,5 @@ export async function GET() {
     isPaid,
     isPastDue,
     hasAccess: hasServiceAccess(data),
-  });
+  }, { headers: privateHeaders });
 }

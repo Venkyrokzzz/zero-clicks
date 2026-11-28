@@ -6,12 +6,17 @@ import { checkRateLimit } from "@/lib/rateLimit";
 import { supabase } from "@/lib/supabase";
 import { reviewPublishingEnabled } from "@/lib/reviewPublishing";
 
+const REVIEW_PUBLIC_FIELDS =
+  "id, reviewer_name, rating, review_text, sentiment, status, draft_response, escalation_reason, attention_reason, created_at, posted_to_google_at, automatically_approved, publication_message, publication_blocked, google_reply_state";
+
+const privateHeaders = { "Cache-Control": "private, no-store" };
+
 export async function GET() {
   const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+  if (!userId) return NextResponse.json({ error: "Unauthorised" }, { status: 401, headers: privateHeaders });
 
   const { allowed } = checkRateLimit(`reviews:read:${userId}`, 60);
-  if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
+  if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429, headers: privateHeaders });
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -19,16 +24,16 @@ export async function GET() {
     .eq("clerk_user_id", userId)
     .maybeSingle();
 
-  if (profileError) return NextResponse.json({ error: "Could not verify venue access." }, { status: 503 });
+  if (profileError) return NextResponse.json({ error: "Could not verify venue access." }, { status: 503, headers: privateHeaders });
   if (!profile?.business_name?.trim()) {
-    return NextResponse.json({ error: "Finish setting up your venue first.", code: "ONBOARDING_REQUIRED" }, { status: 409 });
+    return NextResponse.json({ error: "Finish setting up your venue first.", code: "ONBOARDING_REQUIRED" }, { status: 409, headers: privateHeaders });
   }
-  if (!hasServiceAccess(profile)) return NextResponse.json({ error: 'Subscription inactive', code: 'TRIAL_EXPIRED' }, { status: 403 });
+  if (!hasServiceAccess(profile)) return NextResponse.json({ error: 'Subscription inactive', code: 'TRIAL_EXPIRED' }, { status: 403, headers: privateHeaders });
 
   const [{ data: reviews, error }, { data: settings }] = await Promise.all([
     supabase
       .from("reviews")
-      .select("*")
+      .select(REVIEW_PUBLIC_FIELDS)
       .eq("clerk_user_id", userId)
       .order("created_at", { ascending: false }),
     supabase
@@ -38,7 +43,7 @@ export async function GET() {
       .maybeSingle(),
   ]);
 
-  if (error) return NextResponse.json({ error: "Could not load reviews." }, { status: 500 });
+  if (error) return NextResponse.json({ error: "Could not load reviews." }, { status: 500, headers: privateHeaders });
 
   const metrics = {
     totalReviews: reviews.length,
@@ -52,7 +57,7 @@ export async function GET() {
     metrics,
     publishingEnabled: reviewPublishingEnabled(),
     autoPublishRoutine: Boolean(settings?.auto_publish_venue && settings?.auto_publish_enabled_at),
-  });
+  }, { headers: privateHeaders });
 }
 
 export async function PUT(request: NextRequest) {

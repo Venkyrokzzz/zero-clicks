@@ -14,9 +14,11 @@ async function getVenue(userId: string) {
     ? googleVenueResource(data.account_id, data.location_id) : null
 }
 
+const privateHeaders = { 'Cache-Control': 'private, no-store' }
+
 export async function GET() {
   const { userId } = await auth()
-  if (!userId) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
+  if (!userId) return NextResponse.json({ error: 'Unauthorised' }, { status: 401, headers: privateHeaders })
 
   const { data, error } = await supabase
     .from('settings')
@@ -24,14 +26,14 @@ export async function GET() {
     .eq('clerk_user_id', userId)
     .maybeSingle()
 
-  if (error) return NextResponse.json({ error: 'Could not load settings.' }, { status: 500 })
-  if (!data) return NextResponse.json({ error: 'Settings not found.' }, { status: 404 })
+  if (error) return NextResponse.json({ error: 'Could not load settings.' }, { status: 500, headers: privateHeaders })
+  if (!data) return NextResponse.json({ error: 'Settings not found.' }, { status: 404, headers: privateHeaders })
   const venue = await getVenue(userId).catch(() => null)
   return NextResponse.json({
     tone: data.tone, signature: data.signature, flag_negative: data.flag_negative,
     autoPublishRoutine: Boolean(data.auto_publish_venue && data.auto_publish_enabled_at && (!venue || data.auto_publish_venue === venue)),
     canEnableAutomaticPublishing: Boolean(venue) && reviewPublishingEnabled(),
-  })
+  }, { headers: privateHeaders })
 }
 
 export async function PUT(req: Request) {
