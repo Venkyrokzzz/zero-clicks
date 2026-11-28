@@ -120,8 +120,8 @@ export default function ConnectionStatus() {
         )}
         {state === "connected" && (
           <p className={s.muted}>
-            You can open your review inbox. Reviews will appear after Zero
-            Clicks checks your listing.
+            You can open your review inbox or enable automatic replies for routine reviews in{" "}
+            <a href="/dashboard/settings">Reply settings</a>.
           </p>
         )}
         {state === "choose" && (
@@ -176,6 +176,11 @@ export default function ConnectionStatus() {
           <a href="/dashboard" className={s.button}>
             Open review inbox
           </a>
+          {state === "connected" && (
+            <a href="/dashboard/settings" className={s.primary}>
+              Enable automatic replies
+            </a>
+          )}
         </div>
       </div>
     </main>

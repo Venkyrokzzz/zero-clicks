@@ -25,11 +25,18 @@ export async function GET() {
   }
   if (!hasServiceAccess(profile)) return NextResponse.json({ error: 'Subscription inactive', code: 'TRIAL_EXPIRED' }, { status: 403 });
 
-  const { data: reviews, error } = await supabase
-    .from("reviews")
-    .select("*")
-    .eq("clerk_user_id", userId)
-    .order("created_at", { ascending: false });
+  const [{ data: reviews, error }, { data: settings }] = await Promise.all([
+    supabase
+      .from("reviews")
+      .select("*")
+      .eq("clerk_user_id", userId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("settings")
+      .select("auto_publish_venue,auto_publish_enabled_at")
+      .eq("clerk_user_id", userId)
+      .maybeSingle(),
+  ]);
 
   if (error) return NextResponse.json({ error: "Could not load reviews." }, { status: 500 });
 
@@ -40,7 +47,12 @@ export async function GET() {
     sentCount: reviews.filter((r) => r.status === "sent" && r.posted_to_google_at && r.google_reply_state !== "rejected").length,
   };
 
-  return NextResponse.json({ reviews, metrics, publishingEnabled: reviewPublishingEnabled() });
+  return NextResponse.json({
+    reviews,
+    metrics,
+    publishingEnabled: reviewPublishingEnabled(),
+    autoPublishRoutine: Boolean(settings?.auto_publish_venue && settings?.auto_publish_enabled_at),
+  });
 }
 
 export async function PUT(request: NextRequest) {

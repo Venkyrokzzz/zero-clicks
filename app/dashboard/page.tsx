@@ -208,6 +208,7 @@ function ReviewEditor({
 export default function Inbox() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [publishingEnabled, setPublishingEnabled] = useState(false);
+  const [autoPublishRoutine, setAutoPublishRoutine] = useState(false);
   const [connection, setConnection] = useState<Connection>();
   const [connectionError, setConnectionError] = useState(false);
   const [selected, setSelected] = useState<string>();
@@ -221,9 +222,10 @@ export default function Inbox() {
     setLoading(true);
     setError("");
     try {
-      const data = await panelRequest<{ reviews: Review[]; publishingEnabled?: boolean }>("/api/reviews");
+      const data = await panelRequest<{ reviews: Review[]; publishingEnabled?: boolean; autoPublishRoutine?: boolean }>("/api/reviews");
       setReviews(data.reviews);
       setPublishingEnabled(data.publishingEnabled === true);
+      setAutoPublishRoutine(data.autoPublishRoutine === true);
       setSelected((current) =>
         data.reviews.some((r) => r.id === current)
           ? current
@@ -298,7 +300,13 @@ export default function Inbox() {
         </header>
         <TrialBanner />
         {!loading && !error && (
-          <p className={s.notice}>{publishingEnabled ? "Manage automatic replies in Settings. Reviews flagged for attention need your approval." : "Google publishing is unavailable. Replies stay in Zero Clicks until you copy them."}</p>
+          <p className={s.notice}>
+            {publishingEnabled
+              ? autoPublishRoutine
+                ? "Automatic replies are on for routine reviews. Flagged reviews wait here for your approval."
+                : <>Automatic replies are off. <a href="/dashboard/settings">Enable automatic replies</a> in Reply settings, or approve drafts below.</>
+              : "Google publishing is currently in draft-only mode. Replies stay in Zero Clicks until you copy them."}
+          </p>
         )}
         {connectionError && (
           <p className={s.alert}>

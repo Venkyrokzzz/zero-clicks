@@ -59,7 +59,7 @@ export default function ReviewHandoff() {
   return (
     <section id="review-handoff" className={s.section} aria-labelledby="review-handoff-title">
       <h2 id="review-handoff-title">How V1 handles a review</h2>
-      <p className={s.intro}>Pick a guest review to see what V1 picks up, how it drafts a reply, and what reaches the manager.</p>
+      <p className={s.intro}>Pick a guest review to see what V1 picks up, when it replies automatically, and what reaches your inbox.</p>
       <div ref={bench} className={s.workbench}>
         <div className={s.toolbar}>
           <div className={s.scenarios} role="group" aria-label="Review examples">
@@ -100,19 +100,19 @@ export default function ReviewHandoff() {
                   </button>
                 ))}
               </div>
-              <p className={s.destination}>{needsAttention ? "Needs attention · Owner inbox" : "Automatic queue · When enabled"}<small>{needsAttention ? "Held for approval" : "Sample only"}</small></p>
+              <p className={s.destination}>{needsAttention ? "Needs attention · Owner inbox" : "Automatic queue · Publishes on Google"}<small>{needsAttention ? "Held for approval" : "Auto-reply enabled"}</small></p>
             </div>
           </li>
           <li className={s.reply}>
             <div className={s.step}><span>3</span>{stages[2]}</div>
             <article className={s.paper} aria-label={needsAttention ? "Owner inbox private draft" : "Automatic reply preview"}>
-              <div className={s.cardHeader}><div><strong>{needsAttention ? "Owner inbox" : "Google reply preview"}</strong><small>{needsAttention ? "Private draft" : "Automatic when enabled"}</small></div></div>
+              <div className={s.cardHeader}><div><strong>{needsAttention ? "Owner inbox" : "Google reply preview"}</strong><small>{needsAttention ? "Private draft" : "Automatic reply"}</small></div></div>
               <p className={s.replyText}>{example.draft.split(example.replyPattern).map((part, index) => index % 2 === 0 ? part :
                 <mark key={index} data-tone={needsAttention ? "risk" : index === 3 && selection.index === 0 ? "note" : "praise"}
                   data-active={activeTopic === (needsAttention ? 1 : Math.floor(index / 2))}>{part}</mark>)}</p>
               <div className={s.cardFooter}>
                 <button type="button" onClick={copyDraft}>{copyStatus === "Copied draft" ? copyStatus : "Copy draft"}</button>
-                <strong className={s.stamp} data-attention={needsAttention}>{needsAttention ? "Needs attention" : "Auto-publish"}</strong>
+                <strong className={s.stamp} data-attention={needsAttention}>{needsAttention ? "Needs attention" : "Auto-reply"}</strong>
               </div>
               <span className={s.feedback} role="status">{copyStatus}</span>
             </article>
@@ -120,7 +120,7 @@ export default function ReviewHandoff() {
         </ol>
       </div>
       <footer className={s.footer}>
-        <p>Demo only. Routine replies can auto-publish after you opt in. Flagged replies require approval.</p>
+        <p>Demo only. Routine reviews auto-reply when enabled; flagged reviews wait for your approval.</p>
         <a href="#walkthrough">Try your own review <span aria-hidden="true">→</span></a>
       </footer>
     </section>

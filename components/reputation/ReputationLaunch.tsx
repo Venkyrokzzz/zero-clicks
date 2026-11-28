@@ -100,7 +100,7 @@ function StepIcon({ index }: { index: number }) {
 export function Process({ showWalkthroughLink = false }: { showWalkthroughLink?: boolean }) {
   return (
     <section id="how-it-works" className={e.process}>
-      <h2>From review to draft</h2>
+      <h2>Automatic replies, with safety</h2>
       {showWalkthroughLink && <Link className={e.underlined} href="/how-it-works#owner-walkthrough">Watch how drafts work</Link>}
       <ol>
         {steps.map(([title, body], index) => (
@@ -150,7 +150,7 @@ function DemoSection({ standalone }: { standalone: boolean }) {
       <div className={e.demoInner}>
         <div className={e.demoIntro}>
           <Heading id="demo-heading">Try it with a review</Heading>
-          <p>Choose a sample or paste a public review. Try editing and copying a private draft.</p>
+          <p>Choose a sample or paste a public review to see whether V1 auto-replies or holds it for approval.</p>
         </div>
         <ReviewDesk headingLevel={standalone ? "h2" : "h3"} />
       </div>
@@ -164,7 +164,7 @@ export function Pricing({ standalone = false }: { standalone?: boolean }) {
       <div>
         <h2>{standalone ? "Founding & Standard plans" : "A clear plan for your venue"}</h2>
         <p className={s.pricingDescription}>
-          Google review drafts, an owner inbox, and guided onboarding.
+          Automatic Google review replies, an owner inbox for flagged reviews, and guided onboarding.
         </p>
         <PricingCheckout foundingOpen={FOUNDING_OPEN} />
         <Link className={s.pricingContact} href={enquiry}>Discuss your venue</Link>

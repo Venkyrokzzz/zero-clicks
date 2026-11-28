@@ -300,7 +300,7 @@ export default function ReviewDesk({ headingLevel = "h2" }: { headingLevel?: "h2
                 {copied ? (
                   <span role="status">Draft copied.</span>
                 ) : (
-                  <span>Edit or copy your private draft.</span>
+                  <span>Routine reviews auto-reply once enabled; edit or copy here in the demo.</span>
                 )}
                 <button
                   type="button"
