@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     template: "%s | Zero Clicks",
   },
   description:
-    "Reputation Manager by Zero Clicks helps UK pubs and restaurants draft, review and approve Google review replies. Your voice. Your approval. Your reputation.",
+    "Automatically reply to routine Google reviews for UK pubs and restaurants. Flagged and sensitive reviews stay private for your approval.",
   keywords: [
     "AI automation UK hospitality",
     "pub review automation",

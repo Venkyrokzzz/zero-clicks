@@ -131,7 +131,7 @@ export default function OwnerWalkthrough({ standalone = false }: { standalone?: 
         </div>
       </div>
       <footer className={s.footer}>
-        <p>Draft-only pilot. The owner decides what goes on Google.</p>
+        <p>Routine replies can auto-publish when you opt in. Flagged reviews wait for your approval.</p>
         {standalone && <Link href="/demo">Try your own review <span aria-hidden="true">→</span></Link>}
       </footer>
     </section>

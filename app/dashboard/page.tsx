@@ -297,7 +297,9 @@ export default function Inbox() {
           </div>
         </header>
         <TrialBanner />
-        <p className={s.notice}>{publishingEnabled ? "Manage automatic replies in Settings. Reviews flagged for attention need your approval." : "Google publishing is unavailable. Replies stay in Zero Clicks until you copy them."}</p>
+        {!loading && !error && (
+          <p className={s.notice}>{publishingEnabled ? "Manage automatic replies in Settings. Reviews flagged for attention need your approval." : "Google publishing is unavailable. Replies stay in Zero Clicks until you copy them."}</p>
+        )}
         {connectionError && (
           <p className={s.alert}>
             Could not read your Google connection. Select Refresh to retry.

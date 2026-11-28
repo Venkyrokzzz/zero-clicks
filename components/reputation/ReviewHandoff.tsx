@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { classifyReview } from "@/lib/reviewDisposition";
+import { classifyReview, isRoutineReview } from "@/lib/reviewDisposition";
 import { reviewExamples } from "./reviewExamples";
 import s from "./ReviewHandoff.module.css";
 
@@ -17,7 +17,7 @@ export default function ReviewHandoff() {
   const currentSelection = useRef(selection);
   const example = reviewExamples[selection.index];
   const review = `${example.leading}${example.praise}${example.middle}${example.concern}.`;
-  const needsAttention = classifyReview(example.rating, review).disposition === "manager";
+  const needsAttention = !isRoutineReview(classifyReview(example.rating, review).disposition);
   const activeTopic = hovered ?? pinned;
 
   useEffect(() => {
